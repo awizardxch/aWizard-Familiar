@@ -58,6 +58,15 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/skills/chiaWalletSdk.md`** — Lower-level wallet-engine reference: spend construction, AggSig, signer behavior, `chia-wallet-sdk` (the library Sage is built on)
 - **`docs/skills/chiaPrimitivesPatterns.md`** — Singleton state machines, CAT issuance, CR-CATs, secure-the-bag distribution
 - **`docs/skills/chiaDevTooling.md`** — Chia docs hub, tracing tools, RPC tooling, package and ops utilities
+- **`docs/skills/forgePuzzleV10.md`** — Forge's shipping pool puzzle (V10): coin layout, curried config/state, the bracketed weighted invariant, vaults, reserve and LP authorisation, the four fees, cutting a revision
+- **`docs/skills/forgeLpCat.md`** — Pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule) and the mutual handshake
+- **`docs/skills/forgePoolLifecycleTesting.md`** — Forge lanes and endpoints, the guardrails that must never be bypassed, the suite index and what a green run does not prove
+
+#### Puzzle Security
+- **`docs/skills/clvmPuzzleAudit.md`** — How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy, ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface. Protocol-agnostic — load it for any puzzle review
+
+#### Warp Bridge (Cross-Chain)
+- **`docs/skills/warpBridge.md`** — Complete Chia↔EVM bridge system: 4-step wizard, lockCATs/burnCATs/unlockCATs/mintCATs driver selection, EVM wagmi entry (bridgeEtherToChia/bridgeToChia/bridgeBack), all 3 wallet adapters (Sage WC, Ozone WC, Goby extension), NOSTR validator signature collection, portal singleton mechanics, key puzzle hashes, mainnet contract addresses. Source project: `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love`. Full constants: `warp-ui-love/docs/agent-swarm/IMPLEMENTATION_CONSTANTS.md`
 
 ### Architecture & Guides
 - **`docs/ARCHITECTURE.md`** — Full ecosystem deployment map

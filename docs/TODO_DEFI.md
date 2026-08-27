@@ -26,6 +26,8 @@
 - Phase 10: **Liquidity Manager** ([vaults.awizard.dev](http://localhost:5178)) — Foundation complete; optional post-launch liquidity-management layer ✅
 
 **✅ Just Completed:**
+- **🔒 Forge V10 — internal security audit closed, protocol re-shipped** (2026-08-27) — ten findings, all fixed; two were third-party-reachable fund loss. **LP burn was unauthenticated (V4–V8)** and **reserves were not bound to their pool (V4–V9)**, so every pre-V10 pool was retired and the deployment index now rejects superseded revisions in both directions. V10 curries `launcher_id` into the reserve, authorises it with a puzzle announcement rebuilt in-puzzle, pins the successor with `AssertMyPuzzleHash`, derives the LP action coin id, pins the mint/melt inners, and requires a CAT parent on a melt. Method and defect classes captured in [docs/skills/clvmPuzzleAudit.md](skills/clvmPuzzleAudit.md); shipping shape in [docs/skills/forgePuzzleV10.md](skills/forgePuzzleV10.md). Status: [docs/FORGE_PROTOCOL_STATUS.md](FORGE_PROTOCOL_STATUS.md).
+- **🔀 Forge V4 Protocol — create/add/remove/swap all confirmed on testnet11** — the T6/T11 V4 pool (`geometric-invariant-v1`, launcher `d666d3fe...c9ac4f324`) has confirmed on-chain evidence for create-pool, add-liquidity, remove-liquidity, and swap (both directions). All four actions route through one shared server-side responder (`api/_forgeV4Responder.js`) enforcing a singleton-freshness guard before every transition. A background poller now auto-discovers and auto-fills open Dexie offers matching an indexed V4 pool. Quest moved to done/: [build-forge-swap-execution-path.md](quests/done/build-forge-swap-execution-path.md) — resolved via V4 protocol, not the originally planned `swap_engine.rue` boundary. See [projects/chia-cfmm/docs/LP_LIFECYCLE_STATUS.md](../projects/chia-cfmm/docs/LP_LIFECYCLE_STATUS.md) for the current status table.
 - **� Forge Swap Aggregator Foundation** — quest complete, moved to done/
   - Sessions 1-2: 7-file aggregator module, adapter interface, multi-hop execution, SwapPanel replaced
   - Session 3: Blocker analysis — puzzle reveals ✅, pool state mock fallback ✅
@@ -36,8 +38,9 @@
 - **🎉 T1.6 Pool Fully Live on testnet11** — Stage 1 + Stage 2 completed via Sage RPC two-phase pipeline; LP CAT `cff471f8...3af` confirmed visible in Sage wallet ✅
 
 **🚧 In Progress:**
-- **🔀 Build Forge Swap Execution Path** — [docs/quests/build-forge-swap-execution-path.md](quests/build-forge-swap-execution-path.md) — **ACTIVE** — Lock Forge to an offer-file-first swap architecture, audit current wallet capability gaps, implement the real swap settlement lane, and re-enable execution only where protocol and wallet support are truthful. No mainnet legacy compatibility assumptions.
-- **🔥 Build Pool-Controlled TAIL** — [docs/quests/build-forge-pool-controlled-tail.md](quests/build-forge-pool-controlled-tail.md) — **ACTIVE** — Replace one-time issuance TAIL with pool-singleton-gated elastic-supply TAIL in Rue. Enables trustless mint/burn of LP CAT on add/remove liquidity. Security model: TAIL curries launcher_id, validates singleton announcement. Two-step backend: (1) create pool via Sage RPC, (2) add/remove liquidity via WalletConnect (reusable)
+- **Forge is on V10 with zero live pools** — the index was cleared when the old pools were retired. Next up, in dependency order: deploy the 16-row launch matrix through the real creation path, gate pool creation to an NFT or allowlist, rebuild the 6 suites still skipping against V10, then LP-balancing deposits and the Markets tab fixes. See [docs/skills/forgePoolLifecycleTesting.md](skills/forgePoolLifecycleTesting.md) for what each suite proves.
+- **🔀 Build Forge Swap Execution Path** — [docs/quests/done/build-forge-swap-execution-path.md](quests/done/build-forge-swap-execution-path.md) — **COMPLETE** — resolved via the V4 protocol (`pool_singleton_v4` swap mode), not the originally planned `swap_engine.rue` boundary.
+- **🔥 Build Pool-Controlled TAIL** — [docs/quests/build-forge-pool-controlled-tail.md](quests/build-forge-pool-controlled-tail.md) — foundation completed but security model superseded by the V3 hardening quest; announcement-only authorization is replayable and must not ship to mainnet.
 - **🧊 Forge LP NFT Standard Migration** — [docs/quests/done/forge-lp-nft-standard-migration.md](quests/done/forge-lp-nft-standard-migration.md) — frozen prototype; retain as reusable wallet-visible NFT receipt/container infrastructure for Treasure Chest only
 - **🔐 Cloud Vault + Multisig Pivot** — optional future strategy layer; not required for initial Forge CFMM launch
 - Phase 1: Wallet Connect — integration ready, awaiting testnet wallet testing  
@@ -45,6 +48,7 @@
 - **🧩 Forge Bootstrap Protocol Reconciliation** — [docs/quests/backlog/reconcile-forge-bootstrap-protocol.md](quests/backlog/reconcile-forge-bootstrap-protocol.md) — backlogged architectural ledger; no longer a separate active implementation lane
 - **🖥️ Forge GUI Truth Lane** — [docs/quests/backlog/frontend-gui-pool-deployment.md](quests/backlog/frontend-gui-pool-deployment.md) — backlogged post-deploy UX verification lane
 - **🧭 Forge Pool Launch Flow Enhancements** — [docs/quests/backlog/enhance-forge-pool-launch-and-create-flow-redesign.md](quests/backlog/enhance-forge-pool-launch-and-create-flow-redesign.md) — post-foundation polish for asset search, live metrics, review-step flow, and real burn-initial-LP wiring
+- **🧪 LP Puzzle + Router Balanced/Range Liquidity** — [docs/quests/backlog/enhance-forge-lp-puzzle-router-balanced-and-range-lp.md](quests/backlog/enhance-forge-lp-puzzle-router-balanced-and-range-lp.md) — keep WalletConnect create-offer UX while router handles single-sided balancing and range-style LP strategies on testnet
 - Phase 4: Perpetuals — frontend complete, awaiting contracts
 
 **📦 Ready to Deploy:**
@@ -60,24 +64,29 @@
 
 ## 🔮 Next Session Focus
 
-1. **🔥 Build Pool-Controlled TAIL** (CRITICAL — ACTIVE QUEST)
-   - Update `forge_lp_cat_tail.rue` to enforce singleton announcement validation
-   - Update singleton to emit canonical `(MINT/MELT, delta, recipient)` announcements
-   - Wire authority coin lifecycle (bootstrap + recreate on each supply change)
-   - Update TypeScript builders for deterministic LP CAT asset-id from pool TAIL
-   - See [quests/build-forge-pool-controlled-tail.md](quests/build-forge-pool-controlled-tail.md)
-2. **🔀 Wire WalletConnect Add/Remove Liquidity** (HIGH — after TAIL)
+1. **🔒 LP CAT TAIL audit** — ✅ DONE (2026-08-27). The replay concern was real and worse than
+   suspected: through V8 the TAIL was announcement-only and the pool accepted a solution-supplied
+   action coin id, so reserves could be withdrawn with **no LP destroyed at all**. Closed in V9/V10
+   by the three-part lock — derived action-coin id, pinned mint/melt inners, and a CAT parent
+   required on a melt. See [docs/skills/forgeLpCat.md](skills/forgeLpCat.md).
+1a. **🚀 Deploy the V10 launch matrix** (HIGH — NEXT QUEST)
+  - 16 pools across the routing surface, vaults, weighted, N-asset, and fee edges
+  - every row already deploys through the real creation path in a dry run before coins are spent
+  - re-probe per [docs/skills/clvmPuzzleAudit.md](skills/clvmPuzzleAudit.md) before any pool is minted
+1b. **🛡️ Gate pool creation to an NFT or allowlist** (HIGH)
+  - a pool is permanent, appears beside every audited one, and its creator picks fees and weights
+  - correct default for testnet, wrong one for launch
+2. **🔀 Wire WalletConnect Add/Remove Liquidity** (HIGH)
    - Step 2 reusable path: any user can add/remove liquidity via WalletConnect
    - Same code path for all future deposits and withdrawals
    - Mints LP CAT on deposit, melts LP CAT on withdraw — pool-controlled
-3. **🔀 Build Forge Swap Execution Path** (HIGH)
-  - keep swaps offer-file-first at the user layer
-  - `swap_engine` is the locked settlement boundary; `pool_singleton_v2` stays LP-only
-  - restore or recommit the missing fixture-backed validation artifacts for live pool `e35984cd...20cf`
-  - implement the real swap settlement path for supported pools and surface wallet capability gaps honestly
-4. **🧺 Build Offer-Based Liquidity Flow** (MEDIUM — BACKLOG)
-  - research offer-wrapped deposit and withdraw intents after the spend-bundle liquidity lane is proven
-  - keep LP add/remove spend-bundle-first until wallet capability improves
+3. **🔀 Forge Swap Execution** — ✅ DONE (2026-08-10). V4 swap confirmed both directions on
+   testnet11 through the shared responder + singleton-freshness guard. See
+   [quests/done/build-forge-swap-execution-path.md](quests/done/build-forge-swap-execution-path.md).
+4. **🧺 Validate Offer-Only Liquidity Flow** (HIGH — V3 ACCEPTANCE)
+  - user signs one standard offer for deposit or withdrawal
+  - any keyless responder assembles the deterministic on-chain transition
+  - no separate wallet signature, Sage taker, or trusted responder metadata
 5. **🔀 Forge Swap Aggregator — live on-chain testing** (MEDIUM)
   - connect Sage wallet and validate the routed swap path after the execution quest lands
   - mock reserves continue to support UI/quote testing without full node
@@ -89,9 +98,32 @@
    - Each adapter = one new file implementing `LiquiditySource`
 8. **Stage-2 pipeline hardening** (LOW)
    - eliminate remaining false-failure edge cases in progress display
+9. **LP puzzle v2 hardening + router zap add** (HIGH)
+  - version LP announcements for router-balanced operations
+  - ship zap-add-liquidity action using WalletConnect create-offer as user entry
+  - add strategy abstraction for v3-like range LP behavior on top of current pool primitives
 
 ## 🏁 Completed
 
+- ✅ **2026-08-27** — Forge internal security audit closed; V10 is the shipping revision
+  - 10 findings, all fixed; 2 were third-party-reachable fund loss (unauthenticated LP burn V4–V8, unbound reserves V4–V9)
+  - every pre-V10 pool retired, deployment index cleared, revision filtering applied on the way in as well as out
+  - creation offers redacted at the HTTP boundary — they read standalone as "pay one mojo, take the genesis reserve"
+  - four independent implementations of the curve pinned to the puzzle's own numbers; three had been weight-blind
+  - skills rewritten to V10: `clvmPuzzleAudit.md` (new), `forgePuzzleV10.md` (new), `forgeLpCat.md`, `forgePoolLifecycleTesting.md`
+
+- ✅ **2026-07-23** — Forge keyless router: create-pool now fully keyless (quest: `quests/forge-keyless-router-quest.md`)
+  - New `contracts/forge_create_pool_keyless.py`: builds launcher + P1→P2 + CAT reserves + LP CAT genesis in one atomic bundle from the user's pre-signed offer; pushes via coinset.org — zero server keys (Tibet router parity)
+  - `api/router-create-pool-taker.js` rewritten keyless-only; Sage take/cancel workarounds removed
+  - Historical frontend offer carried `lp_out + 2` XCH; corrected path needs 2 mojos (launcher + LP CAT eve coin)
+  - Two pools deployed on testnet11: launchers `8784f7d3…` (blk 4450051), `a24468c9…` (blk 4450073) — full router e2e PASS
+  - Deploy configs added: Procfile, railway.toml, nixpacks.toml, requirements.txt, ecosystem.config.cjs, setup-oracle-arm.sh
+- ⚠️ **2026-08-09** — Forge V2 trust-boundary audit completed
+  - Existing offers protect user-requested minimums, but V2 puzzles do not enforce exact successor reserve outputs
+  - Announcement-only LP TAIL authorization is replayable; `july23` also has a one-mojo LP supply mismatch
+  - Mainnet design moved to direct singleton↔LP action handshake, canonical reserve IDs, exact reserve plans, and signed launch intent
+  - Architecture: [forge-puzzle-architecture.md](quests/diagrams/forge-puzzle-architecture.md)
+  - Quest: [harden-forge-offer-only-v3.md](quests/backlog/harden-forge-offer-only-v3.md)
 - ✅ **2026-03-22** — Forge Swap Aggregator foundation + multi-hop execution delivered
   - Aggregator module: `types.ts`, `forgeAdapter.ts`, `quoteEngine.ts`, `index.ts` — adapter pattern with `LiquiditySource` interface
   - UI: `AggregatorSwap.tsx` (swap tab), `RoutePreview.tsx` (route visualization), `swapStore.ts` (Zustand state)
@@ -511,6 +543,12 @@ After testnet proofs are live:
 ---
 
 ## 🏁 Completed
+
+- ✅ **2026-08-09** — Forge V4-alpha unbalanced joins and full-position withdrawal implemented
+  - Fresh pools accept one or both reserve CATs on add; no synthetic counterpart deposit
+  - LP mint is the exact floor of 50/50 geometric-invariant growth and remains XCH-backed
+  - Remove continues to return all reserve CATs pro rata
+  - V4 locks `1 LP` mojo at creation; legacy pool `8926` safely burned `1999/2000` LP and returned `1 LP` as change in confirmed transaction `b9d6d640...`
 
 - ✅ **2026-03-05** — `docs/skills/chiaPerpetuals.md` created (full Aftermath-equivalent protocol spec)
 - ✅ **2026-03-05** — `docs/skills/nightspireTheme.md` created (canonical Nightspire CSS design system)

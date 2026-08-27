@@ -53,14 +53,32 @@ Use this file when:
 | `tournamentSystem.md` | Brackets, seeding, prize logic |
 | `snesWorldEngine.md` | World navigation, map systems, encounter integration |
 
-### Forge DeFi Primitives
-
-> Forge-specific knowledge, distinct from generic Chia protocol patterns.
+### Warp Bridge — Cross-Chain Chia ↔ EVM
 
 | Skill | Use it for |
 | --- | --- |
-| `forgeLpCat.md` | Pool-controlled LP CAT TAIL, authority coin lifecycle, announcement format, puzzle hash derivation, bundle descriptor wiring |
-| `forgePoolLifecycleTesting.md` | Current V2 deployment/bootstrap/add/remove validation flow, puzzle-hash boundary, and testnet lifecycle guardrails |
+| `warpBridge.md` | Full Chia↔EVM bridge system: offer lifecycle, lockCATs/burnCATs/unlockCATs/mintCATs driver selection, EVM wagmi entry (bridgeToChia/bridgeBack), NOSTR validator signatures, portal singleton mechanics, Goby/Sage/Ozone adapters, key puzzle hashes and contract addresses |
+
+### Puzzle Security and Audit
+
+> Load `clvmPuzzleAudit.md` before reviewing, probing, or revising **any** puzzle in the
+> workspace — it is protocol-agnostic and applies to cfmm, vaults, perps, and treasure chest.
+
+| Skill | Use it for |
+| --- | --- |
+| `clvmPuzzleAudit.md` | How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy (coin vs puzzle), the ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface |
+
+### Forge DeFi Primitives
+
+> Forge-specific knowledge, distinct from generic Chia protocol patterns.
+> All three are current at **V10**, the shipping revision — pre-V10 pools are retired and carry
+> critical authorisation bugs.
+
+| Skill | Use it for |
+| --- | --- |
+| `forgePuzzleV10.md` | The shipping puzzle set: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history |
+| `forgeLpCat.md` | The pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule), the mutual handshake and message format, genesis trust |
+| `forgePoolLifecycleTesting.md` | Lanes and endpoints, the guardrails that must never be bypassed (freshness, snapshot round trip, revision filtering, offer redaction), the suite index and what a green run does not prove |
 
 ### External Liquidity and DEX Integrations
 
@@ -83,14 +101,27 @@ Use this file when:
 ### DeFi / Protocol Quest
 - `blockchainDecentralization.md`
 - `chiaPrimitivesPatterns.md`
+- `forgePuzzleV10.md` — if the quest touches the Forge puzzle set
 - `chiaDevTooling.md` — only if tooling/Sage internals are in scope
 - `deploymentInfra.md` — only if deployment is in scope
+
+### Puzzle Security / Audit Quest
+- `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
+- `forgePuzzleV10.md` — if the target is a Forge pool
+- `forgeLpCat.md` — if the target is LP supply, the TAIL, or either pinned inner
+- `forgePoolLifecycleTesting.md` — to know which suite already covers the surface
+- `chiaPrimitivesPatterns.md` — only if the quest reaches into singleton or CAT fundamentals
+
+Applies to any puzzle review, not only Forge: reviewing an authorisation path, writing
+adversarial probes, cutting a revision, or judging whether a fix actually closed the hole.
+Two of the ten Forge findings were **introduced by the fix for an earlier one**, so a
+revision is never done until it has been re-probed.
 
 ### External Liquidity / Aggregator Quest
 - `chiaDexieRouting.md`
 - `chiaTibetAmm.md`
 - `tibetUiFrontend.md` — only if frontend or wallet UX is in scope
-- `forgeLpCat.md` — only if local Forge LP or pool authority behavior is also in scope
+- `forgePuzzleV10.md` — only if local Forge pool behaviour or routing lanes are also in scope
 
 ### Wallet / Signing / Multisig Quest
 - `bowAppReference.md` — WalletConnect, CHIP-0002, multi-address scanning
@@ -117,6 +148,11 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `networkGameplayUX.md`
 - `nightspireTheme.md`
 - `discordActivityAuth.md`
+
+### Warp Bridge / Cross-Chain Quest
+- `warpBridge.md` — load first; covers all 4 bridge directions, all 3 wallet adapters, driver selection, NOSTR, EVM contracts
+- `chiaPrimitivesPatterns.md` — only if the quest also touches raw Chia singleton or CAT puzzle design
+- `bowAppReference.md` — only if the quest also involves WalletConnect state channel or multi-address scanning alongside bridging
 
 ### Architecture / Refactor Quest
 - `projectArchitecture.md`

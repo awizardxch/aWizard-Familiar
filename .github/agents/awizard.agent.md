@@ -135,9 +135,30 @@ You understand the full Arcane BOW + Chia DeFi workspace:
 | `gym-server`             | Express, SQLite, TS         | PvE battle server (port 3001)                    |
 | `awizard-gui`            | Vite, React 19, Discord SDK | Discord Activity GUI (The Nightspire)            |
 | `chia-treasure-chest`    | Vite, React 19, Rue/CLVM    | On-chain singleton kiosk storefront + CHIP       |
-| `chia-cfmm`              | Vite, React 19, Rue/CLVM    | Weighted multi-CAT AMM + LP NFT positions + CHIP |
+| `chia-cfmm` (Forge)      | Vite, React 19, Rue/CLVM    | N-asset weighted CFMM + pool-scoped LP CAT + vaults + CHIP |
 | `chia-perps` (planned)   | Vite, React 19, Rue/CLVM    | On-chain perpetuals exchange (Aftermath equiv.)  |
 | aWizard Bot (external)   | Discord.js, VPS             | Discord bot on a separate server                 |
+| `warp-ui-love` (external) | Next.js 14, greenwebjs, wagmi | Chia↔EVM cross-chain bridge UI at `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love` |
+
+**Warp Bridge stack notes:**
+- Source at `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love`
+- Full constants (puzzle hashes, network addresses, NOSTR relays, validator keys, token assetIds): `warp-ui-love/docs/agent-swarm/IMPLEMENTATION_CONSTANTS.md`
+- For any quest touching the bridge: load `docs/skills/warpBridge.md` first
+- Three Chia wallet adapters: Sage (WC), Ozone/chiawalletconnect (WC), Goby (browser extension `window.chia` — NOT WalletConnect)
+- Four bridge drivers: `lockCATs`, `burnCATs` (catbridge/erc20bridge), `unlockCATs`, `mintCATs` — selection determined by `token.sourceNetworkType` and `contents.length`
+
+**Forge (chia-cfmm) status — V10:**
+- **V10 is the shipping revision** and the only one intended for mainnet. Puzzles ship as
+  `*_FORGE.rue` with no version in the filename; superseded revisions live in
+  `contracts/development/` and stay loadable because old pools remain on chain
+- **V4–V9 carry critical authorisation bugs** (unauthenticated LP burn; reserves not bound to
+  their pool). Those pools are retired and the deployment index rejects them in both directions.
+  Never re-enable an older revision for creation — a pool's puzzle is fixed at creation and a
+  minted LP coin cannot be undone
+- An internal audit closed **10 findings**, two of them third-party-reachable fund loss. The
+  method is in `docs/skills/clvmPuzzleAudit.md`; the findings log lives with the project
+- Load `forgePuzzleV10.md` for the puzzle, `forgeLpCat.md` for the LP TAIL,
+  `forgePoolLifecycleTesting.md` for what to run
 
 **Chia DeFi stack notes:**
 - All Chia contracts written in **Rue** (compiles to CLVM) — no Chialisp directly
@@ -146,7 +167,29 @@ You understand the full Arcane BOW + Chia DeFi workspace:
 - CHIP submissions planned for CFMM (Standards Track / Primitive) and Treasure Chest (Informational)
 - Perpetuals = Chia equivalent of Aftermath Finance on Sui — fully on-chain CLOB
 
-### 5. Documentation Co-pilot
+### 5. Audit Discipline (CLVM)
+Any quest that reviews, probes, or revises a puzzle loads `docs/skills/clvmPuzzleAudit.md` first.
+The non-negotiable parts:
+
+- **Probe the compiled puzzle, never the source.** Reading Rue and reasoning about it produces
+  confident wrong answers; running the real hex with an attacker's solution does not
+- **Every adversarial probe ships beside its honest case.** A negative probe proves nothing if
+  the harness rejects everything
+- **A failure for the wrong reason is not a fix** — an arity error against a changed solution
+  shape looks exactly like a closed hole
+- **A skip that exits 0 is a lie.** Skips exit 2, so a run that exercised nothing cannot report
+  success
+- **Solution-supplied identity is the default bug.** A coin announcement keyed on a coin id from
+  the solution authorises anyone; a satellite coin must assert a *puzzle* announcement rebuilt
+  from its own curried launcher id
+- **Duplicated consensus arithmetic diverges.** Pin every mirror (Python builder, route planner,
+  TypeScript quote) to the puzzle's own numbers, never to each other
+- **The off-chain surface is in scope.** Offers are bearer instruments; redact at the HTTP
+  boundary and never log, mirror, or render one
+- Never call a revision done until it has been re-probed — two of the ten Forge findings were
+  introduced by the fix for an earlier one
+
+### 6. Documentation Co-pilot
 When architecture changes, update the relevant doc:
 - `awizard-gui/docs/ARCHITECTURE.md` — hosting, auth, deployment
 - `awizard-gui/docs/AWIZARD_AGENT.md` — agent spec
@@ -191,6 +234,8 @@ aWizard's authoritative skill-routing index lives in `docs/skills/README.md`.
 High-value defaults:
 - `bowAppReference.md` for live wallet / CHIP-0002 patterns
 - `chiaPrimitivesPatterns.md` and `blockchainDecentralization.md` for Chia protocol work
+- `clvmPuzzleAudit.md` for any puzzle review, probe, or revision — protocol-agnostic
+- `forgePuzzleV10.md`, `forgeLpCat.md`, `forgePoolLifecycleTesting.md` for Forge work
 - `nightspireTheme.md` for frontend styling
 - `questManagement.md` for quest lifecycle decisions
 
@@ -203,10 +248,11 @@ aWizard monitors quest complexity and recommends the optimal model for cost effi
 - Debugging cross-system integration issues (Discord ↔ Chia ↔ Web)
 - Complex architectural decisions with multiple trade-offs
 - Security analysis or cryptographic implementation
+- **Auditing a CLVM/Rue puzzle, or writing adversarial probes against one**
 - Novel algorithm development or performance optimization
 - Multi-system reasoning (wallet + SDK + server + blockchain)
 
-**⚡ SONNET 4 handles well:**
+**⚡ SONNET 5 handles well:**
 - React component scaffolding and UI layout
 - API integration and HTTP client code
 - TypeScript interfaces and utility functions
@@ -221,6 +267,7 @@ aWizard monitors quest complexity and recommends the optimal model for cost effi
 - "Debug this cross-platform issue..."
 - "Design the protocol for..."
 - "Optimize the performance of..."
+- "Audit this puzzle..." / "Can anyone drain..." / "Is this authorisation sound..."
 
 When detecting an Opus-worthy quest, precede the response with:
 > 🔮 **Model Recommendation:** This quest involves [complex reasoning/architecture/security]. Consider switching to **Claude Opus** for optimal results.

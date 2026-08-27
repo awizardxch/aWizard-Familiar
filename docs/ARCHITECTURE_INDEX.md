@@ -17,6 +17,7 @@ Use this file when:
 | `docs/ARCHITECTURE.md` | Ecosystem-wide product map | You need the high-level subdomain model, project-to-product mapping, or world metaphor |
 | `projects/arcane-battle-protocol/ARCHITECTURE.md` | On-chain game and protocol architecture | You need battle, contract, state-channel, or reward protocol structure |
 | `projects/awizard-gui/docs/ARCHITECTURE.md` | Discord Activity and GUI architecture | You need Nightspire frontend, auth, client structure, or activity integration details |
+| `docs/quests/diagrams/forge-puzzle-architecture.md` | Forge weighted CFMM puzzle and offer protocol | You need pool, reserve, LP CAT, offer-only, or responder trust-boundary details |
 
 ## Support Architecture Docs
 
@@ -48,6 +49,15 @@ Use this file when:
 - Start with `projects/arcane-battle-protocol/ARCHITECTURE.md`
 - Then open `projects/arcane-battle-protocol/DEPLOYMENT.md`
 - Pair with `docs/skills/chiaPrimitivesPatterns.md` and `docs/skills/blockchainDecentralization.md`
+
+### Forge CFMM / Offer-Only Execution
+- Start with `docs/quests/diagrams/forge-puzzle-architecture.md`
+- Use `docs/quests/backlog/harden-forge-offer-only-v3.md` for the mainnet hardening plan
+- Start with `docs/skills/forgePuzzleV10.md` — the shipping revision; the diagram below predates it
+- Pair with `docs/skills/forgeLpCat.md`, `docs/skills/forgePoolLifecycleTesting.md`, and `docs/skills/chiaTibetAmm.md`
+- For any review, probe, or revision of the puzzles: `docs/skills/clvmPuzzleAudit.md` first
+- Current status: `docs/FORGE_PROTOCOL_STATUS.md` (V10; pre-V10 pools retired and unsafe)
+- Treat routers and indexes as replaceable liveness infrastructure, never protocol authority
 
 ### Nightspire / GUI / Activity
 - Start with `projects/awizard-gui/docs/ARCHITECTURE.md`

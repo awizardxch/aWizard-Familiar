@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated": "2026-04-08",
+  "version": 4,
+  "updated": "2026-08-27",
   "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
   "domains": {
     "chia-protocol": [
@@ -9,8 +9,27 @@
       "chiaPrimitivesPatterns.md",
       "chiaDevTooling.md",
       "sageRpc.md",
+      "forgePuzzleV10.md",
       "forgeLpCat.md",
       "forgePoolLifecycleTesting.md"
+    ],
+    "puzzle-security": [
+      "clvmPuzzleAudit.md",
+      "chiaPrimitivesPatterns.md"
+    ],
+    "clvm-audit": [
+      "clvmPuzzleAudit.md",
+      "forgePuzzleV10.md"
+    ],
+    "adversarial-testing": [
+      "clvmPuzzleAudit.md",
+      "forgePoolLifecycleTesting.md"
+    ],
+    "forge-protocol": [
+      "forgePuzzleV10.md",
+      "forgeLpCat.md",
+      "forgePoolLifecycleTesting.md",
+      "clvmPuzzleAudit.md"
     ],
     "wallets-and-signing": [
       "bowAppReference.md",
@@ -49,6 +68,7 @@
       "bondPvpEconomy.md",
       "nftRewards.md",
       "sageRpc.md",
+      "forgePuzzleV10.md",
       "forgeLpCat.md",
       "chiaDexieRouting.md",
       "chiaTibetAmm.md"
@@ -57,7 +77,7 @@
       "chiaDexieRouting.md",
       "chiaTibetAmm.md",
       "tibetUiFrontend.md",
-      "forgeLpCat.md",
+      "forgePuzzleV10.md",
       "forgePoolLifecycleTesting.md"
     ],
     "external-dex-frontend": [
@@ -72,6 +92,21 @@
     ],
     "quest-planning": [
       "questManagement.md"
+    ],
+    "warp-bridge": [
+      "warpBridge.md"
+    ],
+    "cross-chain-bridge": [
+      "warpBridge.md",
+      "chiaPrimitivesPatterns.md"
+    ],
+    "chia-evm-bridge": [
+      "warpBridge.md",
+      "bowAppReference.md"
+    ],
+    "bridge-offer-lifecycle": [
+      "warpBridge.md",
+      "chiaWalletSdk.md"
     ]
   }
 }

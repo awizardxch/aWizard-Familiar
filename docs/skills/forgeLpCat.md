@@ -1,180 +1,216 @@
-# Skill: Forge LP CAT — Pool-Controlled TAIL System
+# Skill: Forge LP CAT — the pool-controlled TAIL
 
-> Architecture and implementation patterns for Forge's pool-controlled LP CAT TAIL.
-> Learned from: `build-forge-pool-controlled-tail` quest (completed 2026-03-30).
+> The LP CAT handshake as it ships at **V10**. Rewritten 2026-08-27 after the internal audit;
+> everything this file previously said about V2 authority coins and the V4 announcement-only
+> TAIL described **vulnerable revisions** and has been removed rather than kept as history.
+>
+> **Testnet only, not externally audited.** Pre-V10 pools are retired and must not be recreated.
 
 ---
 
 ## Domain
 
-This skill covers the Forge-specific LP CAT TAIL system — where LP token issuance
-is governed on-chain by the pool singleton, not a centralized key or one-time genesis spend.
+Use this for:
 
-Use it for:
-- Deriving LP CAT asset IDs from a pool launcher ID
-- Building deposit/withdrawal authority coin spend descriptors
-- Computing pool announcement IDs for TAIL authorization
-- Understanding the two-contract system (TAIL + authority coin)
+- deriving an LP CAT asset id from a pool launcher id
+- the mint and burn handshake between the pool singleton, the TAIL, and the LP coin
+- reasoning about who may increase or decrease LP supply
+- reviewing a change to the TAIL or either pinned inner
 
----
-
-## Core Architecture
-
-### Two-Contract System
-
-| Contract | File | Role |
-|----------|------|------|
-| LP CAT TAIL | `forge_lp_cat_tail.rue` | Validates mint/burn, asserts pool announcement |
-| Authority Coin | `lp_cat_authority_coin.rue` | 1-mojo persistent coin, recreates on each LP change |
-
-### Security Chain
-
-```
-Pool singleton
-  └─ CREATE_PUZZLE_ANNOUNCEMENT(tree_hash([recipient_ph, lp_amount, pool_id]))
-       │
-       ├── ASSERT_PUZZLE_ANNOUNCEMENT ← Authority coin (validates + recreates)
-       │     └─ CREATE_PUZZLE_ANNOUNCEMENT(tree_hash([launcher_id, asset_id, new_total_lp]))
-       │           │
-       │           └── ASSERT_PUZZLE_ANNOUNCEMENT ← LP CAT TAIL (authorizes mint/burn)
-       │
-       └── ASSERT_PUZZLE_ANNOUNCEMENT ← Reserve coins (lock deposit amounts)
-```
-
-No mint or burn of LP CATs is valid without a matching pool singleton announcement.
+For the pool puzzle itself see `forgePuzzleV10.md`; for the audit method that produced the
+current design see `clvmPuzzleAudit.md`.
 
 ---
 
-## Announcement Format
+## What the LP CAT is
 
-### Deposit (pool singleton emits)
-```
-tree_hash([recipient_puzzle_hash, lp_out, pool_launcher_id])
-```
+An ordinary CAT whose TAIL is `forge_lp_cat_tail_FORGE` **curried with
+`(launcher_id, protocol_version)`**. The TAIL's tree hash is therefore the asset id, and it is
+unique per pool — one pool, one LP asset id, for the life of the pool. Minting more units later
+keeps the same asset id.
 
-### Withdrawal (pool singleton emits)
-```
-tree_hash([redeemer_puzzle_hash, lp_burned, pool_launcher_id])
-```
-
-### Authority coin self-announcement (emitted when it recreates itself)
-```
-tree_hash([launcher_id, lp_cat_asset_id, next_total_lp_supply])
-```
-
-The TAIL asserts the authority coin's announcement to confirm authority was spent.
+Supply is governed on chain by the pool singleton. There is no authority key, no admin coin, and
+no one-time genesis spend that could be replayed. The V2-era `lp_cat_authority_coin` prototype is
+not part of the shipping set and is not created or spent by any current lane.
 
 ---
 
-## Puzzle Hash Derivation
+## The three-part lock
 
-LP CAT `asset_id` = TAIL puzzle hash = deterministic from `launcher_id` alone.
+Supply moves only when **all three** of these hold. Each was added in response to a separate
+finding, and each closes an attack the other two do not.
 
-```python
-# Python — pool_tail_authority_spend.py
-from pool_tail_authority_spend import (
-    compute_lp_cat_asset_id,
-    compute_authority_puzzle_hash,
-)
-contracts_dir = Path("contracts/")
-asset_id  = compute_lp_cat_asset_id(contracts_dir, launcher_id)
-auth_ph   = compute_authority_puzzle_hash(contracts_dir, launcher_id, asset_id)
+### 1. The pool derives the action coin's id (stops an impostor *puzzle*)
+
+The pool does not accept an `lp_action_coin_id` from the solution. It rebuilds it:
+
+```
+lp_action_coin_id == sha256(lp_parent_id
+                            + cat_puzzle_hash(lp_tail_hash, PINNED_INNER)
+                            + amount)
 ```
 
-```typescript
-// TypeScript — src/lib/lpCatAuthority.ts
-const assetId  = await computeLpCatAssetId(launcherId);
-const tailPh   = await computeTailPuzzleHash(launcherId);
-const authPh   = await computeAuthorityPuzzleHash(launcherId, assetId);
-const annId    = await computeDepositAnnouncementId(poolPh, recipientPh, lpOut, poolId);
+- on a **remove**, `PINNED_INNER = LP_MELT_INNER_HASH` and `amount` = the burn
+- on an **add**, `PINNED_INNER = LP_MINT_INNER_HASH` and `amount` = 1 (the eve)
+
+Through V8 this field was free, checked only `!= 0`, with the link to the pool being a coin
+announcement. Any coin running any puzzle can emit any message, so an attacker named a plain coin
+they controlled, spent it emitting the acknowledgement, and the pool released reserves with **no
+LP destroyed at all**.
+
+### 2. The inner puzzle is pinned (stops a no-op burn)
+
+Binding the id alone is not sufficient. The honest path used a plain `identity` inner, which
+imposes no melt — leaving "own the LP, spend it without burning, collect the reserves". The two
+pinned inners exist so that binding a coin to their puzzle hash *is* proof of what the coin does.
+
+```clojure
+; melt — its whole amount is destroyed, and there is no other path
+(mod (lp_tail lp_action) (list (list 51 () -113 lp_tail lp_action)))
+
+; mint — the minted coin plus the TAIL call, nothing else
+(mod (settlement_hash amount lp_tail lp_action)
+  (list (list 51 settlement_hash amount)
+        (list 51 () -113 lp_tail lp_action)))
 ```
 
----
+Both are deliberately **unparameterised beyond what the CAT layer already pins**: any extra
+argument is another thing a caller could vary, and the security here comes from having nothing to
+vary. `lp_tail` cannot be swapped because the coin's puzzle hash commits to the asset id, which
+*is* the TAIL's tree hash. On the mint side `settlement_hash` and `amount` are safe to leave
+open — the depositor chooses where their own LP lands, the pool independently re-derives the
+canonical mint from its invariant and refuses any other figure, and the TAIL checks the delta
+against the real CAT ring.
 
-## CLI
+### 3. The TAIL requires a CAT parent on a melt (stops an impostor *coin*)
 
-```bash
-# From contracts/ directory
-python pool_tail_authority_spend.py --launcher-id <hex>
-# Returns: { tail_puzzle_hash, lp_cat_asset_id, authority_puzzle_hash }
+```
+assert parent_is_cat || action.expected_delta > 0;
 ```
 
+CAT2 lets a coin with no valid lineage be spent when the TAIL authorises it, and for a non-CAT
+parent the TAIL scores `amount + delta` rather than `delta`. Without this line an attacker could
+`CREATE_COIN` at the melt puzzle hash out of ordinary mojos and pick `delta = -2 * amount` to
+make `effective_delta` equal whatever burn the pool asked for — destroying LP that was never
+issued while the pool released reserves against it.
+
+A melt destroys supply, so it can only come from a coin that held supply. Minting stays open
+because **a genesis eve has no CAT parent by definition** — that is exactly why the branch
+exists.
+
 ---
 
-## Authority Coin Spend Pattern
+## The handshake
 
-```python
-# Deposit descriptor
-auth = build_deposit_authority_spend(
-    contracts_dir, launcher_id, lp_cat_asset_id,
-    authority_coin_parent,   # parent_coin_info of current authority coin
-    pool_puzzle_hash,
-    recipient_puzzle_hash,
-    lp_out,
-    current_total_lp,
-)
-# auth.coin_id                      → spend this coin in the bundle
-# auth.authority_announcement_id()  → ID the TAIL must ASSERT_PUZZLE_ANNOUNCEMENT
-# auth.to_dict()                    → JSON-serializable descriptor
+Mutual, and neither side can be satisfied by an impostor.
 
-# Withdrawal descriptor
-auth = build_withdraw_authority_spend(
-    contracts_dir, launcher_id, lp_cat_asset_id,
-    authority_coin_parent,
-    pool_puzzle_hash,
-    redeemer_puzzle_hash,
-    lp_burned,
-    current_total_lp,
-)
+```
+pool singleton                                    LP action coin (CAT, pinned inner)
+  |                                                        |
+  |-- CreateCoinAnnouncement { message } ----------------->|  AssertCoinAnnouncement
+  |                                                        |    sha256(pool_coin_id + message)
+  |                                                        |
+  |<-- AssertCoinAnnouncement -----------------------------|  CreateCoinAnnouncement
+  |     sha256(lp_action_coin_id + acknowledgement)        |    { acknowledgement }
 ```
 
-The descriptors are now emitted in the `authority_spend` field of `forge_add_liquidity.py`
-and `forge_remove_liquidity.py` `--dry-run` output. When the pool singleton puzzle reveal
-becomes available, these descriptors wire directly into the full spend bundle.
+The TAIL also emits `AssertMyCoinId { coin_id: action.lp_action_coin_id }`, so the coin running
+it is the coin the pool named.
+
+### Message format
+
+```
+message = tree_hash([
+    "forge-lp-action-v3",
+    launcher_id,
+    current_pool_coin_id,
+    lp_action_coin_id,
+    effective_delta,
+    new_total_lp,
+    next_state_root,
+])
+
+acknowledgement = tree_hash([message, "lp-ack-v3"])
+```
+
+Note it commits to `effective_delta` and `new_total_lp`, not just to "something happened" — the
+V4-era gap where the TAIL never compared the CAT delta to the pool-approved `lp_delta` is closed.
+
+### What the TAIL checks, in order
+
+1. `launcher_id != 0`, `protocol_version == PROTOCOL_VERSION` (10)
+2. `current_pool_coin_id != 0`, `lp_action_coin_id != 0`, `expected_delta != 0`,
+   `new_total_lp >= 0`
+3. the coin's own id (from CAT2 truths) equals `action.lp_action_coin_id`, and its amount is
+   positive
+4. `parent_is_cat || expected_delta > 0`
+5. `effective_delta == expected_delta`, where `effective_delta` is `delta` for a CAT parent and
+   `amount + delta` for a genesis
+
+The version assert means an LP asset id is pinned to one protocol revision as well as one pool.
+Bumping `PROTOCOL_VERSION` changes the TAIL's tree hash and therefore the asset id — a new
+revision cannot mint into an existing pool's LP supply.
 
 ---
 
-## Key Files
+## Mint and burn shapes
 
-| File | Purpose |
-|------|---------|
-| `contracts/forge_lp_cat_tail.rue` | TAIL Rue source |
-| `contracts/lp_cat_authority_coin.rue` | Authority coin Rue source |
-| `contracts/compiled/forge_lp_cat_tail.clvm.hex` | Compiled TAIL CLVM |
-| `contracts/compiled/lp_cat_authority_coin.clvm.hex` | Compiled authority CLVM |
-| `contracts/pool_tail_authority_spend.py` | Python descriptor builders + CLI |
-| `contracts/forge_add_liquidity.py` | Deposit script (authority_spend in result) |
-| `contracts/forge_remove_liquidity.py` | Withdraw script (authority_spend in result) |
-| `src/lib/lpCatAuthority.ts` | TypeScript puzzle hash derivation |
-| `src/lib/spendBundles.ts` | TypeScript `LpAuthorityDescriptor` types + builders |
-| `api/pool-tail-authority.js` | GET endpoint: puzzle hashes from launcher ID |
+```
+Add:
+  eve coin (1 mojo, wrapped in LP_MINT_INNER, no CAT parent)
+  + extra_delta = lp_minted - 1
+  = lp_minted LP CAT at the settlement puzzle hash, same asset id
 
----
+Remove:
+  the LP being burned (CAT parent, wrapped in LP_MELT_INNER)
+  + extra_delta = -burn
+  = no LP CAT output
+```
 
-## Known Values (TM10 — testnet11)
-
-| Property | Value |
-|----------|-------|
-| Launcher ID | `6fb445ab73bb90002f294c72dafd4f9f3ae2c2fb5671d0b4ab4b88a290ed3cc0` |
-| New LP CAT asset ID (pool TAIL) | `efce9954287878a3f645ddbf76cb75666828b6c7293296dceab69ae66189c62a` |
-| Authority puzzle hash | `726fcf284bf6bb1b65959d35a44c561c65490643c6de5fe5a3b63b1b38eef948` |
-| Old FLPTM10 asset ID (fixed TAIL) | `418c18a5222ad34812633877747ed253394344d65077bf13e0b84b85494256fb` |
+The one mojo on an add is CAT substrate. It does not derive or create a new asset id.
 
 ---
 
-## Known Blockers
+## Genesis is creator-trusted, by construction
 
-- **Pool singleton puzzle reveal**: The pool's compiled CLVM is in `dist/` but the Rue source
-  is not on disk. Full spend bundle construction (pool singleton spend + reserve spends + authority
-  coin + TAIL) cannot proceed without it.
-- **Authority coin parent**: Must be set in `authorityCoinParent` in the deployment index batch
-  for the authority coin ID to be computed. Without it, puzzle hash derivation still works but
-  the full coin ID is unknown.
-- **Simulator test**: No full lifecycle test (deposit → verify LP CAT minted) has been run yet.
+At pool creation the creator controls both the pool's curried state and the LP supply the TAIL is
+told to mint, because the coin authorising that mint is an ordinary coin in their own bundle —
+there is no pool yet to authorise it. This is inherent to permissionless creation and was probed
+rather than assumed:
+
+- a mismatched state makes the pool **inert** — `AssertMyAmount` fails against the real reserve
+  coins — which costs the creator, not the protocol
+- burning *all* creator LP returns strictly less than was deposited (the genesis lock:
+  `CREATE_COIN ZERO32, 1`, and `burn < total_lp`)
+
+Gating creation to an allowlist or NFT is a product decision on top of this, not a substitute for
+it.
 
 ---
 
-## Related Quests
+## Where it lives
 
-- `done/build-forge-pool-controlled-tail.md` — foundation quest (completed 2026-03-30)
-- `backlog/enhance-forge-full-liquidity-bundle.md` — full bundle construction (next)
+Local paths (`projects/` is not published in this repo):
+
+| file | purpose |
+|---|---|
+| `contracts/forge_lp_cat_tail_FORGE.rue` | the TAIL |
+| `contracts/forge_lp_melt_inner_FORGE.clsp` | pinned burn inner |
+| `contracts/forge_lp_mint_inner_FORGE.clsp` | pinned mint inner |
+| `contracts/forge_lp_tail_spend_builder.py` | builds the TAIL spend for both directions |
+| `contracts/forge_puzzles.py` | resolves `_FORGE` vs archived revisions; `FORGE_VERSION` |
+| `contracts/_test_forge_audit.py` | TAIL probes, including the fabricated-melt case |
+| `contracts/_test_forge_lp_binding.py` | id binding **and** the pinned-inner case |
+| `contracts/_test_forge_exploit_closed.py` | the V8 drain, accepted then refused |
+
+---
+
+## Rules to carry into any change here
+
+- **Never accept an action coin id from a solution.** Derive it.
+- **Never widen a pinned inner.** Its security is that it has nothing to vary.
+- **Re-probe the melt path after any TAIL edit** — the fabricated-melt finding was introduced by
+  the fix for the unauthenticated burn, and was argued to be impossible before the probe
+  disagreed.
+- **A hardened TAIL is a new asset id.** Any change to the TAIL changes its tree hash, so
+  existing pools keep their old LP asset and a migration means new pools.

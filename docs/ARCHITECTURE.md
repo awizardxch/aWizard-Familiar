@@ -58,17 +58,47 @@ Fungible LP representation. Standard weighted CFMM.
 
 | Property | Detail |
 |---|---|
-| Pool type | Weighted multi-CAT CFMM (Balancer-style) |
+| Pool type | N-asset weighted CFMM (Balancer-style), 1–10 assets; shipping revision = **V10** |
 | LP token | Fungible CAT, ticker `ASSET1ASSET2-FORGE` |
 | Fee | Configurable per-pool (e.g. 0.3%) |
 | Math | `calcSwapOut`, `calcSwapIn`, `powFrac` — implemented in `cfmm.ts` |
-| Contracts | `pool_singleton_v2.rue` for LP state, `swap_engine.rue` for swap settlement, `pool_launcher.rue` for pool launch |
+| Contracts | `pool_singleton_FORGE` (state + all three modes), `forge_reserve_FORGE` (curried with the pool's `launcher_id`), `forge_lp_cat_tail_FORGE` plus the pinned `forge_lp_{mint,melt}_inner_FORGE`; all built via `contracts/forge_stdin.py`. Superseded revisions live in `contracts/development/` |
+| Invariant | `prod(reserve_i ** weight_i)`, integer weights, **verified by bracketing** rather than solved — no fractional exponents on chain |
+| Single-asset pools | A vault: cannot swap, so wrapping and redeeming its LP is its only trade, and the liquidity fee applies to that crossing |
 
-Forge's forward swap boundary is now explicit:
+Forge's execution boundary:
 
-- `pool_singleton_v2.rue` is the LP authority and state-transition lane
-- `swap_engine.rue` is the canonical on-chain settlement boundary behind the offer-first swap UX
-- external routed offers may be accepted through wallet-native take-offer methods or the local Sage RPC bridge when the browser session does not advertise those methods
+- the pool singleton is the LP authority and the state-transition lane; a router assembles the
+  bundle from a signed Offer and **never holds a key**, so it cannot alter what the trader signed
+- external routed offers may be accepted through wallet-native take-offer methods, or the local
+  Sage RPC bridge when the browser session does not advertise them
+- Forge maintains a local offer relay/indexer for uploaded offer files and router-created pending
+  matches; router order is AMM-first, then Forge-owned indexed offers, with Dexie retained as an
+  external fallback rather than the primary dependency
+- **creation offers are bearer instruments** and are redacted at the HTTP boundary — never logged,
+  mirrored to a public venue, or rendered with a copy button
+
+Lanes: direct (`swap` / `add` / `remove`), multi-hop, split, and vault-route (swap then redeem).
+A redemption may end a route but never open one; a wrap leg has no settling lane and is dropped
+at quote time.
+
+**V10 semantics** (see [docs/skills/forgePuzzleV10.md](skills/forgePuzzleV10.md)):
+
+- creation commits the creator-selected bootstrap amounts, which set the initial ratios, and locks
+  a genesis LP mojo at an unspendable destination so a holder can burn their whole position
+- adds may be balanced, imbalanced or single-sided; the imbalance fee falls on `(K - k_i)/K` of the
+  excess, so an unbalanced add followed by a pro-rata remove is not a fee-free swap
+- LP CAT issuance requires equal XCH mojo backing, because CAT value cannot be created without
+  base-coin value
+- removes are exactly proportional and free for every multi-asset pool, with `burn < total_lp`
+- **a reserve moves only on a puzzle announcement from its own pool**, rebuilt in-puzzle from the
+  reserve's curried `launcher_id`; and LP supply moves only through the derived action coin id,
+  the pinned inner, and a CAT-parent melt
+- every transition passes a singleton-freshness guard (`api/_forgeResponder.js`) — exact unspent
+  coin, matching puzzle hash, no pending mempool spend — and the successor snapshot it persists is
+  the only source of the pool's next state
+- **pre-V10 pools are retired and unsafe**; the deployment index rejects superseded revisions in
+  both directions. See [docs/FORGE_PROTOCOL_STATUS.md](FORGE_PROTOCOL_STATUS.md)
 
 ### 2. NFT Vault — Treasure Chests
 
