@@ -293,10 +293,11 @@ substitute.
 ## Reference
 
 Forge's own findings log — the worked example for everything above — is
-`projects/chia-cfmm/docs/FORGE_SECURITY_AUDIT.md`, with the puzzle reference in
-`FORGE_PUZZLE_V10.md` beside it. Both are local only: `projects/` is not published in this
-repo. The log's reproduction block is the model for a suite index — one line per suite,
-naming which finding it covers.
+[`docs/FORGE_SECURITY_AUDIT.md`](../FORGE_SECURITY_AUDIT.md), which ships with this repo. The
+fuller version, carrying the proof file names, the numbers each probe produced, and the
+reproduction commands, sits with the code at `projects/chia-cfmm/docs/FORGE_SECURITY_AUDIT.md` —
+workspace only, since `projects/` is not published here. That reproduction block is the model for
+a suite index: one line per suite, naming which finding it covers.
 
 Related skills: `forgePuzzleV10.md` (the shipping shape), `forgeLpCat.md` (the LP
 handshake in detail), `forgePoolLifecycleTesting.md` (what to run), and

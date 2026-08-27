@@ -4,8 +4,8 @@
 > mainnet; V4–V9 exist on testnet and are described only where behaviour differs.
 > Updated 2026-08-27, after the internal audit closed 10 findings and the old pools were retired.
 >
-> **Not externally audited. Testnet only.** Findings log: `clvmPuzzleAudit.md` for the method,
-> `projects/chia-cfmm/docs/FORGE_SECURITY_AUDIT.md` for the log itself (local only).
+> **Not externally audited. Testnet only.** `clvmPuzzleAudit.md` for the method,
+> [`docs/FORGE_SECURITY_AUDIT.md`](../FORGE_SECURITY_AUDIT.md) for the findings log.
 
 ---
 

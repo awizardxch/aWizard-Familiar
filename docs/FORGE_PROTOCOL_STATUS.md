@@ -15,7 +15,7 @@ every pre-V10 pool was retired.
 | Superseded | V4–V9, archived in `contracts/development/`, still loadable because old pools stay on chain |
 | Creation | V10 only. Minting a superseded revision is refused unless `allowUnsafeLegacyVersion` is set, which the HTTP relay drops |
 | Live pools | none — the deployment index was cleared when the old pools were retired. The pools to create next are in the local `FORGE_LAUNCH_MATRIX.md` (16 rows, all deployed through the real creation path in a dry run before any coins are spent) |
-| Audit | 10 findings, all fixed. Method: [`docs/skills/clvmPuzzleAudit.md`](skills/clvmPuzzleAudit.md). Findings log: `projects/chia-cfmm/docs/FORGE_SECURITY_AUDIT.md` (local only) |
+| Audit | 10 findings, all fixed. Findings: [`docs/FORGE_SECURITY_AUDIT.md`](FORGE_SECURITY_AUDIT.md). Method: [`docs/skills/clvmPuzzleAudit.md`](skills/clvmPuzzleAudit.md) |
 
 ### Why every pre-V10 pool was retired
 

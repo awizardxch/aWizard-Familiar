@@ -190,7 +190,8 @@ it.
 
 ## Where it lives
 
-Local paths (`projects/` is not published in this repo):
+Workspace paths — pointers for someone with the monorepo open, not where the knowledge lives
+(`projects/` is not published in this repo, so everything needed is above):
 
 | file | purpose |
 |---|---|

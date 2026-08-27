@@ -12,6 +12,12 @@ Use this file when:
 
 ## Primary Architecture Docs
 
+> **Published vs workspace.** This repo ships standalone on GitHub: `.github/`, `docs/`,
+> `docs/skills/`, `.vscode/`, `README.md`. Rows below pointing into `projects/` or `docs/quests/`
+> are **workspace only** — they exist for someone with the monorepo open, and anything the agent
+> must be able to rely on lives in `docs/`.
+
+
 | Document | Scope | Open this when |
 | --- | --- | --- |
 | `docs/ARCHITECTURE.md` | Ecosystem-wide product map | You need the high-level subdomain model, project-to-product mapping, or world metaphor |
@@ -51,12 +57,12 @@ Use this file when:
 - Pair with `docs/skills/chiaPrimitivesPatterns.md` and `docs/skills/blockchainDecentralization.md`
 
 ### Forge CFMM / Offer-Only Execution
-- Start with `docs/quests/diagrams/forge-puzzle-architecture.md`
-- Use `docs/quests/backlog/harden-forge-offer-only-v3.md` for the mainnet hardening plan
-- Start with `docs/skills/forgePuzzleV10.md` — the shipping revision; the diagram below predates it
+- Start with `docs/skills/forgePuzzleV10.md` — the shipping revision
 - Pair with `docs/skills/forgeLpCat.md`, `docs/skills/forgePoolLifecycleTesting.md`, and `docs/skills/chiaTibetAmm.md`
 - For any review, probe, or revision of the puzzles: `docs/skills/clvmPuzzleAudit.md` first
 - Current status: `docs/FORGE_PROTOCOL_STATUS.md` (V10; pre-V10 pools retired and unsafe)
+- Findings: `docs/FORGE_SECURITY_AUDIT.md` — ten, all fixed, two third-party-reachable fund loss
+- `docs/quests/diagrams/forge-puzzle-architecture.md` (workspace only) predates V10 — read it as history
 - Treat routers and indexes as replaceable liveness infrastructure, never protocol authority
 
 ### Nightspire / GUI / Activity

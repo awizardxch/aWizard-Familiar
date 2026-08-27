@@ -73,6 +73,8 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/NIGHTSPIRE_THEME.md`** — Nightspire CSS token system for all frontends
 - **`docs/AWIZARD_AGENT.md`** — Agent behavior and mode documentation
 - **`docs/CODE_AUDIT_REPORT.md`** — Code quality baseline and audit results
+- **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V10 shipping, why V4–V9 are unsafe
+- **`docs/FORGE_SECURITY_AUDIT.md`** — Forge findings log: ten findings, severity, how each was closed
 - **`docs/TODO_DEFI.md`** — DeFi build phases tracking
 - **`docs/TODO_WORLD.md`** — World engine development tracking
 - **`docs/QUEST_WORKFLOW.md`** — Foundation-First pattern quick reference

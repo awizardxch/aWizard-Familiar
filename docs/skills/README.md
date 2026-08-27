@@ -166,6 +166,18 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `docs/ARCHITECTURE_INDEX.md` — where to find the right architecture document
 - `docs/ARCHITECTURE.md` — ecosystem-level product and subdomain map
 - `docs/QUEST_WORKFLOW.md` — quest lifecycle and backlog movement rules
+- `docs/FORGE_PROTOCOL_STATUS.md` — Forge protocol status (V10) and why V4–V9 are unsafe
+- `docs/FORGE_SECURITY_AUDIT.md` — the findings log the audit skill generalises from
+
+## Skills Must Stand Alone
+
+This repo publishes standalone: `.github/`, `docs/`, `docs/skills/`, `.vscode/`, `README.md`.
+`projects/`, `tests/`, `scripts/`, `docs/quests/` and `memories/` are gitignored and never ship.
+
+A skill therefore carries its knowledge **inline**. A path into `projects/…` is a pointer for
+someone with the monorepo open — never the place the knowledge lives. When a project doc holds
+something the agent needs, summarise it into `docs/` (as `docs/FORGE_SECURITY_AUDIT.md` does)
+instead of linking out to it.
 
 ## Backlog Wiring Rule
 
