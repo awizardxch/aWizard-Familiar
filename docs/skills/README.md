@@ -172,6 +172,7 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `docs/ARCHITECTURE.md` — ecosystem-level product and subdomain map
 - `docs/QUEST_WORKFLOW.md` — quest lifecycle and backlog movement rules
 - `docs/FORGE_PROTOCOL_STATUS.md` — Forge protocol status (V10) and why V4–V9 are unsafe
+- `docs/FORGE_V11_SPEC.md` — the V11 build spec: decisions, state, five actions, finalizer, registry, test lanes, phased build order
 - `docs/FORGE_SECURITY_AUDIT.md` — the findings log the audit skill generalises from
 
 ## Skills Must Stand Alone

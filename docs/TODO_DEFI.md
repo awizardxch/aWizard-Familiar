@@ -80,13 +80,13 @@
         were both rejected; the N-asset band derivation stays in the skill as the research record
   - [ ] cheap future-proofing only: finalizer tested at N=2 and N=10, fixed tag/state conventions,
         reserved slot nonces, pool-type field in the router registry
-  - [ ] **decide the oracle leaf**: height-weighted price accumulator in state + an `observe` action
-        that snapshots to a slot and announces (recommended yes — cannot be added to existing pools later)
-  - [ ] decide protocol fee accrual in state + batched collect versus the V10 per-swap payout coin
-  - [ ] **on-chain pool registry** (separate singleton, CHIP-0050 slots with sorted-list uniqueness):
-        one canonical pool per asset set + weights, creation fee or NFT gate, revision gate by puzzle
-        hash; retires the server/localStorage deployment index — also closes 1c below
-  - [ ] liquidity mining via the CHIP-0051 reward distributor pointed at the LP CAT (no new puzzles)
+  - [x] oracle leaf: yes — accumulator in state, `observe` action (2026-09-04)
+  - [x] protocol fee accrual in state + permissionless `collect` leaf: yes (2026-09-04)
+  - [x] on-chain pool registry: yes (2026-09-04) — closes 1c
+  - [x] LP mining via CHIP-0051 reward distributor: yes, post-launch (2026-09-04)
+  - **Build spec and phase plan: [docs/FORGE_V11_SPEC.md](FORGE_V11_SPEC.md)** — phases 0–9 absorb
+    Roadmap §2–§5, TODO 1b/1c/2/4/9, Phases 8/9/4c/10; five merkle leaves fixed
+    (`swap, add, remove, observe, collect`); open items settle in phase 1
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
     the action layer, `p2_delegated_by_singleton` reserves, and a Forge-written multi-reserve
     finalizer (none exists upstream — the reserve finalizer is the template)

@@ -16,7 +16,7 @@ every pre-V10 pool was retired.
 | Creation | V10 only. Minting a superseded revision is refused unless `allowUnsafeLegacyVersion` is set, which the HTTP relay drops |
 | Live pools | none — the deployment index was cleared when the old pools were retired. The pools to create next are in the local `FORGE_LAUNCH_MATRIX.md` (16 rows, all deployed through the real creation path in a dry run before any coins are spent) |
 | Audit | 10 findings, all fixed. Findings: [`docs/FORGE_SECURITY_AUDIT.md`](FORGE_SECURITY_AUDIT.md). Method: [`docs/skills/clvmPuzzleAudit.md`](skills/clvmPuzzleAudit.md) |
-| Next revision | **V11, adopted 2026-09-04, not started.** CHIP-0050 action layer: Forge-written binding checks fall from ~21 to ~4 and the reserve-only bug class disappears. Conditions: upstream-grade review of the Forge-written multi-reserve finalizer; audit the final multi-action puzzle once (one action per spend is router policy at launch, never an in-puzzle guard — a pool's puzzle is immutable). Scope: weighted N-asset full range, V10 curve/fees/LP CAT unchanged, three actions. Concentrated liquidity is off scope (2026-09-04); it returns as a second pool type with NFT positions so wallets and other DEXes identify them. [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) |
+| Next revision | **V11, adopted 2026-09-04, not started.** CHIP-0050 action layer: Forge-written binding checks fall from ~21 to ~4 and the reserve-only bug class disappears. Conditions: upstream-grade review of the Forge-written multi-reserve finalizer; audit the final multi-action puzzle once (one action per spend is router policy at launch, never an in-puzzle guard — a pool's puzzle is immutable). Scope: weighted N-asset full range, V10 curve/fees/LP CAT unchanged, five leaves (`swap, add, remove, observe, collect`): oracle accumulator + `observe`, protocol fees accrued and collected in batch, an on-chain pool registry, CHIP-0051 LP mining post-launch. Concentrated liquidity is off scope; it returns as a second pool type with NFT positions. Build order: [`docs/FORGE_V11_SPEC.md`](FORGE_V11_SPEC.md) [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) |
 
 ### Why every pre-V10 pool was retired
 
@@ -47,7 +47,9 @@ The durable protocol knowledge has moved into skills, which are the maintained c
 - [`docs/skills/forgePoolLifecycleTesting.md`](skills/forgePoolLifecycleTesting.md) — lanes,
   guardrails, the suite index, and what a green run does not prove
 - [`docs/skills/clvmPuzzleAudit.md`](skills/clvmPuzzleAudit.md) — how any puzzle here gets audited
-- [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) — the V11 candidate: CHIP-0050
+- [`docs/FORGE_V11_SPEC.md`](FORGE_V11_SPEC.md) — the V11 build spec: decision ledger, state,
+  actions, finalizer, registry, test lanes, phased build order against the roadmap
+- [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) — the V11 rationale: CHIP-0050
   reference, the exploit-surface count, the multi-reserve finalizer, audit additions
 
 Project-local docs (not published in this repo, `projects/` is gitignored):

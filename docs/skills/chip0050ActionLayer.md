@@ -17,6 +17,10 @@
 > positions are **NFTs**, so wallets and other DEXes identify them natively; the N-asset band
 > maths below is kept as the research record for that work, not as V11 design.
 >
+> **Build spec:** [`docs/FORGE_V11_SPEC.md`](../FORGE_V11_SPEC.md) — decision ledger, state,
+> the five actions (`swap, add, remove, observe, collect`), finalizer, registry, test lanes,
+> build order against the rest of the roadmap.
+>
 > **Nothing in V11 exists yet. Nothing is audited.** The upstream components are reviewed and on
 > mainnet; the Forge actions and the multi-reserve finalizer are new code until proven otherwise.
 
@@ -693,12 +697,11 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
    puzzle change.
 5. **Config placement.** Curried into each action versus carried in state. Curried is cheaper and
    immutable, which is the V10 property worth keeping.
-6. **Oracle leaf.** Does V11 carry a height-weighted price accumulator in state and an `observe`
-   action that snapshots it to a slot and announces it? Recommended yes: small, permissionless,
-   and the only way a V11 pool can ever feed the perps oracle on chain — it cannot be added to
-   existing pools later.
-7. **Protocol fee accrual.** Per-swap payout coin (V10) versus accrual in state with a batched
-   collect. Recommended accrual; decide whether collect is its own leaf.
+6. ~~Oracle leaf.~~ **Decided yes (2026-09-04):** accumulator in state updated by every spend's
+   first action; `observe` snapshots to a slot and announces. Spec: `docs/FORGE_V11_SPEC.md` §4.
+7. ~~Protocol fee accrual.~~ **Decided yes (2026-09-04):** `fees_owed` in state, permissionless
+   `collect` leaf. Registry and CHIP-0051 LP mining also confirmed. **The build order is
+   [`docs/FORGE_V11_SPEC.md`](../FORGE_V11_SPEC.md).**
 
 ---
 
