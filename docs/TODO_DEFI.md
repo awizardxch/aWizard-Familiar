@@ -80,6 +80,10 @@
         homothetic) and Result 2 (a pairwise swap moves two thresholds monotonically → one sorted
         threshold list per asset) for N ∈ {2,3,5,10}; equal V3 at N=2; equal V10 at u=0; choose the
         re-entry rule (reactivate action vs partial activity); no negative reserves, fees never leave
+  - [x] LP identity: **one LP asset id per pool** (per-band asset ids rejected 2026-09-04); the range
+        is enforced per coin by a self-propagating position layer (CR-CAT pattern), fungible within a band
+  - [ ] position layer puzzle: morphed CREATE_COIN, per-coin conservation, TAIL-call waiver; probe that a
+        ring mixing two tags cannot move value between them
   - [ ] if the maths does not close: V11 ships the zero band only, bands become a second pool type
   - [ ] build concentration-ready: finalizer tested at N=2 and N=10, fixed tag/state conventions,
         reserved slot nonces for ticks and positions, pool-type field in the router registry

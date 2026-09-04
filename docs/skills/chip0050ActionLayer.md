@@ -517,33 +517,45 @@ are thresholds on one monotone scalar, so the crossing order is the sorted order
 lists — each protected by the CHIP-0050 uniqueness pattern. Slots spent per swap = bands
 crossed, as in V3. This is what makes N-asset bands verifiable in-puzzle rather than research.
 
-**How the asset id tells ranges apart — why no NFT.** Every band has its own LP CAT and the
-range is baked into the asset id:
+**One LP asset id per pool — the position layer.** Per-band asset ids were considered and
+rejected (2026-09-04): a full-range and a concentrated holder hold the same assets in different
+ranges, and the frontend must not have to discover a new asset id per range. The constraint that
+shapes the replacement: **a fungible token cannot carry two different claims.** The CAT layer
+only conserves total supply across a ring, so if two ranges shared an asset id with nothing else
+enforcing the difference, one spend could move value from the richer range into the poorer one.
+V3 hit this and chose NFTs. Forge keeps fungibility within a range with a lighter mechanism:
 
 ```
-band_tail_hash = curry_tree_hash(LP_TAIL_MOD, [launcher_id, hash(u), protocol_version])
-band_asset_id  = band_tail_hash
+LP coin = CAT(pool_lp_asset_id, position_layer(band_id, owner_inner))
 ```
 
-Same range, same token: two holders of the full-range band hold the same asset id, as they
-should, because their claims are interchangeable. Different range, different token. V3 needed an
-NFT per position because fees are not compounded there, so two positions on the same tick pair
-carry different uncollected-fee balances and are not interchangeable. Here fees compound into the
-band's `L`, every holder of a band token has an identical pro-rata claim, and there is no
-per-position state left — positions in the same range are genuinely fungible, so a fungible token
-is the correct representation (the fungible-V3-wrapper idea, done natively). Slots hold
-range-level records and the per-asset threshold lists, never positions; that is the exact shape
-XCHandles already runs on mainnet (a sorted doubly-linked list in slots). Quantise `u` to a grid,
-like V3 tick spacing, so ranges cluster; a range nobody else uses is a band with one holder,
-which is the NFT case as a degenerate band. Naming is off-chain as for every CAT; CATalog can
-register band tokens.
+The position layer is a self-propagating inner layer curried with the band id. It (1) morphs
+every `CREATE_COIN` from the owner inner so the child is wrapped in the same layer with the same
+band id — the tag can never be dropped or changed by a normal spend; (2) asserts the sum of its
+outputs equals its own amount, so value cannot cross tags inside a ring; (3) waives (2) only
+when the spend carries the TAIL call, i.e. the pool-authorised mint or melt. Same tag: coins
+merge and split freely, so positions in a range stay fungible. Different tags: cannot combine.
+Precedent: credential-restricted CATs enforce their layer on every descendant by morphing
+`CREATE_COIN`, and the NFT ownership layer does the same; only the payload is new.
+
+Why no per-position NFT: fees compound into the band's `L`, so there is no per-position state
+(V3 needed NFTs because uncompounded fees make positions on the same ticks non-interchangeable).
+Slots hold band records and per-asset threshold lists, never positions — the shape XCHandles
+already runs on mainnet. Quantise `u` to a grid so ranges cluster.
+
+**Trade-off accepted.** Anything that handles the LP token by asset id alone is wrong about
+value: a wallet shows one balance mixing ranges, a DEX cannot price the asset id, an offer that
+picks coins by asset id may pick the wrong band. The Forge frontend reads coins and tags
+directly (one pool, one asset id, one scan). The LP token is for band-aware software only; if
+it must later serve as collateral or trade elsewhere, that software must read the tag.
 
 **What reuses Forge tech.**
 
-- **One fungible LP CAT per band**, TAIL curried with `(launcher_id, band_id, protocol_version)`.
-  The three-part lock (`forgeLpCat.md`) carries over per band unchanged; the only pool-side
-  change is that `add` and `remove` compute the band's TAIL hash from the launcher id and the
-  band id in the solution before binding the LP action coin id exactly as V10 does.
+- **One LP CAT per pool**, TAIL curried with `(launcher_id, protocol_version)` as in V10, with
+  the range carried by the position layer above. The three-part lock (`forgeLpCat.md`) carries
+  over unchanged; the only pool-side change is that the pinned inner hash in the derived
+  mint/melt coin id becomes `position_layer(band_id, LP_MINT_INNER | LP_MELT_INNER)`, so `add`
+  and `remove` bind the band inside the same derivation.
 - **Fees compound in-band**: the swap fee stays in the active bands' reserves pro rata by `L_k`,
   each `L_k` grows homothetically (`u` unchanged), so range LP CATs appreciate. No fee-growth
   accumulators.
@@ -579,7 +591,8 @@ turns bands on when the band suites are green.
 
 **State sketch.** `[L_active, [R_1..R_N] (active virtual reserves), [total_1..total_N] (real
 reserves held, for the finalizer), zero-band L and LP supply]`; per-band data (`u`, `L_k`, LP
-supply, frozen reserves and status) in band slots; per-asset threshold lists in slots.
+supply, frozen reserves and status) in band slots; per-asset threshold lists in slots. One LP
+asset id per pool; the band id lives in each LP coin's position layer.
 
 **Reference-maths acceptance.** Numerically demonstrate Results 1 and 2 for N ∈ {2, 3, 5, 10}
 with random weights, offsets and swap sequences; equal V3 at N = 2 and equal weights; equal the
@@ -674,6 +687,10 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
    pool type.
 1. **Tag encoding.** `(-42 index . condition)` versus one opcode per reserve (`-42 - index`).
    The former keeps a single strip rule in the finalizer; settle it before writing actions.
+1a. **Position layer puzzle.** Write and audit the self-propagating band-tag layer (morphed
+   `CREATE_COIN`, per-coin conservation, TAIL-call waiver) before the LP binding is designed
+   around it; model it on the CR-CAT layer, and test that a ring mixing two tags cannot move
+   value between them.
 2. **LP TAIL handshake.** Keep the puzzle announcement from the action-layer singleton, or revise
    the TAIL to use a message. A message is cleaner; it means a TAIL change and therefore already
    the new asset id V11 brings anyway.
