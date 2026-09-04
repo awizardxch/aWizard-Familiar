@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updated": "2026-08-27",
+  "version": 5,
+  "updated": "2026-09-04",
   "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
   "domains": {
     "chia-protocol": [
@@ -11,15 +11,18 @@
       "sageRpc.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
-      "forgePoolLifecycleTesting.md"
+      "forgePoolLifecycleTesting.md",
+      "chip0050ActionLayer.md"
     ],
     "puzzle-security": [
       "clvmPuzzleAudit.md",
-      "chiaPrimitivesPatterns.md"
+      "chiaPrimitivesPatterns.md",
+      "chip0050ActionLayer.md"
     ],
     "clvm-audit": [
       "clvmPuzzleAudit.md",
-      "forgePuzzleV10.md"
+      "forgePuzzleV10.md",
+      "chip0050ActionLayer.md"
     ],
     "adversarial-testing": [
       "clvmPuzzleAudit.md",
@@ -29,7 +32,8 @@
       "forgePuzzleV10.md",
       "forgeLpCat.md",
       "forgePoolLifecycleTesting.md",
-      "clvmPuzzleAudit.md"
+      "clvmPuzzleAudit.md",
+      "chip0050ActionLayer.md"
     ],
     "wallets-and-signing": [
       "bowAppReference.md",
@@ -107,6 +111,17 @@
     "bridge-offer-lifecycle": [
       "warpBridge.md",
       "chiaWalletSdk.md"
+    ],
+    "action-layer": [
+      "chip0050ActionLayer.md",
+      "forgePuzzleV10.md",
+      "clvmPuzzleAudit.md"
+    ],
+    "forge-v11": [
+      "chip0050ActionLayer.md",
+      "forgePuzzleV10.md",
+      "forgeLpCat.md",
+      "forgePoolLifecycleTesting.md"
     ]
   }
 }

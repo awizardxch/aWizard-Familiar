@@ -248,7 +248,9 @@ This protocol will be submitted as multiple CHIPs:
 | C | Oracle Aggregation Standard | Standards Track / Primitive |
 | D | Permissionless Vault Standard | Informational / Puzzle |
 
-Start with CHIP-A (CLOB) after testnet proof. Reference CHIP-50 (Action Layer) for forward-compatibility.
+Start with CHIP-A (CLOB) after testnet proof. Build on CHIP-0050 (Action Layer and Slots) from
+the start — Forge V11 adopts it for the CFMM, and the CLOB and position maps are the first
+consumers of slots. Reference and audit additions: `chip0050ActionLayer.md`.
 
 ---
 

@@ -89,6 +89,7 @@ protocol where a singleton controls satellite coins.
 | `AssertCoinAnnouncement` keyed on a coin id the asserting puzzle **derives, or holds in curried state** | only that specific coin | sound |
 | `AssertPuzzleAnnouncement` keyed on a puzzle hash **rebuilt in-puzzle from a curried identity** | only a coin actually running that puzzle | **sound — the right default for satellite → controller** |
 | A curried `launcher_id` asserted non-zero and then never used | nobody — it is decoration | **broken.** Grep for curried fields with no consumer. |
+| `RECEIVE_MESSAGE` with sender mode **puzzle** and receiver mode **coin**, the sender hash rebuilt from a curried singleton struct hash | only the controlling singleton, and only for this exact coin | **sound — preferred over announcements.** The mode bits bind identity types explicitly; there is no `sha256(id + message)` concatenation and no domain separator to get wrong. This is the CHIP-0050 reserve binding, and the V11 default. |
 
 **The rule.** A satellite coin (reserve, vault, escrow, position) must assert a **puzzle**
 announcement whose id it rebuilds from *its own curried* launcher id plus the controller's
@@ -300,5 +301,6 @@ workspace only, since `projects/` is not published here. That reproduction block
 a suite index: one line per suite, naming which finding it covers.
 
 Related skills: `forgePuzzleV10.md` (the shipping shape), `forgeLpCat.md` (the LP
-handshake in detail), `forgePoolLifecycleTesting.md` (what to run), and
-`chiaPrimitivesPatterns.md` (singleton and CAT fundamentals).
+handshake in detail), `forgePoolLifecycleTesting.md` (what to run),
+`chiaPrimitivesPatterns.md` (singleton and CAT fundamentals), and `chip0050ActionLayer.md`
+(the action-layer audit additions for V11: finalizer, multi-action and reserve probes).

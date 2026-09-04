@@ -69,11 +69,24 @@
    action coin id, so reserves could be withdrawn with **no LP destroyed at all**. Closed in V9/V10
    by the three-part lock — derived action-coin id, pinned mint/melt inners, and a CAT parent
    required on a melt. See [docs/skills/forgeLpCat.md](skills/forgeLpCat.md).
-1a. **🚀 Deploy the V10 launch matrix** (HIGH — NEXT QUEST)
+1a. **🔐 Forge V11 — CHIP-0050 action layer** (HIGH — decided 2026-09-04, build after V10 tests)
+  - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
+    the action layer, `p2_delegated_by_singleton` reserves, and a Forge-written multi-reserve
+    finalizer (none exists upstream — the reserve finalizer is the template)
+  - [ ] settle the five open items in [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md)
+        (tag encoding, LP TAIL handshake, protocol fee placement, router as sequencer, config placement)
+  - [ ] port the curve functions into a shared Rue module; three action puzzles: `swap`, `add`, `remove`
+  - [ ] `multi_reserve_finalizer.rue` from `reserve_finalizer.rue` at the CHIP's pinned commit
+  - [ ] integrity pins for the upstream action-layer, `p2_delegated_by_singleton` and slot hashes
+  - [ ] action-layer audit additions (finalizer, multi-action, reserve probes) as named suites that exit 2 on skip
+  - [ ] second driver via `chia-wallet-sdk` `ActionLayer` + `Reserve`; bundles must match the Python driver
+  - [ ] re-run the launch matrix under V11; V10 pools retire like V4–V9 did
+  - one action per spend at launch; multi-trader batching is a flagged follow-up
+1b. **🚀 Deploy the V10 launch matrix** (HIGH — NEXT QUEST)
   - 16 pools across the routing surface, vaults, weighted, N-asset, and fee edges
   - every row already deploys through the real creation path in a dry run before coins are spent
   - re-probe per [docs/skills/clvmPuzzleAudit.md](skills/clvmPuzzleAudit.md) before any pool is minted
-1b. **🛡️ Gate pool creation to an NFT or allowlist** (HIGH)
+1c. **🛡️ Gate pool creation to an NFT or allowlist** (HIGH)
   - a pool is permanent, appears beside every audited one, and its creator picks fees and weights
   - correct default for testnet, wrong one for launch
 2. **🔀 Wire WalletConnect Add/Remove Liquidity** (HIGH)
@@ -532,7 +545,7 @@ not a required custody system for initial CFMM launch.
 After testnet proofs are live:
 
 - [ ] Treasure Chest CHIP — NFT programmable vault standard (Informational)
-- [ ] CFMM CHIP — weighted multi-CAT AMM primitive (Standards Track)
+- [ ] CFMM CHIP — weighted multi-CAT AMM primitive (Standards Track); built on CHIP-0050 from V11, so the submission covers the actions, the multi-reserve finalizer and the curve, not the glue
 - [ ] Emoji Token CHIP — emoji metadata standard for CATs
 - [ ] Perps CHIP-A: On-Chain CLOB Standard
 - [ ] Perps CHIP-B: Perpetual Futures Position Standard
