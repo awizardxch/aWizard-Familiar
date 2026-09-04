@@ -1,16 +1,20 @@
-# Skill: CHIP-0050 Action Layer — the V11 candidate
+# Skill: CHIP-0050 Action Layer — the V11 target
 
-> Reference for CHIP-0050 (Action Layer and Slots) and the evaluation of building Forge V11 on it.
+> Reference for CHIP-0050 (Action Layer and Slots) and the Forge V11 design built on it.
 > Written 2026-09-04 while V10 is on testnet11 and V11 has not started.
 >
-> **The rule being tested.** Forge adopts the CHIP-0050 methods *if* they are more secure with
-> fewer points of exploit over the long term. This file is the check. The surface count below
-> says the rule holds, with two conditions: the Forge-written finalizer is reviewed to the same
-> standard as the upstream pieces, and the puzzle that gets audited is the **final** one —
-> multi-action allowed — with one-action-per-spend held as router policy at launch, never as an
-> in-puzzle guard (a pool's puzzle is immutable, so a guard would force a V12 migration; see
-> "Build the final version first"). Under those conditions the recommendation is to adopt.
-> **Adoption is a recommendation, not a decision, until the protocol owner confirms it.**
+> **Adopted 2026-09-04.** The rule was: adopt the CHIP-0050 methods if they are more secure with
+> fewer points of exploit over the long term. The surface count below says yes, on two
+> conditions: the Forge-written finalizer is reviewed to the same standard as the upstream
+> pieces, and the puzzle that gets audited is the **final** one — multi-action allowed, with
+> one-action-per-spend held as router policy at launch, never as an in-puzzle guard (a pool's
+> puzzle is immutable, so a guard would force a V12 migration; see "Build the final version
+> first"). The owner confirmed adoption on those terms.
+>
+> **Direction.** One pool type, N-asset, where full range is the zero-offset case and ranges are
+> added through slots — "Bands" below. Because a pool's actions are fixed at creation, the band
+> actions must be in V11's merkle root from day one; the router hides them at launch. V11's
+> scope is gated on the off-chain reference maths.
 >
 > **Nothing in V11 exists yet. Nothing is audited.** The upstream components are reviewed and on
 > mainnet; the Forge actions and the multi-reserve finalizer are new code until proven otherwise.
@@ -481,6 +485,84 @@ way, but it means stage 3 is where the design becomes durable, not stage 2.
 action set includes tier creation and multi-tier swaps, which pulls the concentrated maths into
 the first audit. Do not decide that before step 1 exists and matches V3 at N = 2.
 
+### Bands — the N-asset range design (v0, 2026-09-04)
+
+The owner's direction is one pool type with ranges added through slots, so this records the
+design as derived so far. Everything here is **to be proven in the reference maths** before any
+puzzle is written; the two results marked *derived* were derived on paper, not tested.
+
+**Definition.** A band is a weighted sub-pool with virtual offsets:
+
+```
+prod( (r_i + v_i) ^ w_i ) = L        r_i real reserves, v_i fixed virtual offsets
+u_i = v_i / L                        the band's range, scale-free; band id = hash(u vector)
+```
+
+Full range is the band with all `u_i = 0`; it never exits. Bands with the same `u` are the same
+band and aggregate additively in `L`.
+
+**Result 1 — active bands are homothetic** (*derived*). For a weighted pool at liquidity `L` and
+price point `P`, the equilibrium virtual reserve of asset `m` is `R_m = L · g_m(P)` with
+`g_m = R_m / L` of the aggregated active pool. So every in-range band holds
+`r_m = L_k · (g_m(P) − u_m)`, all in-range bands share prices, and they aggregate linearly in
+`L` — the same reason V3 positions aggregate. A band is in range iff `g_m(P) ≥ u_m` for every
+asset `m`.
+
+**Result 2 — a pairwise swap moves exactly two thresholds, monotonically** (*derived*). In a swap
+of `i` for `j`, every `R_m` outside the pair is fixed and `L_active` is fixed, so `g_m` is
+constant for `m ∉ {i, j}`; `g_i` rises and `g_j` falls. A band exits when `g_j` reaches its
+`u_j`; a band re-enters when `g_i` reaches its `u_i` (with its other constraints holding). Both
+are thresholds on one monotone scalar, so the crossing order is the sorted order of thresholds.
+**The V3 tick list generalises to one sorted doubly-linked list of thresholds per asset** — N
+lists — each protected by the CHIP-0050 uniqueness pattern. Slots spent per swap = bands
+crossed, as in V3. This is what makes N-asset bands verifiable in-puzzle rather than research.
+
+**What reuses Forge tech.**
+
+- **One fungible LP CAT per band**, TAIL curried with `(launcher_id, band_id, protocol_version)`.
+  The three-part lock (`forgeLpCat.md`) carries over per band unchanged.
+- **Fees compound in-band**: the swap fee stays in the active bands' reserves pro rata by `L_k`,
+  each `L_k` grows homothetically (`u` unchanged), so range LP CATs appreciate. No fee-growth
+  accumulators.
+- **Reserves stay one coin per asset**, holding the sum over all bands; the multi-reserve
+  finalizer recreates N reserves as already designed.
+- **Swaps bracket-verify per segment**: the router computes the segment sequence; the puzzle
+  verifies each segment's invariant at the active `L`, refuses `output ± 1`, and checks that the
+  segment ends exactly at the next threshold in the relevant list.
+- **Create band** is a permissionless action: one band slot plus one threshold inserted into each
+  of the N per-asset lists (N + 1 slot creations).
+- **Existing LP holders move into a range without leaving the pool**: burn full-range LP into
+  pro-rata reserves, deposit into band `k` at ratio `g(P) − u_k`, excess returned or swapped —
+  a `remove` then an `add` in one multi-action spend. Nothing new.
+
+**The open problem — re-entry after other prices moved.** In V3 an exited position holds one
+asset and matches exactly when price returns to its boundary. With N assets a band exits on one
+asset's threshold, and while frozen the other prices keep moving; when `g_j` returns to `u_j` the
+band's frozen reserves no longer match the pool's price point. Two candidate answers:
+
+- *Reactivate action (pragmatic).* Permissionless: the caller trades against the frozen band to
+  bring it to pool prices, keeps the arbitrage, the band's LPs bear the cost — the same economics
+  as V3's out-of-range loss. Verifiable: post-trade band reserves must be homothetic with the
+  pool at `P` and satisfy the band's invariant with fee.
+- *Partial activity (elegant).* A band with `r_j = 0` stays active in its remaining assets. Not
+  shown to be consistent with Result 1; do not build on it until it is.
+
+The reference maths settles this before any band action is written.
+
+**V11 action set under this direction.** `swap`, `add`, `remove`, `create_band`,
+`reactivate_band`, and `collect` only if anything is not auto-compounded — roughly six leaves,
+all in the first audit. The router exposes `swap`, `add`, `remove` on the zero band at launch and
+turns bands on when the band suites are green.
+
+**State sketch.** `[L_active, [R_1..R_N] (active virtual reserves), [total_1..total_N] (real
+reserves held, for the finalizer), zero-band L and LP supply]`; per-band data (`u`, `L_k`, LP
+supply, frozen reserves and status) in band slots; per-asset threshold lists in slots.
+
+**Reference-maths acceptance.** Numerically demonstrate Results 1 and 2 for N ∈ {2, 3, 5, 10}
+with random weights, offsets and swap sequences; equal V3 at N = 2 and equal weights; equal the
+V10 curve at `u = 0`; exercise exit, re-entry and both candidate re-entry rules; property-test
+that no band's real reserve ever goes negative and that fees never leave the pool.
+
 ### Migration
 
 A pool's puzzle is fixed at creation, so V10 pools cannot become V11 pools. V11 means a new LP
@@ -559,13 +641,14 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 
 ## Open items to settle before code
 
-0. **Confirm adoption.** The surface count above is the evidence; the protocol owner decides.
-0a. **Confirm the V11 pool type.** Weighted N-asset (option A, recommended), concentrated
-   (B), or both (C). This fixes the state shape and the LP representation and cannot change after
-   creation. Either way the state is tiers with K = 1.
-0b. **Concentration scope for V11.** Decide only after the off-chain reference maths for
-   N-asset virtual-reserve positions exists and matches V3 at N = 2: does V11 ship tier creation
-   and multi-tier swaps (concentrated maths in the first audit) or K = 1 only.
+0. ~~Confirm adoption.~~ **Confirmed 2026-09-04.**
+0a. ~~Confirm the V11 pool type.~~ **Direction confirmed:** one N-asset pool type with full range
+   as the zero band and ranges added through slots ("Bands"). This puts the band actions in V11's
+   merkle root from day one.
+0b. **V11 scope, gated on the reference maths.** Results 1 and 2 demonstrated, V3 matched at
+   N = 2, V10 matched at `u = 0`, and the re-entry rule chosen. Until then no band puzzle is
+   written; if the maths does not close, V11 ships the zero band only and bands become a second
+   pool type.
 1. **Tag encoding.** `(-42 index . condition)` versus one opcode per reserve (`-42 - index`).
    The former keeps a single strip rule in the finalizer; settle it before writing actions.
 2. **LP TAIL handshake.** Keep the puzzle announcement from the action-layer singleton, or revise

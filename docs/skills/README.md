@@ -72,9 +72,10 @@ Use this file when:
 
 > Forge-specific knowledge, distinct from generic Chia protocol patterns.
 > The first three are current at **V10**, the shipping revision — pre-V10 pools are retired and
-> carry critical authorisation bugs. **V11 is evaluated, not decided:** the CHIP-0050 action layer
-> is recommended for it on a surface count, pending the owner's confirmation;
-> `chip0050ActionLayer.md` carries the count and the candidate design.
+> carry critical authorisation bugs. **V11 is adopted (2026-09-04) on the CHIP-0050 action
+> layer**, one N-asset pool type with full range as the zero band and ranges ("bands") added
+> through slots; `chip0050ActionLayer.md` carries the surface count, the design, and the
+> reference-maths gate.
 
 | Skill | Use it for |
 | --- | --- |

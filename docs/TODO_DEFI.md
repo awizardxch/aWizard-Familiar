@@ -69,19 +69,18 @@
    action coin id, so reserves could be withdrawn with **no LP destroyed at all**. Closed in V9/V10
    by the three-part lock — derived action-coin id, pinned mint/melt inners, and a CAT parent
    required on a melt. See [docs/skills/forgeLpCat.md](skills/forgeLpCat.md).
-1a. **🔐 Forge V11 — CHIP-0050 action layer** (HIGH — evaluated 2026-09-04, recommended, build after V10 tests)
-  - rule: adopt the CHIP methods if they are more secure with fewer points of exploit long term;
-    the surface count in [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md) says
-    yes on two conditions (upstream-grade review of the finalizer; audit the final multi-action
-    puzzle once — a pool's puzzle is immutable, so an in-puzzle guard would force a V12 migration)
-  - [ ] **owner confirms adoption** — nothing below starts before this
-  - [ ] **owner confirms the V11 pool type** — weighted N-asset (recommended) or concentrated;
-        N-asset concentration is buildable the Forge way (virtual-reserve form of the weighted
-        curve, known at N=2 as Uniswap V3 and at N=1 as the vault); see the skill's build-out path
-  - [ ] **reference maths first**: N-asset virtual-reserve positions off-chain, property-tested to
-        equal V3 at N=2 and the V10 curve at zero offsets — gates any concentration in V11
-  - [ ] design V11 state as tiers with K=1 (a full-range pool is a one-tier pool); tiers with their
-        own LP CATs are the first concentrated form, slot-based ranges the second
+1a. **🔐 Forge V11 — CHIP-0050 action layer with N-asset bands** (HIGH — adopted 2026-09-04, build after V10 tests)
+  - rule met: more secure with fewer points of exploit long term; surface count and design in
+    [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md). Conditions: upstream-grade
+    review of the finalizer; audit the final multi-action puzzle once (no in-puzzle guard)
+  - [x] owner confirms adoption (2026-09-04)
+  - [x] direction: one N-asset pool type, full range = zero band, ranges ("bands") added through
+        slots, band actions in the merkle root from day one, router hides them at launch
+  - [ ] **reference maths first** (gates every band puzzle): demonstrate Result 1 (active bands
+        homothetic) and Result 2 (a pairwise swap moves two thresholds monotonically → one sorted
+        threshold list per asset) for N ∈ {2,3,5,10}; equal V3 at N=2; equal V10 at u=0; choose the
+        re-entry rule (reactivate action vs partial activity); no negative reserves, fees never leave
+  - [ ] if the maths does not close: V11 ships the zero band only, bands become a second pool type
   - [ ] build concentration-ready: finalizer tested at N=2 and N=10, fixed tag/state conventions,
         reserved slot nonces for ticks and positions, pool-type field in the router registry
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
