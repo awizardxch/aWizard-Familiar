@@ -5,10 +5,12 @@
 >
 > **The rule being tested.** Forge adopts the CHIP-0050 methods *if* they are more secure with
 > fewer points of exploit over the long term. This file is the check. The surface count below
-> says the rule holds, with two conditions: V11 launches with a single-action guard, and the
-> Forge-written finalizer is reviewed to the same standard as the upstream pieces. Under those
-> conditions the recommendation is to adopt. **Adoption is a recommendation, not a decision, until
-> the protocol owner confirms it.**
+> says the rule holds, with two conditions: the Forge-written finalizer is reviewed to the same
+> standard as the upstream pieces, and the puzzle that gets audited is the **final** one —
+> multi-action allowed — with one-action-per-spend held as router policy at launch, never as an
+> in-puzzle guard (a pool's puzzle is immutable, so a guard would force a V12 migration; see
+> "Build the final version first"). Under those conditions the recommendation is to adopt.
+> **Adoption is a recommendation, not a decision, until the protocol owner confirms it.**
 >
 > **Nothing in V11 exists yet. Nothing is audited.** The upstream components are reviewed and on
 > mainnet; the Forge actions and the multi-reserve finalizer are new code until proven otherwise.
@@ -175,7 +177,7 @@ fourth.
 | Forge-written binding checks | ~4 | LP action coin id derivation, settlement assertion, LP TAIL handshake, tag index range |
 | Upstream-written binding checks | N messages + merkle proofs | reviewed code; Forge pins the hashes and never edits it |
 | New Forge component: the multi-reserve finalizer | 1 (~120 lines) | holds every reserve; the one place that needs upstream-grade review |
-| Multi-action state threading and sequencer ordering | 0 at launch | each action asserts the ephemeral state is empty and sets it — this restores V10's one-action-per-spend property at the puzzle level until batching is wanted |
+| Multi-action state threading and sequencer ordering | audited at launch, exercised by policy later | state threading is upstream code; an action correct for any prior state across spends is correct for any prior state within one; the Forge-specific checks (no relative conditions, LP handshake keyed per action coin, several tagged outputs per reserve) are suites, not design; the router runs one action per spend at launch |
 
 Net: Forge-written binding checks fall from about 21 to about 4, one exploit class disappears
 outright (a reserve-only bug, which is what V4–V9 had, cannot exist because the reserve puzzle
@@ -326,15 +328,47 @@ one) instead of the V10 pool's.
 
 - The first action of a spend sees `()`. Any action that emits a relative condition, or that must
   run at most once per spend, checks the ephemeral state and writes a marker into it.
-- **Launch condition: single-action guard.** Every V11 action asserts the ephemeral state is `()`
-  and returns a non-nil marker. A second action in the same spend then fails. This makes V11's
-  per-spend surface identical to V10's and removes the multi-action and sequencer-ordering risks
-  from the launch audit. Removing the guard is a later revision with its own audit.
-- **No relative or height conditions in any action.** Add them later only behind the guard.
-- When the guard is eventually lifted, batching several traders' swaps in one spend is safe by
-  construction only because each trader's minimum output is enforced by their own offer's
-  settlement announcement; that property must be re-proved in the multi-action suites at that
-  time.
+- **No in-puzzle single-action guard.** A guard is one assert per action, but removing it later
+  changes every action hash, therefore the merkle root, therefore the pool puzzle — a V12
+  migration with live liquidity. Multi-action is audited in V11 and the launch caution lives in
+  the router (below).
+- **No relative or height conditions in any action.** V11 needs none. Any future one goes behind
+  an ephemeral check and is a new revision.
+- **Multi-action correctness is a property of the actions, not of the spend.** Each action reads
+  state from the truth, not from anything curried, so an action correct for any prior state across
+  spends is correct for any prior state within one. The Forge-specific things to prove: the LP
+  handshake is keyed per LP action coin, not per pool spend (two adds in one spend produce two
+  distinct handshakes); several `-42`-tagged outputs for one reserve compose; and each trader's
+  minimum output is enforced by their own offer's settlement announcement, so ordering inside a
+  spend cannot take more from a trader than they signed for.
+- **Router policy at launch: one action per spend.** Batching is switched on later with no puzzle
+  change. Third parties can batch against the audited puzzle from day one, which is fine because
+  that is what the audit covered.
+
+### Build the final version first
+
+The question "ship a guarded V11 and design a V12 for multi-action later?" answers itself once
+the immutability is taken seriously:
+
+- **A guard is not a small change to remove.** Every action's hash changes, so the merkle root
+  changes, so the pool puzzle hash changes. V12 is a full migration — new LP asset ids, every LP
+  removing and re-adding, a new launch matrix, another external audit — not a patch.
+- **Migration cost is zero now and grows with adoption.** No liquidity is live on V10. A later
+  migration carries LP coordination, fees, slippage and trust, and a second audit bill.
+- **Multi-action adds tests, not design.** State threading is upstream. The Forge-owned puzzles
+  are identical with or without the guard; only the suites and the audit scope grow.
+- **Multi-action is already in the backlog.** Zap-add (swap then add in one spend) is a two-action
+  spend. A pool can be spent once per block, about every 19 seconds, so one action per spend caps
+  a pool at one trade per block; batching through the router lifts that with no puzzle change.
+- **"Final" for the CFMM is bounded.** Three actions, N reserves, multi-action allowed, no upgrade
+  authority. Concentrated liquidity, limit orders and anything using slots are a different
+  product with their own audit; do not fold them in.
+- **Future migrations need no migration action.** Remove from the old pool plus add to the new one
+  is two singleton spends in one offer-settled bundle, already composable. Keep the merkle root
+  to the three actions.
+
+So: audit the final puzzle once, launch with router policy at one action per spend, and enable
+batching later without touching the chain.
 
 ### Migration
 
@@ -372,7 +406,10 @@ to this architecture.
 **Actions**
 
 - Each action alone, then every ordered pair and the three-action combination in one spend, with
-  the state threaded and the invariant checked at the end of the chain, not per action.
+  the state threaded and the invariant checked at the end of the chain, not per action. These are
+  launch scope, not a follow-up: the puzzle that ships allows them.
+- Two adds in one spend produce two distinct LP handshakes and two minted LP coins; two removes
+  produce two melts; an add and a remove in one spend net correctly.
 - The same action twice in one spend, including two swaps in opposite directions.
 - Sandwich inside a spend: a sequencer orders swap A, swap B, swap A'. Confirm B's settlement
   announcement still guarantees B's minimum output.
@@ -420,8 +457,10 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 3. **Protocol fee.** V10 pays it as a second output from the shrinking reserve. In V11 it is a
    second `-42`-tagged `CREATE_COIN` from the `swap` action. Confirm the fee recipient is curried
    into `swap`, not solution-supplied.
-4. **Router as sequencer.** Settled by the launch condition above: one action per spend, enforced
-   in the puzzle by the ephemeral guard, not by router policy. Batching is a later revision.
+4. **Router as sequencer.** Settled: the puzzle allows multi-action and is audited for it; the
+   router runs one action per spend at launch as policy and enables batching later. The batching
+   rollout needs its own off-chain review (ordering log, per-trader settlement proof) but no
+   puzzle change.
 5. **Config placement.** Curried into each action versus carried in state. Curried is cheaper and
    immutable, which is the V10 property worth keeping.
 

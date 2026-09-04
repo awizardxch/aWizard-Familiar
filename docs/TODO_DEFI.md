@@ -72,7 +72,8 @@
 1a. **🔐 Forge V11 — CHIP-0050 action layer** (HIGH — evaluated 2026-09-04, recommended, build after V10 tests)
   - rule: adopt the CHIP methods if they are more secure with fewer points of exploit long term;
     the surface count in [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md) says
-    yes on two conditions (single-action guard at launch, upstream-grade review of the finalizer)
+    yes on two conditions (upstream-grade review of the finalizer; audit the final multi-action
+    puzzle once — a pool's puzzle is immutable, so an in-puzzle guard would force a V12 migration)
   - [ ] **owner confirms adoption** — nothing below starts before this
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
     the action layer, `p2_delegated_by_singleton` reserves, and a Forge-written multi-reserve
@@ -84,7 +85,8 @@
   - [ ] action-layer audit additions (finalizer, multi-action, reserve probes) as named suites that exit 2 on skip
   - [ ] second driver via `chia-wallet-sdk` `ActionLayer` + `Reserve`; bundles must match the Python driver
   - [ ] re-run the launch matrix under V11; V10 pools retire like V4–V9 did
-  - one action per spend at launch, enforced in-puzzle by the ephemeral guard; batching is a later revision
+  - [ ] multi-action suites are launch scope: every ordered pair and triple in one spend, two adds, two removes, add+remove
+  - one action per spend at launch as **router policy**; batching (and zap-add) switched on later with no puzzle change
 1b. **🚀 Deploy the V10 launch matrix** (HIGH — NEXT QUEST)
   - 16 pools across the routing surface, vaults, weighted, N-asset, and fee edges
   - every row already deploys through the real creation path in a dry run before coins are spent
