@@ -75,9 +75,13 @@
     yes on two conditions (upstream-grade review of the finalizer; audit the final multi-action
     puzzle once — a pool's puzzle is immutable, so an in-puzzle guard would force a V12 migration)
   - [ ] **owner confirms adoption** — nothing below starts before this
-  - [ ] **owner confirms the V11 pool type** — weighted N-asset (recommended) or concentrated
-        two-asset; concentrated liquidity is a second pool type sharing the finalizer and reserves,
-        with positions and ticks in slots and range orders for free (see the skill)
+  - [ ] **owner confirms the V11 pool type** — weighted N-asset (recommended) or concentrated;
+        N-asset concentration is buildable the Forge way (virtual-reserve form of the weighted
+        curve, known at N=2 as Uniswap V3 and at N=1 as the vault); see the skill's build-out path
+  - [ ] **reference maths first**: N-asset virtual-reserve positions off-chain, property-tested to
+        equal V3 at N=2 and the V10 curve at zero offsets — gates any concentration in V11
+  - [ ] design V11 state as tiers with K=1 (a full-range pool is a one-tier pool); tiers with their
+        own LP CATs are the first concentrated form, slot-based ranges the second
   - [ ] build concentration-ready: finalizer tested at N=2 and N=10, fixed tag/state conventions,
         reserved slot nonces for ticks and positions, pool-type field in the router registry
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with

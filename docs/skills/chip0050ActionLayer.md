@@ -381,8 +381,8 @@ puzzle fixes both at creation:
 
 | | weighted pool type (V11) | concentrated pool type (later) |
 |---|---|---|
-| Assets | 2–10, integer weights | exactly 2 — there is no audited maths for per-user ranges in an N-asset weighted pool |
-| Curve | `prod(reserve_i^weight_i)`, bracket-verified | sqrt-price and tick maths, still integer, still bracket-verifiable |
+| Assets | 2–10, integer weights | 2 in the V3 form; N is buildable — see "N-asset concentrated liquidity" below. Audited N-asset concentration exists at the pool level (Gyroscope 3-CLP, E-CLP; Curve amplification); per-user arbitrary ranges in N assets have no solution to copy |
+| Curve | `prod(reserve_i^weight_i)`, bracket-verified | virtual-reserve form `prod((r_i + v_i)^w_i) = L`, still integer, still bracket-verifiable per segment; equals V3's `(x + L/sqrt(pb))(y + L*sqrt(pa)) = L^2` at N = 2 |
 | LP representation | fungible LP CAT, fees pro rata on reserves | one record per position (range, liquidity, fee-growth snapshot) held in **slots**; fees from fee-growth-inside accounting; full-range LPs are positions too, and the LP CAT has no meaning here |
 | State | `[reserves, total_lp]` | plus sqrt price, current tick, global fee growth; ticks are slots holding net liquidity and fee growth outside |
 | Swap | one action, two reserves change | crosses ticks by spending and re-creating each tick slot crossed — cost scales with ticks crossed |
@@ -409,7 +409,77 @@ type — the curve probed for months — and the concentrated type follows as an
 type, building on yakuhito's reviewed puzzles if they land first. Option B: V11 is the
 concentrated type with full range as a special case, dropping the weighted curve and LP CAT for
 it — largest scope, and concentrated liquidity on the coinset model is unproven. Option C: both
-in V11 — A built at once, with the largest single audit.
+in V11 — A built at once, with the largest single audit. Whichever is chosen, design V11's state
+as **tiers with K = 1** (below): a full-range weighted pool is exactly a one-tier pool, and it
+costs nothing now.
+
+### N-asset concentrated liquidity — the build-out path
+
+"Nobody has built per-user ranges in an N-asset pool" is not "it cannot be built". The Forge rule
+applies: know the solution at N = 2 and N = 1, then build out. This section records what
+generalises, what does not, and the order to build in.
+
+**What generalises.** A V3 position is a constant-product pool with virtual reserves:
+
+```
+(x + L/sqrt(pb)) * (y + L*sqrt(pa)) = L^2
+```
+
+The weighted generalisation is the same move applied to the Forge curve:
+
+```
+prod( (r_i + v_i) ^ w_i ) = L        // v_i: fixed virtual offsets, the position's "range"
+```
+
+- each concentrated position is a small weighted pool with virtual offsets; at N = 2 with equal
+  weights it reduces exactly to V3's real-reserve formulas (the correctness check); at N = 1 the
+  offsets are meaningless and it degenerates to the vault; with all `v_i = 0` it is the V10 curve
+- positions with identical offsets aggregate additively in `L`, as V3 positions sharing a tick
+  pair do
+- within a segment (no boundary crossed) the active liquidity is fixed and the invariant is one
+  product, so **bracket verification works per segment** — the router solves off-chain, the
+  puzzle verifies a claimed segment sequence and refuses `output ± 1` on each
+- fees stay inside each position's reserves, so LP claims appreciate pro rata **per range** and no
+  fee-growth accumulators are needed
+
+**What does not generalise — the research piece.**
+
+- *A range is a region, not a box.* In V3 a range is an interval on one price line. For a weighted
+  N-asset position the boundary where one real reserve reaches zero is a curved surface in the
+  space of N−1 relative prices. Well defined, but "my range is 0.9–1.1" no longer describes it
+  directly; Gyroscope solved this only for symmetric regions around a target price.
+- *Ticks stop being ordered.* A swap of asset i for asset j moves the price point in more than
+  one dimension, so it can cross boundaries of different positions on different axes. In 2D the
+  next boundary is the next initialised tick in a sorted doubly-linked list (the CHIP-0050
+  uniqueness pattern). In N dimensions there is no single sorted list: "no boundary lies between
+  here and the claimed crossing" must be verified by checking **every active range** at each
+  segment end. That is O(ranges × segments) per swap, and each boundary crossed is a slot spend,
+  so this is also what sets swap cost on Chia.
+
+**Build order.**
+
+1. **Reference maths off-chain first**, as the perps maths reference was done: a weighted position
+   with virtual offsets — its active region, its real reserves as a function of `L` and price,
+   the segment-wise swap. Property tests: equals V3 at N = 2, equals the V10 curve at `v = 0`,
+   degenerates at N = 1. No puzzle work before this passes.
+2. **Tiers, not per-user ranges, as the first on-chain form.** A pool holds a small fixed set of
+   concentration tiers (K ≈ 3), each a weighted sub-pool with its own offsets and **its own
+   fungible LP CAT**. Full range is the tier with `v = 0`. Users choose a tier. State stays
+   O(N × K), the V10 LP CAT lock carries over per tier untouched, no slots are needed, and with K
+   small the crossing sequence is verified by brute force in-puzzle. This already delivers "some
+   LPs full range, some concentrated".
+3. **Permissionless ranges in slots second.** Each distinct range becomes a slot; positions
+   aggregate per range as in V3; the swap verifies crossings by checking every active range at
+   each segment end. Cost grows with distinct ranges crossed, which is what V3 pays too.
+
+**The constraint that bites.** A tier's region is fixed in the puzzle at creation. If price
+trends out of every tight tier, the pool is full-range-only until LPs re-add elsewhere — and
+"elsewhere" is another tier or a slot range. Same dead-capital behaviour as V3, handled the same
+way, but it means stage 3 is where the design becomes durable, not stage 2.
+
+**What this changes for V11.** Cheap: state as tiers with K = 1. Real decision: whether V11's
+action set includes tier creation and multi-tier swaps, which pulls the concentrated maths into
+the first audit. Do not decide that before step 1 exists and matches V3 at N = 2.
 
 ### Migration
 
@@ -491,8 +561,11 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 
 0. **Confirm adoption.** The surface count above is the evidence; the protocol owner decides.
 0a. **Confirm the V11 pool type.** Weighted N-asset (option A, recommended), concentrated
-   two-asset (B), or both (C). This fixes the state shape and the LP representation and cannot
-   change after creation.
+   (B), or both (C). This fixes the state shape and the LP representation and cannot change after
+   creation. Either way the state is tiers with K = 1.
+0b. **Concentration scope for V11.** Decide only after the off-chain reference maths for
+   N-asset virtual-reserve positions exists and matches V3 at N = 2: does V11 ship tier creation
+   and multi-tier swaps (concentrated maths in the first audit) or K = 1 only.
 1. **Tag encoding.** `(-42 index . condition)` versus one opcode per reserve (`-42 - index`).
    The former keeps a single strip rule in the finalizer; settle it before writing actions.
 2. **LP TAIL handshake.** Keep the puzzle announcement from the action-layer singleton, or revise
