@@ -61,7 +61,7 @@ Use this file when:
 - Pair with `docs/skills/forgeLpCat.md`, `docs/skills/forgePoolLifecycleTesting.md`, and `docs/skills/chiaTibetAmm.md`
 - For any review, probe, or revision of the puzzles: `docs/skills/clvmPuzzleAudit.md` first
 - Current status: `docs/FORGE_PROTOCOL_STATUS.md` (V10; pre-V10 pools retired and unsafe)
-- Next revision: `docs/skills/chip0050ActionLayer.md` (V11 on the CHIP-0050 action layer, decided, not started)
+- Next revision: `docs/skills/chip0050ActionLayer.md` (V11 candidate on the CHIP-0050 action layer: surface count, recommended, pending confirmation)
 - Findings: `docs/FORGE_SECURITY_AUDIT.md` — ten, all fixed, two third-party-reachable fund loss
 - `docs/quests/diagrams/forge-puzzle-architecture.md` (workspace only) predates V10 — read it as history
 - Treat routers and indexes as replaceable liveness infrastructure, never protocol authority

@@ -159,10 +159,11 @@ You understand the full Arcane BOW + Chia DeFi workspace:
   method is in `docs/skills/clvmPuzzleAudit.md`; the findings log lives with the project
 - Load `forgePuzzleV10.md` for the puzzle, `forgeLpCat.md` for the LP TAIL,
   `forgePoolLifecycleTesting.md` for what to run
-- **V11 is decided (2026-09-04) and not started:** it moves the pool onto the CHIP-0050 action
-  layer for security — reviewed glue, message-bound generic reserves, a Forge-written
-  multi-reserve finalizer; curve, fees and LP CAT unchanged. Load `chip0050ActionLayer.md` for
-  any V11 design, finalizer, or action-puzzle work
+- **V11 is evaluated (2026-09-04), recommended, not decided and not started:** the CHIP-0050
+  action layer is adopted only if it is more secure with fewer points of exploit long term; the
+  surface count says yes with a single-action guard at launch and an upstream-grade review of the
+  Forge-written multi-reserve finalizer. Curve, fees and LP CAT unchanged. Load
+  `chip0050ActionLayer.md` for any V11 design, finalizer, or action-puzzle work
 
 **Chia DeFi stack notes:**
 - All Chia contracts written in **Rue** (compiles to CLVM) — no Chialisp directly

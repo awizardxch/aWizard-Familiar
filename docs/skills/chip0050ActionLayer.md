@@ -1,13 +1,14 @@
-# Skill: CHIP-0050 Action Layer — the V11 target
+# Skill: CHIP-0050 Action Layer — the V11 candidate
 
-> Reference for CHIP-0050 (Action Layer and Slots) and the decision to build Forge V11 on it.
+> Reference for CHIP-0050 (Action Layer and Slots) and the evaluation of building Forge V11 on it.
 > Written 2026-09-04 while V10 is on testnet11 and V11 has not started.
 >
-> **Decision.** V11 keeps the V10 curve, fees and LP CAT, and replaces the monolithic pool inner
-> and the custom reserve puzzle with the CHIP-0050 action layer, generic singleton-delegated
-> reserves, and a Forge-written multi-reserve finalizer. The reason is security: the glue that
-> produced every V4–V10 critical (state recreation, reserve binding) becomes community-reviewed
-> code, and the code Forge still owns shrinks to what an auditor actually has to read.
+> **The rule being tested.** Forge adopts the CHIP-0050 methods *if* they are more secure with
+> fewer points of exploit over the long term. This file is the check. The surface count below
+> says the rule holds, with two conditions: V11 launches with a single-action guard, and the
+> Forge-written finalizer is reviewed to the same standard as the upstream pieces. Under those
+> conditions the recommendation is to adopt. **Adoption is a recommendation, not a decision, until
+> the protocol owner confirms it.**
 >
 > **Nothing in V11 exists yet. Nothing is audited.** The upstream components are reviewed and on
 > mainnet; the Forge actions and the multi-reserve finalizer are new code until proven otherwise.
@@ -151,6 +152,46 @@ start.
 
 ---
 
+## The surface count — does "fewer points of exploit" hold?
+
+Counted from the V10 sources, not estimated. Forge owns 1,248 lines at V10. About 530 are
+binding and recreation glue — plan validation, coin-id and puzzle-hash checks, announcement
+hashing, and the entire reserve puzzle. About 500 are curve, LP and fee logic. The exploitable
+surface is the set of solution inputs and trust links that need a Forge-written check to be safe:
+
+| V10 surface | count | in the findings log |
+|---|---|---|
+| Pool solution fields needing a binding: `mode`, `current_pool_coin_id`, 8 `ReservePlan` fields per reserve, `lp_action_coin_id`, `lp_delta`, `lp_parent_id` | 13 | the LP-burn critical was `lp_action_coin_id` |
+| Reserve solution fields: `asset_id`, `reserve_inner_puzzle_hash`, `pool_inner_puzzle_hash`, `plan` | 4 | the reserve critical was all four |
+| Hand-rolled announcement links: pool→reserve, reserve→pool, pool↔LP TAIL, reserve→settlement | 4 | each a `sha256(id + message)` with a domain separator |
+| Curve and LP checks | unchanged in both designs | the V9 fabricated-melt and vault-redemption defects |
+
+Every third-party-reachable fund-loss finding sits in the first three rows. None sits in the
+fourth.
+
+| V11 surface | count | why |
+|---|---|---|
+| Action solution fields: swap 5, add ~4, remove ~3 — the curve inputs only | ~12 | no coin ids, successor ids, successor puzzle hashes or pool identity exist in any solution; reserve identity comes from the curried puzzle hash, the pre-spend amount in state, and a parent id that can only be right or fail the bundle |
+| Forge-written binding checks | ~4 | LP action coin id derivation, settlement assertion, LP TAIL handshake, tag index range |
+| Upstream-written binding checks | N messages + merkle proofs | reviewed code; Forge pins the hashes and never edits it |
+| New Forge component: the multi-reserve finalizer | 1 (~120 lines) | holds every reserve; the one place that needs upstream-grade review |
+| Multi-action state threading and sequencer ordering | 0 at launch | each action asserts the ephemeral state is empty and sets it — this restores V10's one-action-per-spend property at the puzzle level until batching is wanted |
+
+Net: Forge-written binding checks fall from about 21 to about 4, one exploit class disappears
+outright (a reserve-only bug, which is what V4–V9 had, cannot exist because the reserve puzzle
+contains no Forge code), and the binding primitive is stronger. The curve and LP surface is
+identical in both designs, the off-chain bearer-offer surface is untouched, and the migration
+itself is the largest near-term risk — V9 showed that rewrites ship bugs, which is why the curve is
+ported, not rewritten, and the existing adversarial suites carry forward.
+
+So the rule holds on the glue, is neutral on the maths, and costs one re-audit cycle. Long term,
+the upstream components are reviewed, on mainnet in three apps, and are what the TibetSwap
+successor is built on, so auditors and tooling converge there. Pool puzzles are immutable in both
+designs, so an upstream bug would hit V11 pools exactly as a Forge bug hits V10 pools; neither
+has an upgrade path.
+
+---
+
 ## Why the CHIP model is the more secure one
 
 1. **Review pedigree.** The action layer, both finalizers, the slot puzzle and
@@ -285,11 +326,15 @@ one) instead of the V10 pool's.
 
 - The first action of a spend sees `()`. Any action that emits a relative condition, or that must
   run at most once per spend, checks the ephemeral state and writes a marker into it.
-- V11 sets no per-spend limits, so the rule is simply: **no relative or height conditions in any
-  action**. Add them later only behind an ephemeral guard.
-- Batching several traders' swaps in one spend is allowed by construction. Each trader's minimum
-  output is enforced by their own offer's settlement announcement, so ordering within the spend
-  cannot take more from a trader than they signed for.
+- **Launch condition: single-action guard.** Every V11 action asserts the ephemeral state is `()`
+  and returns a non-nil marker. A second action in the same spend then fails. This makes V11's
+  per-spend surface identical to V10's and removes the multi-action and sequencer-ordering risks
+  from the launch audit. Removing the guard is a later revision with its own audit.
+- **No relative or height conditions in any action.** Add them later only behind the guard.
+- When the guard is eventually lifted, batching several traders' swaps in one spend is safe by
+  construction only because each trader's minimum output is enforced by their own offer's
+  settlement announcement; that property must be re-proved in the multi-action suites at that
+  time.
 
 ### Migration
 
@@ -366,6 +411,7 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 
 ## Open items to settle before code
 
+0. **Confirm adoption.** The surface count above is the evidence; the protocol owner decides.
 1. **Tag encoding.** `(-42 index . condition)` versus one opcode per reserve (`-42 - index`).
    The former keeps a single strip rule in the finalizer; settle it before writing actions.
 2. **LP TAIL handshake.** Keep the puzzle announcement from the action-layer singleton, or revise
@@ -374,9 +420,8 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 3. **Protocol fee.** V10 pays it as a second output from the shrinking reserve. In V11 it is a
    second `-42`-tagged `CREATE_COIN` from the `swap` action. Confirm the fee recipient is curried
    into `swap`, not solution-supplied.
-4. **Router as sequencer.** Whether the router batches multiple traders per spend in V11 or keeps
-   one action per spend until the multi-action tests are green. Recommended: one per spend at
-   launch, batching as a flagged follow-up.
+4. **Router as sequencer.** Settled by the launch condition above: one action per spend, enforced
+   in the puzzle by the ephemeral guard, not by router policy. Batching is a later revision.
 5. **Config placement.** Curried into each action versus carried in state. Curried is cheaper and
    immutable, which is the V10 property worth keeping.
 

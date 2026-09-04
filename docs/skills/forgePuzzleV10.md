@@ -274,7 +274,8 @@ remain loadable — that is what `development/` and the resolver are for. New po
 
 ### V11 is not a revision of this puzzle
 
-V11 replaces `pool_singleton_FORGE` and `forge_reserve_FORGE` with the CHIP-0050 action layer,
+If adopted (recommended on a surface count, pending confirmation), V11 replaces
+`pool_singleton_FORGE` and `forge_reserve_FORGE` with the CHIP-0050 action layer,
 generic singleton-delegated reserves and a Forge-written multi-reserve finalizer. The curve, the
 fees and the LP CAT carry over unchanged. The steps above still apply to the LP TAIL bump and the
 version registration, but the puzzle set is different — `chip0050ActionLayer.md` is the design.
@@ -292,7 +293,7 @@ version registration, but the puzzle set is different — `chip0050ActionLayer.m
 | V8 | per-pool protocol fee + recipient inserted at config 5/6; vault crossing charges the liquidity fee | reserves still unbound |
 | V9 | LP action coin id derived and inner pinned | reserves still unbound; introduced the fabricated-melt and vault-redemption defects |
 | V10 | reserve curried with `launcher_id`, puzzle-announcement authorisation, `AssertMyPuzzleHash`, `lp_parent_id` | **shipping** |
-| V11 | CHIP-0050 action layer: merkle-tree actions, message-bound generic reserves, multi-reserve finalizer; curve, fees and LP CAT unchanged | **planned, not started** — `chip0050ActionLayer.md` |
+| V11 | CHIP-0050 action layer: merkle-tree actions, message-bound generic reserves, multi-reserve finalizer; curve, fees and LP CAT unchanged | **candidate, recommended, not started** — `chip0050ActionLayer.md` |
 
 All pre-V10 testnet pools were retired; the deployment index was cleared and
 `normalizeDeploymentIndex` now drops any batch that is not the shipping revision, on the way in

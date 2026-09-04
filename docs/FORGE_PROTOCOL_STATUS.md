@@ -16,7 +16,7 @@ every pre-V10 pool was retired.
 | Creation | V10 only. Minting a superseded revision is refused unless `allowUnsafeLegacyVersion` is set, which the HTTP relay drops |
 | Live pools | none — the deployment index was cleared when the old pools were retired. The pools to create next are in the local `FORGE_LAUNCH_MATRIX.md` (16 rows, all deployed through the real creation path in a dry run before any coins are spent) |
 | Audit | 10 findings, all fixed. Findings: [`docs/FORGE_SECURITY_AUDIT.md`](FORGE_SECURITY_AUDIT.md). Method: [`docs/skills/clvmPuzzleAudit.md`](skills/clvmPuzzleAudit.md) |
-| Next revision | **V11, decided 2026-09-04, not started.** Moves the pool onto the CHIP-0050 action layer for security: reviewed glue, message-bound generic reserves, a Forge-written multi-reserve finalizer. Curve, fees and LP CAT unchanged. Design: [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) |
+| Next revision | **V11 candidate, evaluated 2026-09-04, not started.** Rule: adopt the CHIP-0050 action layer if it is more secure with fewer points of exploit long term. The surface count says yes — Forge-written binding checks fall from ~21 to ~4 and the reserve-only bug class disappears — on two conditions: a single-action guard at launch and upstream-grade review of the Forge-written multi-reserve finalizer. Recommended; pending owner confirmation. Curve, fees and LP CAT unchanged. [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) |
 
 ### Why every pre-V10 pool was retired
 
@@ -47,8 +47,8 @@ The durable protocol knowledge has moved into skills, which are the maintained c
 - [`docs/skills/forgePoolLifecycleTesting.md`](skills/forgePoolLifecycleTesting.md) — lanes,
   guardrails, the suite index, and what a green run does not prove
 - [`docs/skills/clvmPuzzleAudit.md`](skills/clvmPuzzleAudit.md) — how any puzzle here gets audited
-- [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) — the V11 target: CHIP-0050
-  reference, why it is the more secure model, the multi-reserve finalizer, audit additions
+- [`docs/skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md) — the V11 candidate: CHIP-0050
+  reference, the exploit-surface count, the multi-reserve finalizer, audit additions
 
 Project-local docs (not published in this repo, `projects/` is gitignored):
 `FORGE_PUZZLE_V10.md`, `FORGE_SECURITY_AUDIT.md`, `FORGE_LAUNCH_MATRIX.md`, `FORGE_ROADMAP.md`.

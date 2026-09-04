@@ -61,7 +61,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/skills/forgePuzzleV10.md`** — Forge's shipping pool puzzle (V10): coin layout, curried config/state, the bracketed weighted invariant, vaults, reserve and LP authorisation, the four fees, cutting a revision
 - **`docs/skills/forgeLpCat.md`** — Pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule) and the mutual handshake
 - **`docs/skills/forgePoolLifecycleTesting.md`** — Forge lanes and endpoints, the guardrails that must never be bypassed, the suite index and what a green run does not prove
-- **`docs/skills/chip0050ActionLayer.md`** — CHIP-0050 (Action Layer and Slots) reference and the Forge V11 target: why the action layer is the more secure model, the multi-reserve finalizer spec, message-bound reserves, action-layer audit additions, open items
+- **`docs/skills/chip0050ActionLayer.md`** — CHIP-0050 (Action Layer and Slots) reference and the Forge V11 candidate: the V10-versus-V11 exploit-surface count, the multi-reserve finalizer spec, message-bound reserves, action-layer audit additions, open items
 
 #### Puzzle Security
 - **`docs/skills/clvmPuzzleAudit.md`** — How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy, ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface. Protocol-agnostic — load it for any puzzle review

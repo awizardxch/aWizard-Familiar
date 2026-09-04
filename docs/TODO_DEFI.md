@@ -69,19 +69,22 @@
    action coin id, so reserves could be withdrawn with **no LP destroyed at all**. Closed in V9/V10
    by the three-part lock — derived action-coin id, pinned mint/melt inners, and a CAT parent
    required on a melt. See [docs/skills/forgeLpCat.md](skills/forgeLpCat.md).
-1a. **🔐 Forge V11 — CHIP-0050 action layer** (HIGH — decided 2026-09-04, build after V10 tests)
+1a. **🔐 Forge V11 — CHIP-0050 action layer** (HIGH — evaluated 2026-09-04, recommended, build after V10 tests)
+  - rule: adopt the CHIP methods if they are more secure with fewer points of exploit long term;
+    the surface count in [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md) says
+    yes on two conditions (single-action guard at launch, upstream-grade review of the finalizer)
+  - [ ] **owner confirms adoption** — nothing below starts before this
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
     the action layer, `p2_delegated_by_singleton` reserves, and a Forge-written multi-reserve
     finalizer (none exists upstream — the reserve finalizer is the template)
-  - [ ] settle the five open items in [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md)
-        (tag encoding, LP TAIL handshake, protocol fee placement, router as sequencer, config placement)
+  - [ ] settle the open items in the skill (tag encoding, LP TAIL handshake, protocol fee placement, config placement)
   - [ ] port the curve functions into a shared Rue module; three action puzzles: `swap`, `add`, `remove`
   - [ ] `multi_reserve_finalizer.rue` from `reserve_finalizer.rue` at the CHIP's pinned commit
   - [ ] integrity pins for the upstream action-layer, `p2_delegated_by_singleton` and slot hashes
   - [ ] action-layer audit additions (finalizer, multi-action, reserve probes) as named suites that exit 2 on skip
   - [ ] second driver via `chia-wallet-sdk` `ActionLayer` + `Reserve`; bundles must match the Python driver
   - [ ] re-run the launch matrix under V11; V10 pools retire like V4–V9 did
-  - one action per spend at launch; multi-trader batching is a flagged follow-up
+  - one action per spend at launch, enforced in-puzzle by the ephemeral guard; batching is a later revision
 1b. **🚀 Deploy the V10 launch matrix** (HIGH — NEXT QUEST)
   - 16 pools across the routing surface, vaults, weighted, N-asset, and fee edges
   - every row already deploys through the real creation path in a dry run before coins are spent

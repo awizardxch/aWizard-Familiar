@@ -72,12 +72,13 @@ Use this file when:
 
 > Forge-specific knowledge, distinct from generic Chia protocol patterns.
 > The first three are current at **V10**, the shipping revision — pre-V10 pools are retired and
-> carry critical authorisation bugs. **V11 is decided but not started:** it moves the pool onto
-> the CHIP-0050 action layer for security; `chip0050ActionLayer.md` is the target design.
+> carry critical authorisation bugs. **V11 is evaluated, not decided:** the CHIP-0050 action layer
+> is recommended for it on a surface count, pending the owner's confirmation;
+> `chip0050ActionLayer.md` carries the count and the candidate design.
 
 | Skill | Use it for |
 | --- | --- |
-| `chip0050ActionLayer.md` | CHIP-0050 reference (action layer, finalizers, `p2_delegated_by_singleton`, slots, pinned hashes), why it is the more secure model, the V11 target design, the multi-reserve finalizer spec, action-layer audit additions, open items |
+| `chip0050ActionLayer.md` | CHIP-0050 reference (action layer, finalizers, `p2_delegated_by_singleton`, slots, pinned hashes), the V10-versus-V11 exploit-surface count, the V11 candidate design, the multi-reserve finalizer spec, action-layer audit additions, open items |
 | `forgePuzzleV10.md` | The shipping puzzle set: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history |
 | `forgeLpCat.md` | The pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule), the mutual handshake and message format, genesis trust |
 | `forgePoolLifecycleTesting.md` | Lanes and endpoints, the guardrails that must never be bypassed (freshness, snapshot round trip, revision filtering, offer redaction), the suite index and what a green run does not prove |
