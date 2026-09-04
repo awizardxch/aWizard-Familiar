@@ -360,15 +360,56 @@ the immutability is taken seriously:
 - **Multi-action is already in the backlog.** Zap-add (swap then add in one spend) is a two-action
   spend. A pool can be spent once per block, about every 19 seconds, so one action per spend caps
   a pool at one trade per block; batching through the router lifts that with no puzzle change.
-- **"Final" for the CFMM is bounded.** Three actions, N reserves, multi-action allowed, no upgrade
-  authority. Concentrated liquidity, limit orders and anything using slots are a different
-  product with their own audit; do not fold them in.
+- **"Final" for the weighted pool type is bounded.** Three actions, N reserves, multi-action
+  allowed, no upgrade authority. Concentrated liquidity is not a different product — full range
+  is a special case of it — but it is a different curve and position model, and therefore a
+  different **pool type** with its own merkle root, state and audit (next section). It is
+  additive, not a migration of weighted pools.
 - **Future migrations need no migration action.** Remove from the old pool plus add to the new one
   is two singleton spends in one offer-settled bundle, already composable. Keep the merkle root
   to the three actions.
 
 So: audit the final puzzle once, launch with router policy at one action per spend, and enable
 batching later without touching the chain.
+
+### Concentrated liquidity is a second pool type, not a later revision
+
+"Some LPs want full range, some want a range" is exactly Uniswap V3, where full range is one
+position among many, and it is the direction of the TibetSwap successor. What decides whether
+Forge can offer it is not the action layer but the curve and the position model, and a pool's
+puzzle fixes both at creation:
+
+| | weighted pool type (V11) | concentrated pool type (later) |
+|---|---|---|
+| Assets | 2–10, integer weights | exactly 2 — there is no audited maths for per-user ranges in an N-asset weighted pool |
+| Curve | `prod(reserve_i^weight_i)`, bracket-verified | sqrt-price and tick maths, still integer, still bracket-verifiable |
+| LP representation | fungible LP CAT, fees pro rata on reserves | one record per position (range, liquidity, fee-growth snapshot) held in **slots**; fees from fee-growth-inside accounting; full-range LPs are positions too, and the LP CAT has no meaning here |
+| State | `[reserves, total_lp]` | plus sqrt price, current tick, global fee growth; ticks are slots holding net liquidity and fee growth outside |
+| Swap | one action, two reserves change | crosses ticks by spending and re-creating each tick slot crossed — cost scales with ticks crossed |
+| Add / remove | mint / melt LP CAT | mint, burn and collect on a position slot |
+| Limit orders | none | free: a single-tick range position converts fully when price crosses it (a range order). A full order book is the perps CLOB, which stays separate |
+| Shared | action layer, multi-reserve finalizer (N = 2), reserve coins, offer settlement, router | same |
+
+So the concentrated type is a second merkle root with different actions and state, reusing the
+audited finalizer and reserves. Weighted pools keep serving index and 80/20 use cases that
+concentration cannot; the two types coexist under one router, as they do in every mature
+ecosystem. Nothing about adding the second type migrates the first.
+
+**Build V11 concentration-ready.** These cost nothing now and avoid a framework change later:
+
+- the finalizer is written for N reserves and tested at N = 2 and N = 10
+- the `-42` tag encoding and the state conventions are fixed in this file and reused verbatim
+- a slot nonce namespace is reserved: one nonce for tick slots, one for position slots, distinct
+  from any future use, so slot values of different types can never be confused (CHIP-0050
+  security note: slot values also need a nonce or counter against spend-and-recreate forging)
+- the router's pool registry carries a pool-type field from day one
+
+**Choose the pool type before V11 is designed.** Option A (recommended): V11 is the weighted
+type — the curve probed for months — and the concentrated type follows as an additive second
+type, building on yakuhito's reviewed puzzles if they land first. Option B: V11 is the
+concentrated type with full range as a special case, dropping the weighted curve and LP CAT for
+it — largest scope, and concentrated liquidity on the coinset model is unproven. Option C: both
+in V11 — A built at once, with the largest single audit.
 
 ### Migration
 
@@ -449,6 +490,9 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 ## Open items to settle before code
 
 0. **Confirm adoption.** The surface count above is the evidence; the protocol owner decides.
+0a. **Confirm the V11 pool type.** Weighted N-asset (option A, recommended), concentrated
+   two-asset (B), or both (C). This fixes the state shape and the LP representation and cannot
+   change after creation.
 1. **Tag encoding.** `(-42 index . condition)` versus one opcode per reserve (`-42 - index`).
    The former keeps a single strip rule in the finalizer; settle it before writing actions.
 2. **LP TAIL handshake.** Keep the puzzle announcement from the action-layer singleton, or revise

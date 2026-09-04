@@ -75,6 +75,11 @@
     yes on two conditions (upstream-grade review of the finalizer; audit the final multi-action
     puzzle once — a pool's puzzle is immutable, so an in-puzzle guard would force a V12 migration)
   - [ ] **owner confirms adoption** — nothing below starts before this
+  - [ ] **owner confirms the V11 pool type** — weighted N-asset (recommended) or concentrated
+        two-asset; concentrated liquidity is a second pool type sharing the finalizer and reserves,
+        with positions and ticks in slots and range orders for free (see the skill)
+  - [ ] build concentration-ready: finalizer tested at N=2 and N=10, fixed tag/state conventions,
+        reserved slot nonces for ticks and positions, pool-type field in the router registry
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
     the action layer, `p2_delegated_by_singleton` reserves, and a Forge-written multi-reserve
     finalizer (none exists upstream — the reserve finalizer is the template)
