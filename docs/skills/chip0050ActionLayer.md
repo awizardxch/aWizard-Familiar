@@ -517,10 +517,33 @@ are thresholds on one monotone scalar, so the crossing order is the sorted order
 lists — each protected by the CHIP-0050 uniqueness pattern. Slots spent per swap = bands
 crossed, as in V3. This is what makes N-asset bands verifiable in-puzzle rather than research.
 
+**How the asset id tells ranges apart — why no NFT.** Every band has its own LP CAT and the
+range is baked into the asset id:
+
+```
+band_tail_hash = curry_tree_hash(LP_TAIL_MOD, [launcher_id, hash(u), protocol_version])
+band_asset_id  = band_tail_hash
+```
+
+Same range, same token: two holders of the full-range band hold the same asset id, as they
+should, because their claims are interchangeable. Different range, different token. V3 needed an
+NFT per position because fees are not compounded there, so two positions on the same tick pair
+carry different uncollected-fee balances and are not interchangeable. Here fees compound into the
+band's `L`, every holder of a band token has an identical pro-rata claim, and there is no
+per-position state left — positions in the same range are genuinely fungible, so a fungible token
+is the correct representation (the fungible-V3-wrapper idea, done natively). Slots hold
+range-level records and the per-asset threshold lists, never positions; that is the exact shape
+XCHandles already runs on mainnet (a sorted doubly-linked list in slots). Quantise `u` to a grid,
+like V3 tick spacing, so ranges cluster; a range nobody else uses is a band with one holder,
+which is the NFT case as a degenerate band. Naming is off-chain as for every CAT; CATalog can
+register band tokens.
+
 **What reuses Forge tech.**
 
 - **One fungible LP CAT per band**, TAIL curried with `(launcher_id, band_id, protocol_version)`.
-  The three-part lock (`forgeLpCat.md`) carries over per band unchanged.
+  The three-part lock (`forgeLpCat.md`) carries over per band unchanged; the only pool-side
+  change is that `add` and `remove` compute the band's TAIL hash from the launcher id and the
+  band id in the solution before binding the LP action coin id exactly as V10 does.
 - **Fees compound in-band**: the swap fee stays in the active bands' reserves pro rata by `L_k`,
   each `L_k` grows homothetically (`u` unchanged), so range LP CATs appreciate. No fee-growth
   accumulators.
