@@ -578,6 +578,24 @@ with random weights, offsets and swap sequences; equal V3 at N = 2 and equal wei
 V10 curve at `u = 0`; exercise exit, re-entry and both candidate re-entry rules; property-test
 that no band's real reserve ever goes negative and that fees never leave the pool.
 
+### Slots and the full-range CFMM
+
+Inside the pool puzzle: none. Slots are for data that is large or rarely read; a full-range
+weighted pool's state is N reserves and one LP supply, all touched every spend — exactly what
+the CHIP says to keep in state. Around the pool, four uses, one of which touches V11's merkle
+root:
+
+| use | where | V11 impact |
+|---|---|---|
+| **On-chain pool registry** — one slot per pool (launcher, asset set, weights, fee, revision) with sorted-list uniqueness so there is one canonical pool per asset set and weights; registration may require a fee or an NFT and may refuse any non-shipping revision by puzzle hash. Replaces the server/localStorage deployment index (source of the retired-pools-reappearing finding) and answers the "gate pool creation" quest without an admin key. CATalog's design applied to pools; reviewed puzzles reusable | separate singleton | none — add any time; first slot project |
+| **Liquidity mining** via the CHIP-0051 reward distributor (slot-based, reviewed, on mainnet) pointed at the Forge LP CAT | separate app | none — nothing to write |
+| **Price history for the perps oracle** — last observation in state, a window of observations in slots (the textbook slot case). Chia puzzles cannot read the clock, but a spend pins its height with `ASSERT_HEIGHT_ABSOLUTE` and `ASSERT_BEFORE_HEIGHT_ABSOLUTE`, so a height-weighted cumulative price is honest. An on-chain consumer cannot read an unspent coin, so the perps contract consumes the price only if the pool is spent in the same bundle and announces it — which needs an **`observe` action** in the pool | pool action + state accumulator | **decide before V11**: actions are fixed at creation, so V11 pools are oracle-capable only if the leaf is in the root from day one (~50 lines, permissionless, a few integers of state) |
+| **Future concentrated type** — band records, per-asset threshold lists, pool-native resting orders (overlaps the CLOB plan) | future type | none |
+
+Not a slot but worth doing in V11 state: accrue protocol fees per asset in state and pay them
+through a batched collect instead of an extra coin on every swap — cheaper per swap; whether it
+is a fourth leaf or folded into an action is a design-pass detail.
+
 ### Migration
 
 A pool's puzzle is fixed at creation, so V10 pools cannot become V11 pools. V11 means a new LP
@@ -675,6 +693,12 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
    puzzle change.
 5. **Config placement.** Curried into each action versus carried in state. Curried is cheaper and
    immutable, which is the V10 property worth keeping.
+6. **Oracle leaf.** Does V11 carry a height-weighted price accumulator in state and an `observe`
+   action that snapshots it to a slot and announces it? Recommended yes: small, permissionless,
+   and the only way a V11 pool can ever feed the perps oracle on chain — it cannot be added to
+   existing pools later.
+7. **Protocol fee accrual.** Per-swap payout coin (V10) versus accrual in state with a batched
+   collect. Recommended accrual; decide whether collect is its own leaf.
 
 ---
 
