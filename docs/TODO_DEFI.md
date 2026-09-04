@@ -69,24 +69,17 @@
    action coin id, so reserves could be withdrawn with **no LP destroyed at all**. Closed in V9/V10
    by the three-part lock — derived action-coin id, pinned mint/melt inners, and a CAT parent
    required on a melt. See [docs/skills/forgeLpCat.md](skills/forgeLpCat.md).
-1a. **🔐 Forge V11 — CHIP-0050 action layer with N-asset bands** (HIGH — adopted 2026-09-04, build after V10 tests)
+1a. **🔐 Forge V11 — CHIP-0050 action layer, weighted full range** (HIGH — adopted 2026-09-04, build after V10 tests)
   - rule met: more secure with fewer points of exploit long term; surface count and design in
     [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md). Conditions: upstream-grade
     review of the finalizer; audit the final multi-action puzzle once (no in-puzzle guard)
   - [x] owner confirms adoption (2026-09-04)
-  - [x] direction: one N-asset pool type, full range = zero band, ranges ("bands") added through
-        slots, band actions in the merkle root from day one, router hides them at launch
-  - [ ] **reference maths first** (gates every band puzzle): demonstrate Result 1 (active bands
-        homothetic) and Result 2 (a pairwise swap moves two thresholds monotonically → one sorted
-        threshold list per asset) for N ∈ {2,3,5,10}; equal V3 at N=2; equal V10 at u=0; choose the
-        re-entry rule (reactivate action vs partial activity); no negative reserves, fees never leave
-  - [x] LP identity: **one LP asset id per pool** (per-band asset ids rejected 2026-09-04); the range
-        is enforced per coin by a self-propagating position layer (CR-CAT pattern), fungible within a band
-  - [ ] position layer puzzle: morphed CREATE_COIN, per-coin conservation, TAIL-call waiver; probe that a
-        ring mixing two tags cannot move value between them
-  - [ ] if the maths does not close: V11 ships the zero band only, bands become a second pool type
-  - [ ] build concentration-ready: finalizer tested at N=2 and N=10, fixed tag/state conventions,
-        reserved slot nonces for ticks and positions, pool-type field in the router registry
+  - [x] pool type: weighted N-asset full range; V10 curve, fees and LP CAT unchanged; three actions
+  - [x] **concentrated liquidity off scope** (2026-09-04) — returns as a second pool type with NFT
+        positions so wallets and other DEXes identify them; per-band asset ids and a position layer
+        were both rejected; the N-asset band derivation stays in the skill as the research record
+  - [ ] cheap future-proofing only: finalizer tested at N=2 and N=10, fixed tag/state conventions,
+        reserved slot nonces, pool-type field in the router registry
   - keep the V10 curve, fees and LP CAT; replace the pool inner and the custom reserve puzzle with
     the action layer, `p2_delegated_by_singleton` reserves, and a Forge-written multi-reserve
     finalizer (none exists upstream — the reserve finalizer is the template)
@@ -672,6 +665,11 @@ After testnet proofs are live:
 ---
 
 ## 💡 Ideas Parking Lot
+
+- **Concentrated pool type (post-V11)** — second merkle root on the same action layer, finalizer and
+  reserves; positions as NFTs carrying `(band_id, share)`; N-asset "bands" per the research record in
+  `docs/skills/chip0050ActionLayer.md`; gated on off-chain reference maths (homothety, two-threshold
+  result, re-entry rule) matched to V3 at N=2 and V10 at zero offsets
 
 - **Cross-collateral margin**: use CFMM LP NFTs as collateral in the perps account singleton
 - **Insurance fund mining**: emit reward CATs to liquidators proportional to bad debt covered

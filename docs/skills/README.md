@@ -73,13 +73,14 @@ Use this file when:
 > Forge-specific knowledge, distinct from generic Chia protocol patterns.
 > The first three are current at **V10**, the shipping revision — pre-V10 pools are retired and
 > carry critical authorisation bugs. **V11 is adopted (2026-09-04) on the CHIP-0050 action
-> layer**, one N-asset pool type with full range as the zero band and ranges ("bands") added
-> through slots; `chip0050ActionLayer.md` carries the surface count, the design, and the
-> reference-maths gate.
+> layer**: weighted N-asset full range, V10 curve/fees/LP CAT unchanged, three actions, N
+> reserves, multi-action allowed. Concentrated liquidity is off scope; it returns as a second
+> pool type with NFT positions. `chip0050ActionLayer.md` carries the surface count, the V11
+> design, and the band research record.
 
 | Skill | Use it for |
 | --- | --- |
-| `chip0050ActionLayer.md` | CHIP-0050 reference (action layer, finalizers, `p2_delegated_by_singleton`, slots, pinned hashes), the V10-versus-V11 exploit-surface count, the V11 candidate design, the multi-reserve finalizer spec, why the final multi-action puzzle is audited once (no in-puzzle guard), action-layer audit additions, open items |
+| `chip0050ActionLayer.md` | CHIP-0050 reference (action layer, finalizers, `p2_delegated_by_singleton`, slots, pinned hashes), the V10-versus-V11 exploit-surface count, the V11 candidate design, the multi-reserve finalizer spec, why the final multi-action puzzle is audited once (no in-puzzle guard), action-layer audit additions, the descoped N-asset band research record (future concentrated type, NFT positions), open items |
 | `forgePuzzleV10.md` | The shipping puzzle set: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history |
 | `forgeLpCat.md` | The pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule), the mutual handshake and message format, genesis trust |
 | `forgePoolLifecycleTesting.md` | Lanes and endpoints, the guardrails that must never be bypassed (freshness, snapshot round trip, revision filtering, offer redaction), the suite index and what a green run does not prove |

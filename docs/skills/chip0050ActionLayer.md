@@ -11,10 +11,11 @@
 > puzzle is immutable, so a guard would force a V12 migration; see "Build the final version
 > first"). The owner confirmed adoption on those terms.
 >
-> **Direction.** One pool type, N-asset, where full range is the zero-offset case and ranges are
-> added through slots — "Bands" below. Because a pool's actions are fixed at creation, the band
-> actions must be in V11's merkle root from day one; the router hides them at launch. V11's
-> scope is gated on the off-chain reference maths.
+> **Scope (2026-09-04).** V11 is the weighted N-asset **full-range** pool on the action layer:
+> the V10 curve, fees and LP CAT unchanged, three actions, N reserves, multi-action allowed.
+> **Concentrated liquidity is off scope.** When it returns it is a second pool type whose
+> positions are **NFTs**, so wallets and other DEXes identify them natively; the N-asset band
+> maths below is kept as the research record for that work, not as V11 design.
 >
 > **Nothing in V11 exists yet. Nothing is audited.** The upstream components are reviewed and on
 > mainnet; the Forge actions and the multi-reserve finalizer are new code until proven otherwise.
@@ -481,15 +482,16 @@ trends out of every tight tier, the pool is full-range-only until LPs re-add els
 "elsewhere" is another tier or a slot range. Same dead-capital behaviour as V3, handled the same
 way, but it means stage 3 is where the design becomes durable, not stage 2.
 
-**What this changes for V11.** Cheap: state as tiers with K = 1. Real decision: whether V11's
-action set includes tier creation and multi-tier swaps, which pulls the concentrated maths into
-the first audit. Do not decide that before step 1 exists and matches V3 at N = 2.
+**What this changes for V11.** Nothing on chain: concentrated liquidity is off V11's scope
+(below). Cheap and still worth doing: state as tiers with K = 1, the N-reserve finalizer tested
+at N = 2 and N = 10, fixed tag and state conventions, reserved slot nonces.
 
-### Bands — the N-asset range design (v0, 2026-09-04)
+### Bands — the N-asset range design (research record, descoped from V11 on 2026-09-04)
 
-The owner's direction is one pool type with ranges added through slots, so this records the
-design as derived so far. Everything here is **to be proven in the reference maths** before any
-puzzle is written; the two results marked *derived* were derived on paper, not tested.
+Concentrated liquidity was taken off V11's scope. This section is kept because the derivation is
+the starting point for the future concentrated pool type. Everything here is **to be proven in
+reference maths** before any puzzle is written; the two results marked *derived* were derived on
+paper, not tested. Nothing here gates V11.
 
 **Definition.** A band is a weighted sub-pool with virtual offsets:
 
@@ -517,45 +519,23 @@ are thresholds on one monotone scalar, so the crossing order is the sorted order
 lists — each protected by the CHIP-0050 uniqueness pattern. Slots spent per swap = bands
 crossed, as in V3. This is what makes N-asset bands verifiable in-puzzle rather than research.
 
-**One LP asset id per pool — the position layer.** Per-band asset ids were considered and
-rejected (2026-09-04): a full-range and a concentrated holder hold the same assets in different
-ranges, and the frontend must not have to discover a new asset id per range. The constraint that
-shapes the replacement: **a fungible token cannot carry two different claims.** The CAT layer
-only conserves total supply across a ring, so if two ranges shared an asset id with nothing else
-enforcing the difference, one spend could move value from the richer range into the poorer one.
-V3 hit this and chose NFTs. Forge keeps fungibility within a range with a lighter mechanism:
-
-```
-LP coin = CAT(pool_lp_asset_id, position_layer(band_id, owner_inner))
-```
-
-The position layer is a self-propagating inner layer curried with the band id. It (1) morphs
-every `CREATE_COIN` from the owner inner so the child is wrapped in the same layer with the same
-band id — the tag can never be dropped or changed by a normal spend; (2) asserts the sum of its
-outputs equals its own amount, so value cannot cross tags inside a ring; (3) waives (2) only
-when the spend carries the TAIL call, i.e. the pool-authorised mint or melt. Same tag: coins
-merge and split freely, so positions in a range stay fungible. Different tags: cannot combine.
-Precedent: credential-restricted CATs enforce their layer on every descendant by morphing
-`CREATE_COIN`, and the NFT ownership layer does the same; only the payload is new.
-
-Why no per-position NFT: fees compound into the band's `L`, so there is no per-position state
-(V3 needed NFTs because uncompounded fees make positions on the same ticks non-interchangeable).
-Slots hold band records and per-asset threshold lists, never positions — the shape XCHandles
-already runs on mainnet. Quantise `u` to a grid so ranges cluster.
-
-**Trade-off accepted.** Anything that handles the LP token by asset id alone is wrong about
-value: a wallet shows one balance mixing ranges, a DEX cannot price the asset id, an offer that
-picks coins by asset id may pick the wrong band. The Forge frontend reads coins and tags
-directly (one pool, one asset id, one scan). The LP token is for band-aware software only; if
-it must later serve as collateral or trade elsewhere, that software must read the tag.
+**Position representation — decided: NFTs (future).** Three options were weighed on
+2026-09-04. *Per-band LP CATs* (range in the asset id): correct in every wallet automatically,
+but a new asset id per range for the frontend to discover — rejected. *One asset id with a
+self-propagating position layer* carrying the band id (CR-CAT pattern; a fungible token cannot
+carry two claims, so the range must be enforced inside the coin): one asset id per pool and
+fungible within a band, but any wallet, DEX or offer that handles the token by asset id alone is
+wrong about value — rejected because other DEXes and wallets must identify the coins properly.
+*NFT positions*, as in V3: each position a Chia NFT carrying the band and share, identified
+natively by every wallet and DEX, non-fungible, per-position record — **chosen** for the future
+concentrated pool type. Fees still compound into the band's `L`, so the NFT needs no fee
+snapshots, only `(band_id, share)`; band records and per-asset threshold lists stay in slots.
 
 **What reuses Forge tech.**
 
-- **One LP CAT per pool**, TAIL curried with `(launcher_id, protocol_version)` as in V10, with
-  the range carried by the position layer above. The three-part lock (`forgeLpCat.md`) carries
-  over unchanged; the only pool-side change is that the pinned inner hash in the derived
-  mint/melt coin id becomes `position_layer(band_id, LP_MINT_INNER | LP_MELT_INNER)`, so `add`
-  and `remove` bind the band inside the same derivation.
+- **The full-range LP CAT stays exactly as V10** for the zero band. Concentrated positions are
+  NFTs (above); the pool binds an NFT position's mint or update the way V10 binds the LP action
+  coin — by deriving the coin id from a pinned inner — which is future design work.
 - **Fees compound in-band**: the swap fee stays in the active bands' reserves pro rata by `L_k`,
   each `L_k` grows homothetically (`u` unchanged), so range LP CATs appreciate. No fee-growth
   accumulators.
@@ -584,15 +564,14 @@ band's frozen reserves no longer match the pool's price point. Two candidate ans
 
 The reference maths settles this before any band action is written.
 
-**V11 action set under this direction.** `swap`, `add`, `remove`, `create_band`,
+**Action set of the future concentrated pool type.** `swap`, `add`, `remove`, `create_band`,
 `reactivate_band`, and `collect` only if anything is not auto-compounded — roughly six leaves,
-all in the first audit. The router exposes `swap`, `add`, `remove` on the zero band at launch and
-turns bands on when the band suites are green.
+its own merkle root, its own audit. V11 keeps three.
 
-**State sketch.** `[L_active, [R_1..R_N] (active virtual reserves), [total_1..total_N] (real
-reserves held, for the finalizer), zero-band L and LP supply]`; per-band data (`u`, `L_k`, LP
-supply, frozen reserves and status) in band slots; per-asset threshold lists in slots. One LP
-asset id per pool; the band id lives in each LP coin's position layer.
+**State sketch (future type).** `[L_active, [R_1..R_N] (active virtual reserves),
+[total_1..total_N] (real reserves held, for the finalizer), zero-band L and LP supply]`; per-band
+data (`u`, `L_k`, share supply, frozen reserves and status) in band slots; per-asset threshold
+lists in slots; positions as NFTs carrying `(band_id, share)`.
 
 **Reference-maths acceptance.** Numerically demonstrate Results 1 and 2 for N ∈ {2, 3, 5, 10}
 with random weights, offsets and swap sequences; equal V3 at N = 2 and equal weights; equal the
@@ -678,19 +657,12 @@ Map onto the lanes in `forgePoolLifecycleTesting.md`; the guardrails there do no
 ## Open items to settle before code
 
 0. ~~Confirm adoption.~~ **Confirmed 2026-09-04.**
-0a. ~~Confirm the V11 pool type.~~ **Direction confirmed:** one N-asset pool type with full range
-   as the zero band and ranges added through slots ("Bands"). This puts the band actions in V11's
-   merkle root from day one.
-0b. **V11 scope, gated on the reference maths.** Results 1 and 2 demonstrated, V3 matched at
-   N = 2, V10 matched at `u = 0`, and the re-entry rule chosen. Until then no band puzzle is
-   written; if the maths does not close, V11 ships the zero band only and bands become a second
-   pool type.
+0a. ~~Confirm the V11 pool type.~~ **Confirmed:** weighted N-asset full range. Concentrated
+   liquidity is off scope; it returns as a second pool type with NFT positions, and the band
+   research record above is its starting point.
 1. **Tag encoding.** `(-42 index . condition)` versus one opcode per reserve (`-42 - index`).
    The former keeps a single strip rule in the finalizer; settle it before writing actions.
-1a. **Position layer puzzle.** Write and audit the self-propagating band-tag layer (morphed
-   `CREATE_COIN`, per-coin conservation, TAIL-call waiver) before the LP binding is designed
-   around it; model it on the CR-CAT layer, and test that a ring mixing two tags cannot move
-   value between them.
+1a. ~~Position layer puzzle.~~ Dropped with the concentrated scope; positions will be NFTs.
 2. **LP TAIL handshake.** Keep the puzzle announcement from the action-layer singleton, or revise
    the TAIL to use a message. A message is cleaner; it means a TAIL change and therefore already
    the new asset id V11 brings anyway.

@@ -159,9 +159,9 @@ You understand the full Arcane BOW + Chia DeFi workspace:
   method is in `docs/skills/clvmPuzzleAudit.md`; the findings log lives with the project
 - Load `forgePuzzleV10.md` for the puzzle, `forgeLpCat.md` for the LP TAIL,
   `forgePoolLifecycleTesting.md` for what to run
-- **V11 is adopted (2026-09-04), not started:** CHIP-0050 action layer, one N-asset pool type
-  with full range as the zero band and ranges ("bands") added through slots; band actions in the
-  merkle root from day one; scope gated on the off-chain reference maths. Conditions: upstream-
+- **V11 is adopted (2026-09-04), not started:** CHIP-0050 action layer, weighted N-asset full
+  range, V10 curve/fees/LP CAT unchanged, three actions. Concentrated liquidity is off scope; it
+  returns as a second pool type with NFT positions. Conditions: upstream-
   grade review of the Forge-written multi-reserve finalizer and one audit of the final
   multi-action puzzle (one action per spend is router policy at launch, never an in-puzzle guard —
   a pool's puzzle is immutable). Load
