@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updated": "2026-08-27",
+  "version": 8,
+  "updated": "2026-09-10",
   "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
   "domains": {
     "chia-protocol": [
@@ -9,27 +9,35 @@
       "chiaPrimitivesPatterns.md",
       "chiaDevTooling.md",
       "sageRpc.md",
+      "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
-      "forgePoolLifecycleTesting.md"
+      "forgePoolLifecycleTesting.md",
+      "chip0050ActionLayer.md"
     ],
     "puzzle-security": [
       "clvmPuzzleAudit.md",
-      "chiaPrimitivesPatterns.md"
+      "chiaPrimitivesPatterns.md",
+      "chip0050ActionLayer.md"
     ],
     "clvm-audit": [
       "clvmPuzzleAudit.md",
-      "forgePuzzleV10.md"
+      "forgePuzzleV11.md",
+      "forgePuzzleV10.md",
+      "chip0050ActionLayer.md"
     ],
     "adversarial-testing": [
       "clvmPuzzleAudit.md",
       "forgePoolLifecycleTesting.md"
     ],
     "forge-protocol": [
+      "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
       "forgePoolLifecycleTesting.md",
-      "clvmPuzzleAudit.md"
+      "clvmPuzzleAudit.md",
+      "chip0050ActionLayer.md",
+      "forgeMultisig.md"
     ],
     "wallets-and-signing": [
       "bowAppReference.md",
@@ -37,6 +45,12 @@
       "sageRpc.md",
       "chiaPrimitivesPatterns.md",
       "chiaDevTooling.md"
+    ],
+    "multisig": [
+      "forgeMultisig.md",
+      "sageRpc.md",
+      "chiaPrimitivesPatterns.md",
+      "clvmPuzzleAudit.md"
     ],
     "multi-address-scanning": [
       "bowAppReference.md",
@@ -68,6 +82,7 @@
       "bondPvpEconomy.md",
       "nftRewards.md",
       "sageRpc.md",
+      "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
       "chiaDexieRouting.md",
@@ -77,6 +92,7 @@
       "chiaDexieRouting.md",
       "chiaTibetAmm.md",
       "tibetUiFrontend.md",
+      "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgePoolLifecycleTesting.md"
     ],
@@ -98,15 +114,32 @@
     ],
     "cross-chain-bridge": [
       "warpBridge.md",
-      "chiaPrimitivesPatterns.md"
+      "chiaPrimitivesPatterns.md",
+      "greenwoodLockbox.md"
     ],
     "chia-evm-bridge": [
       "warpBridge.md",
-      "bowAppReference.md"
+      "bowAppReference.md",
+      "greenwoodLockbox.md"
     ],
     "bridge-offer-lifecycle": [
       "warpBridge.md",
       "chiaWalletSdk.md"
+    ],
+    "greenwood": [
+      "greenwoodLockbox.md",
+      "chiaPrimitivesPatterns.md",
+      "clvmPuzzleAudit.md",
+      "forgeMultisig.md"
+    ],
+    "evm-signed-chia-custody": [
+      "greenwoodLockbox.md",
+      "forgeMultisig.md",
+      "chiaWalletSdk.md"
+    ],
+    "cross-chain-handover": [
+      "greenwoodLockbox.md",
+      "warpBridge.md"
     ]
   }
 }

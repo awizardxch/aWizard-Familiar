@@ -1,7 +1,9 @@
-# Skill: Forge Puzzle V10 — the shipping revision
+# Skill: Forge Puzzle V10 — retired, kept for the math
 
-> Reference for the Forge pool puzzle set as it ships. V10 is the only revision intended for
-> mainnet; V4–V9 exist on testnet and are described only where behaviour differs.
+> **V10 is closed (2026-09-05). The shipping revision is V11.1 — see `forgePuzzleV11.md`.**
+> Load this only for history, or for the weighted invariant itself, which is byte-identical in
+> V11. Do not build against the V10 coin layout, modes or authorisation described below.
+> V4–V9 are retired and are described only where behaviour differs.
 > Updated 2026-08-27, after the internal audit closed 10 findings and the old pools were retired.
 >
 > **Not externally audited. Testnet only.** `clvmPuzzleAudit.md` for the method,

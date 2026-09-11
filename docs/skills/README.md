@@ -71,14 +71,29 @@ Use this file when:
 ### Forge DeFi Primitives
 
 > Forge-specific knowledge, distinct from generic Chia protocol patterns.
-> All three are current at **V10**, the shipping revision — pre-V10 pools are retired and carry
-> critical authorisation bugs.
+> **V11** (the CHIP-0050 action layer) is the shipping revision on testnet11; V10 is closed and
+> kept as the record; pre-V10 pools are retired and carry critical authorisation bugs. V10's
+> math is byte-identical in V11, so `forgePuzzleV10.md` and `forgeLpCat.md` still describe the
+> live invariant and LP TAIL — `chip0050ActionLayer.md` covers what actually changed structurally.
 
 | Skill | Use it for |
 | --- | --- |
-| `forgePuzzleV10.md` | The shipping puzzle set: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history |
+| `chip0050ActionLayer.md` | The shipping V11 puzzle set: registry singleton, the six leaves (swap/add/remove/observe/collect/dao_fee), multi-reserve finalizer, hinted LP CAT genesis, the keyless responder |
+| `forgePuzzleV11.md` | **The shipping revision** (CHIP-0050 action layer): config and state, the prologue, the six leaves' rules (V11.1 protocol 12), the finalizer's ordering, the TAIL's locks, the registry, what is not in the puzzle, cutting a revision |
+| `forgePuzzleV10.md` | V10, closed 2026-09-05, the pre-V11 pool shape: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history — still the reference for the math itself |
 | `forgeLpCat.md` | The pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule), the mutual handshake and message format, genesis trust |
 | `forgePoolLifecycleTesting.md` | Lanes and endpoints, the guardrails that must never be bypassed (freshness, snapshot round trip, revision filtering, offer redaction), the suite index and what a green run does not prove |
+| `greenwoodLockbox.md` | Greenwood: a Chia vault whose only seat is a MetaMask key, wrapped in a singleton and named by an ERC-721 on Robinhood Chain — the EIP-712 custody puzzle, the fixed deposit address across rotations, the hash-lock hand-over, listings, the declaration steward |
+| `forgeMultisig.md` | M-of-N custody safes (tab `🔐`): CNI's `p2_m_of_n_delegate_direct` and the newer vault-puzzle locks, address derivation, the coin-id replay guard, signing views, rekey-as-vote — a **custody** primitive, not a Forge vault pool (see note below) |
+
+> **Three unrelated things are called "vault" in this repo — do not conflate them:**
+> 1. A **Forge vault pool** (🫙) — a single-asset AMM pool (`forgePuzzleV10.md` / `chip0050ActionLayer.md`), reached by swapping into its LP and redeeming. It cannot trade and has no owners.
+> 2. The **Liquidity Manager** (`projects/chia-vaults/`, TODO_DEFI Phase 10) — a backlogged Aftermath-afLP-style auto-rebalancing strategy layer that would sit *on top of* Forge pools. Math library only; no contracts or UI yet. It predates CHIP-0050's action-layer leaves, isn't fully vetted against them, and likely doesn't ship standalone — current thinking is it merges into the Treasure Chest idea rather than staying its own product. Forge already covers most of what this was for, twice over: split-routing rebalances pools passively as a side effect of ordinary flow ("a split is a balancer that pays for itself", `docs/FORGE_PROTOCOL_STATUS.md`), and the `/balancer` path (below) already does active arb-cycle discovery and equilibrium planning. The one undone piece, per `/balancer`'s own source comment, is a scheduled/automatic trigger — "there is no keeper yet" — not rebalancing logic itself.
+> 3. Forge Multisig's **vault locks** (`forgeMultisig.md`) — CNI's M-of-N custody puzzle (singleton + `m_of_n` merkle + `bls_member`), a shared-ownership safe with no yield or rebalancing logic at all. Currently the `/multisig` path inside `forge.awizard.dev`; planned to split into its own subdomain, `lock.awizard.dev` (see `docs/ARCHITECTURE.md`'s "Forge's own path-domains").
+>
+> (2) and (3) barely overlap: one is a yield/rebalancing strategy, the other is key custody. The
+> real composition point is that (3) could hold the deposit a future (2) manages — a multisig
+> safe as the custody layer under a strategy vault — but that composition hasn't been built.
 
 ### External Liquidity and DEX Integrations
 
@@ -101,14 +116,16 @@ Use this file when:
 ### DeFi / Protocol Quest
 - `blockchainDecentralization.md`
 - `chiaPrimitivesPatterns.md`
-- `forgePuzzleV10.md` — if the quest touches the Forge puzzle set
+- `forgePuzzleV11.md` — if the quest touches the Forge puzzle set (`forgePuzzleV10.md` only for history)
+- `greenwoodLockbox.md` — if the quest touches Greenwood: Chia custody signed by an Ethereum key
 - `chiaDevTooling.md` — only if tooling/Sage internals are in scope
 - `deploymentInfra.md` — only if deployment is in scope
 
 ### Puzzle Security / Audit Quest
 - `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
-- `forgePuzzleV10.md` — if the target is a Forge pool
+- `forgePuzzleV11.md` — if the target is a Forge pool (`forgePuzzleV10.md` only for history)
 - `forgeLpCat.md` — if the target is LP supply, the TAIL, or either pinned inner
+- `greenwoodLockbox.md` — if the target is a Greenwood vault or Lockbox; its trust model is that only the MetaMask key can move anything
 - `forgePoolLifecycleTesting.md` — to know which suite already covers the surface
 - `chiaPrimitivesPatterns.md` — only if the quest reaches into singleton or CAT fundamentals
 
@@ -121,13 +138,15 @@ revision is never done until it has been re-probed.
 - `chiaDexieRouting.md`
 - `chiaTibetAmm.md`
 - `tibetUiFrontend.md` — only if frontend or wallet UX is in scope
-- `forgePuzzleV10.md` — only if local Forge pool behaviour or routing lanes are also in scope
+- `forgePuzzleV11.md` — only if local Forge pool behaviour or routing lanes are also in scope (`forgePuzzleV10.md` only for history)
 
 ### Wallet / Signing / Multisig Quest
+- `forgeMultisig.md` — load first for any Forge safe/vault-lock work: address derivation, the propose→sign→execute flow, the coin-id replay guard, rekey-as-vote
 - `bowAppReference.md` — WalletConnect, CHIP-0002, multi-address scanning
 - `sageRpc.md` — operator/backend address derivation, gap-limit expansion
 - `chiaWalletSdk.md` — only when dropping below the Sage/WC layer into signer behavior
 
+Use `forgeMultisig.md` for anything touching `contracts/multisig_tool.py`, `contracts/vault_tool.py`, or the `api/multisig-*` routes — it is the only skill covering the M-of-N safe / vault-lock coordination service.
 Use `bowAppReference.md` first for all WalletConnect and CHIP-0002 UI flows, including `chip0002_getPublicKeys` multi-address patterns.
 Use `sageRpc.md` for backend/operator flows that call Sage RPC directly (`/get_derivations`, `/increase_derivation_index`).
 Use `chiaWalletSdk.md` only when the quest requires raw spend construction or wallet engine internals below Sage.
