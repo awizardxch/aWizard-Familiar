@@ -98,6 +98,14 @@ at a mutant build with `FORGE_V11_COMPILED`. Survivors are triaged in
 `projects/chia-cfmm/docs/FORGE_AUDIT_TIBETSWAP.md`, which also tests both publicly documented
 TibetSwap failures against these puzzles.
 
+The harness taught one lesson worth carrying: a refusal test can pass for the *wrong* assert.
+The finding-4 probe (fabricated melt coin) is refused by the TAIL's delta lock before its
+CAT-parent lock is ever reached, so that lock survived every suite until
+`_test_v11_lp_receive_forgery.py` built the construction that actually reaches it. That suite
+also settles the "inner puzzle forges the TAIL's receive" concern empirically — CAT2 *does* pass
+a bare `RECEIVE_MESSAGE` through, and Forge is safe only because the receiver id is derived from
+the pinned melt inner's hash. Say "which coin", never just "a coin at that puzzle".
+
 ## Published
 
 The puzzles, suites and protocol documents are public at
