@@ -462,8 +462,8 @@ reviewer does not have to find it.
 
 **What the file has.** Measured on the PR head (`CHIPs/chip-0062.md`, 349 lines): 25 em
 dashes; 16 hard-wrapped prose paragraphs and 24 hard-wrapped bullet or quote blocks; one
-further non-ASCII character to check by hand (the arrow in "Chia↔EVM"-style text or a "≥",
-whichever it is — replace it with ASCII).
+further non-ASCII character: the product symbol Π in the invariant's code block under
+*The invariant*; write it `prod(r_i ^ w_i)`.
 
 **The fix.** One mechanical commit, landed **before anything else** so later commits do not
 conflict on every line: join each paragraph and each bullet onto one line (keep the header

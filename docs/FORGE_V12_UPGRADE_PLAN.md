@@ -61,7 +61,7 @@ and 24 hard-wrapped bullet or quote blocks.
    bullet per line.
 2. Replace each em dash by hand — a comma, a colon, or a plain hyphen, whichever the sentence
    wants. Do not batch-replace with `-`; several are parenthetical and read wrong as hyphens.
-3. Replace the one remaining non-ASCII character with ASCII.
+3. Replace the product symbol Π in the invariant's code block with `prod(r_i ^ w_i)`.
 4. Verify: `grep -c $'\u2014' CHIPs/chip-0062.md` prints 0; the paragraph script below prints
    `hard-wrapped prose paragraphs: 0` and `wrapped bullet/quote blocks: 0`.
 
