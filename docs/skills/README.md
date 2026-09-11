@@ -127,6 +127,7 @@ Use this file when:
 - `forgeLpCat.md` — if the target is LP supply, the TAIL, or either pinned inner
 - `greenwoodLockbox.md` — if the target is a Greenwood vault or Lockbox; its trust model is that only the MetaMask key can move anything
 - `forgePoolLifecycleTesting.md` — to know which suite already covers the surface
+- `docs/FORGE_CHIP0062_REVIEW_RESPONSE.md` and `docs/FORGE_V12_UPGRADE_PLAN.md` — if the quest is any of the six CHIP-0062 findings or the V12 cut
 - `chiaPrimitivesPatterns.md` — only if the quest reaches into singleton or CAT fundamentals
 
 Applies to any puzzle review, not only Forge: reviewing an authorisation path, writing
@@ -187,6 +188,8 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `docs/QUEST_WORKFLOW.md` — quest lifecycle and backlog movement rules
 - `docs/FORGE_PROTOCOL_STATUS.md` — Forge protocol status (V10) and why V4–V9 are unsafe
 - `docs/FORGE_SECURITY_AUDIT.md` — the findings log the audit skill generalises from
+- `docs/FORGE_CHIP0062_REVIEW_RESPONSE.md` — the external review of V11.1 (CHIP-0062, PR #217): six findings and how each is answered
+- `docs/FORGE_V12_UPGRADE_PLAN.md` — the V12 revision that closes them: what to change, in what order, definition of done
 
 ## Skills Must Stand Alone
 

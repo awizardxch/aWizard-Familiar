@@ -10,6 +10,12 @@
 > the DAO's puzzle hash; swap takes the slice, collect pays both recipients, the registry key adds the
 > recipient, the TAIL asserts protocol 12. Delta section in `FORGE_PUZZLE_V11.md`; every leaf read in
 > `projects/chia-cfmm/docs/FORGE_V11_CLVM_PASS.md`.
+> **CHIP-0062 review (2026-09-11):** six findings against this revision — genesis binds to no single eve
+> (P0), oracle time is spender-chosen across generations, `burn < total_lp` traps the last holder, the
+> CHIP says ppm where the code says bps, the finalizer takes reserve parents from its solution, and the
+> CHIP never states that an empty spend is refused. Four need a new revision (V12, protocol 13). Read
+> [`docs/FORGE_CHIP0062_REVIEW_RESPONSE.md`](../FORGE_CHIP0062_REVIEW_RESPONSE.md) before building on
+> anything below that the review touches, and [`docs/FORGE_V12_UPGRADE_PLAN.md`](../FORGE_V12_UPGRADE_PLAN.md) to build V12.
 
 ---
 

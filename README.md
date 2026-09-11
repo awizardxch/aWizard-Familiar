@@ -75,6 +75,8 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/CODE_AUDIT_REPORT.md`** — Code quality baseline and audit results
 - **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V10 shipping, why V4–V9 are unsafe
 - **`docs/FORGE_SECURITY_AUDIT.md`** — Forge findings log: ten findings, severity, how each was closed
+- **`docs/FORGE_CHIP0062_REVIEW_RESPONSE.md`** — CHIP-0062 (PR #217) review: the six findings, what V11.1 does, the fix for each, how we answer a CHIP review
+- **`docs/FORGE_V12_UPGRADE_PLAN.md`** — V12 implementation plan: per-file puzzle, driver, registry and test changes, the revision cut, the CHIP commits
 - **`docs/TODO_DEFI.md`** — DeFi build phases tracking
 - **`docs/TODO_WORLD.md`** — World engine development tracking
 - **`docs/QUEST_WORKFLOW.md`** — Foundation-First pattern quick reference

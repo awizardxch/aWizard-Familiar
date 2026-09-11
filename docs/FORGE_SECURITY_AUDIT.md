@@ -5,7 +5,8 @@ the TibetSwap V2 incident prompted a review of our own authorisation logic. Ever
 found by probing the **real compiled puzzles**, not by reading them; each has a proof-of-concept
 or a regression test that fails against the vulnerable revision and passes against the fixed one.
 
-**Status: 10 findings, all fixed. V10 is the shipping revision.**
+**Status: 10 internal findings, all fixed (V10). V11.1 ships on testnet11 and has one external
+review against it — six findings, open, see the last section.**
 
 Forge is testnet-only and unaudited externally.
 
@@ -276,3 +277,38 @@ proves it, is in [skills/clvmPuzzleAudit.md](skills/clvmPuzzleAudit.md).
 - **A round trip nobody performs in a test is a round trip nobody has tested.**
 - **A skip that exits 0 is a lie.** Fifteen suites signalled "skipped" by exiting successfully, so
   a run that exercised almost nothing reported 34 passed / 0 skipped. Skips now exit 2.
+
+---
+
+## External review of V11.1 — CHIP-0062, PR #217 (2026-09-11)
+
+The first review by someone outside the team: greimela's "changes requested" on the CHIP,
+plus one Cursor bot finding. Recorded here so the findings log stays the one place an auditor
+reads first; the analysis and the fixes are in
+[`FORGE_CHIP0062_REVIEW_RESPONSE.md`](FORGE_CHIP0062_REVIEW_RESPONSE.md) and the work in
+[`FORGE_V12_UPGRADE_PLAN.md`](FORGE_V12_UPGRADE_PLAN.md).
+
+| # | Finding | Severity | Introduced | Closes in | Status |
+|---|---------|----------|-----------|-----------|--------|
+| R1 | Genesis authorises any number of eves — unrecorded LP mintable by the creator | **P0** | V11 (launcher-authorised genesis, finding V11-1's fix) | V12 TAIL + registry | open |
+| R2 | Oracle elapsed time is spender-chosen; backfill across generations in one block | P1 | V11 (the oracle is new in V11) | V12 prologue, `ASSERT_MY_BIRTH_HEIGHT` | open |
+| R3 | `burn < total_lp` traps the last LP holder; no bounded minimum liquidity | P1 | V4 (rule unchanged since) | V12 `MIN_LP`, registry floor | open |
+| R4 | CHIP says protocol fee in ppm; puzzle uses bps | P1 | CHIP text (vestigial `protocolFeePpm`) | text + constant rename | open |
+| R5 | Finalizer takes reserve parent ids from its solution; impostor coin can become the tracked reserve | P1 | V11 (V10 kept reserve ids in state) | V12 state shape + finalizer | open |
+| R6 | CHIP does not state that an empty action spend is refused | High (bot) | CHIP text (upstream `action.rue` enforces it) | text + probe | open |
+
+Two of the six (R1, R5) were **introduced by V11's own fixes** — genesis moved to the launcher
+to remove the creator-vouched mint, and reserve ids left the state when the finalizer took over
+binding. That is the third time in this log a fix has carried a finding, and the rule stands:
+a revision is not done until it has been re-probed by someone who did not write it.
+
+Lessons to carry forward, in the audit skill's form:
+
+- **"Only one coin can satisfy this" must name the coin.** An announcement or message bound
+  by puzzle hash and amount is satisfiable by every coin at that hash and amount; bind by coin
+  id, from state or from the asserting coin's own truth.
+- **Time a puzzle reads from its solution is the spender's time.** Consensus knows birth
+  heights; use them.
+- **A rule that keeps an invariant defined must say what it costs.** `burn < total_lp` was
+  correct and silent; the silence was the finding.
+- **A specification is code.** Two findings were sentences; both get a conformance check.

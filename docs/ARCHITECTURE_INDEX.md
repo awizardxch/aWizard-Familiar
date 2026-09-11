@@ -62,6 +62,7 @@ Use this file when:
 - For any review, probe, or revision of the puzzles: `docs/skills/clvmPuzzleAudit.md` first
 - Current status: `docs/FORGE_PROTOCOL_STATUS.md` (V10; pre-V10 pools retired and unsafe)
 - Findings: `docs/FORGE_SECURITY_AUDIT.md` — ten, all fixed, two third-party-reachable fund loss
+- External review: `docs/FORGE_CHIP0062_REVIEW_RESPONSE.md` (CHIP-0062, PR #217, six findings against V11.1) and `docs/FORGE_V12_UPGRADE_PLAN.md` (the revision that closes them)
 - `docs/quests/diagrams/forge-puzzle-architecture.md` (workspace only) predates V10 — read it as history
 - Treat routers and indexes as replaceable liveness infrastructure, never protocol authority
 
