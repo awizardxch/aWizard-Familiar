@@ -29,8 +29,10 @@ the launch matrix, and retirement of every V11.1 pool. Nothing here is a third-p
 an existing testnet pool. The P0 is exploitable by a **pool creator against later depositors**;
 the oracle finding by any trader against a future oracle consumer; the terminal-LP finding is a
 liveness defect; the reserve-parent finding is a lineage hijack that breaks the accounting the
-spec promises. The CHIP should not move to *Review* until all six are closed in code, in the
-suites, and in the text — in that order.
+spec promises. The editor (danieljperry) added two comments of his own: the CHIP is in *Draft* with reviews
+invited on Discord, and the file needs its formatting normalised. Nine comments in all; every
+one gets a visible outcome. The CHIP should not move to *Review* until all six findings are
+closed in code, in the suites, and in the text — in that order.
 
 ---
 
@@ -61,8 +63,9 @@ This is the protocol, so that the next review is handled the same way.
 7. **Discord.** Post the update in the CNI thread, in the paste-ready form
    `FORGE_CHIP_WORKFLOW.md` uses, once V12 is live on testnet11.
 
-Order of work is dictated by dependencies, not severity: the two document-only findings land
-first (they are free), then the four puzzle findings ship together as V12.
+Order of work is dictated by dependencies, not severity: the editor's formatting pass lands
+first (it touches every line, so anything committed before it conflicts), then the two
+document-only findings (they are free), then the four puzzle findings ship together as V12.
 
 ---
 
@@ -76,6 +79,26 @@ first (they are free), then the four puzzle findings ship together as V12.
 | F4 | Protocol-fee unit mismatch | P1 | CHIP "parts per million" vs `protocol_fee_bps` / denominator 10,000 | spec ≠ code | basis points everywhere; normative constants table; rename the misnamed `WEIGHT_SCALE` | text + rename |
 | F5 | Reserve receiver derivation trusts solution data | P1 | `forge_multi_reserve_finalizer.rue` `...reserve_parent_ids` (l. 178, receiver at l. 145–149) | solution-supplied identity | reserve coin ids live in state; the finalizer derives receivers and successors from state | V12 |
 | F6 | Empty action spend not forbidden | High (bot) | CHIP text; upstream `action.rue` already asserts a non-empty selector list | spec silent | one normative sentence, one probe | text + test |
+
+### Every comment on the PR, and what closes it
+
+Nine items as of 2026-09-11. Replies go on the thread named here, not in a new comment.
+
+| # | Author | Where | What it asks | Closed by |
+|---|---|---|---|---|
+| C1 | awizardxch | PR description | (the submission itself) | — |
+| C2 | Cursor bot | review; inline at the *Authorization* section (l. 299–302) | F6 | 1b: probe + normative sentence + objections entry |
+| C3 | danieljperry | conversation | CHIP is *Draft*; reviews invited on Discord | E2: post the update in the CHIPs Discord thread once V12 is live |
+| C4 | danieljperry | conversation | remove mid-paragraph line breaks and U+2014 em dashes | E1: formatting commit, first |
+| C5 | greimela | review body ("changes requested") | five findings; reproduced on consensus-validated bundles | one reply summarising F1–F5, then per-thread replies |
+| C6 | greimela | inline, *Security* threats table | F1 (P0) | V12 step 4 |
+| C7 | greimela | inline, *Security* threats table | F2 (P1) | V12 step 5 |
+| C8 | greimela | inline, *Leaves* `remove` row | F3 (P1) | V12 step 3 |
+| C9 | greimela | inline, *Configuration and state* | F4 (P1) | 1a |
+| C10 | greimela | inline, *Authorization* section | F5 (P1) | V12 step 2 |
+
+(The review body and its five inline comments are one review; counted separately because each
+thread needs its own reply.) No thread is resolved or outdated.
 
 Severity is the reviewer's. We agree with all six. On F5 we have not been able to construct a
 direct extraction of funds, and say so below; it stays P1 because the CHIP's central normative
@@ -433,6 +456,31 @@ reviewer does not have to find it.
 
 ---
 
+## E1 — Formatting (editor)
+
+**The request.** Remove mid-paragraph line breaks and the non-standard U+2014 em dash.
+
+**What the file has.** Measured on the PR head (`CHIPs/chip-0062.md`, 349 lines): 25 em
+dashes; 16 hard-wrapped prose paragraphs and 24 hard-wrapped bullet or quote blocks; one
+further non-ASCII character to check by hand (the arrow in "Chia↔EVM"-style text or a "≥",
+whichever it is — replace it with ASCII).
+
+**The fix.** One mechanical commit, landed **before anything else** so later commits do not
+conflict on every line: join each paragraph and each bullet onto one line (keep the header
+table, code fences and tables as they are), replace each em dash with a comma, a colon or a
+plain hyphen according to the sentence, and re-check with `grep -c $'\u2014'` (expect 0) and
+the paragraph count script in the plan. Text is edited for punctuation only; no wording
+changes ride in this commit, so the reviewer can diff the substantive commits cleanly.
+
+## E2 — Draft status and Discord (editor)
+
+The editor moved the CHIP to *Draft* and invited reviews on Discord. Nothing to fix; two
+things to do: (1) acknowledge on the PR that the Discord thread is where the discussion is
+mirrored, and (2) post the V12 update there, in the paste-ready form
+`FORGE_CHIP_WORKFLOW.md` already uses, once the revision is live on testnet11. The CHIP's
+*Rationale* already cites the earlier Discord vetting; add the CHIPs-repo thread link beside
+it when the update is posted.
+
 ## What the six findings mean together
 
 - **One revision, not four.** F1 changes the TAIL (new LP asset ids per pool), F3 changes the
@@ -462,6 +510,7 @@ reviewer does not have to find it.
 
 ## Nits in the CHIP to fix in the same pass
 
+- E1's formatting pass (25 em dashes, 40 hard-wrapped blocks) is its own commit, first.
 - `Comments-URI` links to PR #192; it should link to PR #217.
 - *Abstract* lists six leaves; *Reference Implementation* and one *Rationale* paragraph say
   "the five leaves". Six.
@@ -486,6 +535,12 @@ reviewer does not have to find it.
 > comes with a regression that fails on the current build. I will push the CHIP edits after
 > the revision is built and green, one commit per finding, and re-request review then. The
 > working document is linked.
+
+**To the editor (one comment):**
+
+> Formatting normalised in the first commit: paragraphs on one line, em dashes replaced, no
+> other text changes in that commit so the substantive edits diff cleanly. The Discord thread
+> will get the same update as this PR once the revision is on testnet.
 
 **Per thread, after the fix commit:** one line naming the mechanism, the `forge-puzzles`
 commit, the test that fails-before/passes-after, and the CHIP commit.

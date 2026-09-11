@@ -49,6 +49,36 @@ one fixes, and cutting the revision twice would mean two LP-asset migrations.
 4. Frontend: retire the vestigial `protocolFeePpm` field name wherever it still exists
    (`grep -rn Ppm src api`); it is where the CHIP's "ppm" came from.
 
+### 1c. E1 — the editor's formatting pass (do this before 1a and 1b)
+
+Mechanical, and it must be the first commit on the CHIP branch because it touches every
+prose line. On the PR head there are 25 U+2014 em dashes, 16 hard-wrapped prose paragraphs
+and 24 hard-wrapped bullet or quote blocks.
+
+1. Join paragraphs: for each block separated by blank lines that is not a table row, a code
+   fence, a heading or the header table, replace internal newlines with a space. For a
+   bullet block, join each bullet's continuation lines onto the bullet's first line; keep one
+   bullet per line.
+2. Replace each em dash by hand — a comma, a colon, or a plain hyphen, whichever the sentence
+   wants. Do not batch-replace with `-`; several are parenthetical and read wrong as hyphens.
+3. Replace the one remaining non-ASCII character with ASCII.
+4. Verify: `grep -c $'\u2014' CHIPs/chip-0062.md` prints 0; the paragraph script below prints
+   `hard-wrapped prose paragraphs: 0` and `wrapped bullet/quote blocks: 0`.
+
+```
+python3 - <<'PY'
+import re
+s=open('CHIPs/chip-0062.md',encoding='utf-8').read()
+paras=[p for p in re.split(r'\n\s*\n', s) if p.strip()]
+skip=('|','```','#')
+print("hard-wrapped prose paragraphs:", sum('\n' in p.strip() for p in paras if not p.lstrip().startswith(skip+('*','-','>'))))
+print("wrapped bullet/quote blocks:", sum(any(l and not l.lstrip().startswith(('*','-','>')) for l in p.strip().split('\n')[1:]) for p in paras if p.lstrip().startswith(('*','-','>'))))
+PY
+```
+
+5. Commit message: "chip-0062: formatting only (single-line paragraphs, ASCII punctuation)".
+   No wording changes ride in it.
+
 ### 1b. F6 — the empty spend, stated and probed
 
 1. `contracts/_test_v11_actions.py`, prologue section: `refuses("a spend with no actions is
@@ -374,6 +404,7 @@ One commit per finding, in this order, each naming the `forge-puzzles` commit:
 
 | commit | CHIP sections touched |
 |---|---|
+| E1 formatting (already landed in step 1c) | every prose line; no wording change |
 | F4 units | *Configuration and state* ("basis points"); new *Constants* table; *Rationale → Objections and responses* entry |
 | F6 empty spend | *Leaves* sentence; *Test Cases* bullet; objections entry naming the vendored assert and pin |
 | F5 reserve ids | *Coin layout*, *Authorization*, *Security* bullet "Reserves are owned by the finalizer"; threat row; objections entry |
@@ -382,7 +413,10 @@ One commit per finding, in this order, each naming the `forge-puzzles` commit:
 | F2 oracle | *Configuration and state*; *Motivation* use-case bullet reworded; threat row; *Requires* gains CHIP-0014; objections entry |
 | nits | `Comments-URI` → PR #217; "five leaves" → six; *Test Cases* lists the six regressions; *Reference Implementation* points at `FORGE_PUZZLE_V12.md` |
 
-Then re-request review from greimela and post the Discord update.
+Then re-request review from greimela, reply on each of the five inline threads and the
+Cursor thread with the mechanism, the `forge-puzzles` commit and the regression's name, thank
+the editor on his formatting comment, and post the same update in the CHIPs Discord thread
+(E2).
 
 ---
 
@@ -395,4 +429,6 @@ Then re-request review from greimela and post the Discord update.
 - twenty pools live on testnet11 at protocol 13 with the lifecycle matrix confirmed, and
   no protocol-12 pool listed;
 - the CHIP text describes the built puzzle, commit for commit, and the reviewer has been
-  re-requested.
+  re-requested;
+- every one of the ten comment threads on the PR has a reply or a linked commit, and the
+  Discord thread carries the update.
