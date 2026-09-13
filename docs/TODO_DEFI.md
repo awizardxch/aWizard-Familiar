@@ -5,9 +5,11 @@
 > Start with `docs/skills/README.md` for skill routing before opening individual domain skills.
 > Projects live in `projects/` — `projects/chia-cfmm/`, `projects/chia-treasure-chest/`, `projects/chia-perps/`
 >
-> **Subdomain targets:** `forge.awizard.dev` (CFMM + NFT vaults), `portal.awizard.dev` (arbitrage),
+> **Subdomain targets:** `forge.awizard.dev` (CFMM + NFT vaults), `lock.awizard.dev` (multisig /
+> vault custody — planned split from Forge's `🔐` tab), `portal.awizard.dev` (arbitrage),
 > `bank.awizard.dev` (portfolio hub), `craft.awizard.dev` (emoji asset creation),
-> `map.awizard.dev` (open world), `build.awizard.dev` (dev expansion), `stats.awizard.dev` (analytics)
+> `map.awizard.dev` (open world), `build.awizard.dev` (dev expansion) — `stats.awizard.dev` was
+> retired 2026-09-05, analytics folded into Forge's Markets tab + `bank.awizard.dev`
 >
 > Goal: prove out the full DeFi OS on Chia testnet11, then write CHIPs for each primitive.
 >
@@ -22,8 +24,8 @@
 - Phase 0: Theme Unification — Nightspire CSS across all projects ✅
 - Phase 5: **Emoji Market** ([craft.awizard.dev](http://localhost:5183)) — 6 core tokens ✅
 - Phase 6: **Bank of Wizards** ([bank.awizard.dev](http://localhost:5184)) — Portfolio aggregation MVP ✅
-- Phase 7: **Analytics Hub** ([stats.awizard.dev](http://localhost:5185)) — Ecosystem metrics ✅
-- Phase 10: **Liquidity Manager** ([vaults.awizard.dev](http://localhost:5178)) — Foundation complete; optional post-launch liquidity-management layer ✅
+- Phase 7: **Analytics Hub** — Ecosystem metrics ✅, but **subdomain retired 2026-09-05** (see Phase 7 section below)
+- Phase 10: **Liquidity Manager** ([vaults.awizard.dev](http://localhost:5178)) — Foundation complete; purpose under review, see Phase 10 section below
 
 **✅ Just Completed:**
 - **🔒 Forge V10 — internal security audit closed, protocol re-shipped** (2026-08-27) — ten findings, all fixed; two were third-party-reachable fund loss. **LP burn was unauthenticated (V4–V8)** and **reserves were not bound to their pool (V4–V9)**, so every pre-V10 pool was retired and the deployment index now rejects superseded revisions in both directions. V10 curries `launcher_id` into the reserve, authorises it with a puzzle announcement rebuilt in-puzzle, pins the successor with `AssertMyPuzzleHash`, derives the LP action coin id, pins the mint/melt inners, and requires a CAT parent on a melt. Method and defect classes captured in [docs/skills/clvmPuzzleAudit.md](skills/clvmPuzzleAudit.md); shipping shape in [docs/skills/forgePuzzleV10.md](skills/forgePuzzleV10.md). Status: [docs/FORGE_PROTOCOL_STATUS.md](FORGE_PROTOCOL_STATUS.md).
@@ -38,11 +40,11 @@
 - **🎉 T1.6 Pool Fully Live on testnet11** — Stage 1 + Stage 2 completed via Sage RPC two-phase pipeline; LP CAT `cff471f8...3af` confirmed visible in Sage wallet ✅
 
 **🚧 In Progress:**
-- **Forge is on V10 with zero live pools** — the index was cleared when the old pools were retired. Next up, in dependency order: deploy the 16-row launch matrix through the real creation path, gate pool creation to an NFT or allowlist, rebuild the 6 suites still skipping against V10, then LP-balancing deposits and the Markets tab fixes. See [docs/skills/forgePoolLifecycleTesting.md](skills/forgePoolLifecycleTesting.md) for what each suite proves.
+- **Forge is on V11 (CHIP-0050 action layer); V10 closed 2026-09-05** — 16 registered pools live on testnet11, every lane (swap, add, remove, observe, collect, multi-hop, split, flow, vault route, routed deposit) settled Sage offers through the keyless responder. Next: phase 8, V10 parity — offer-driven pool creation through the registry, the interface end to end on V11, the vault wrap leg, Markets tab, fee sizing, wallet-sdk driver — then the internal audit. Record: `projects/chia-cfmm/docs/FORGE_V11_FOUNDATIONS.md`; skills [docs/skills/chip0050ActionLayer.md](skills/chip0050ActionLayer.md), [docs/skills/forgePoolLifecycleTesting.md](skills/forgePoolLifecycleTesting.md).
 - **🔀 Build Forge Swap Execution Path** — [docs/quests/done/build-forge-swap-execution-path.md](quests/done/build-forge-swap-execution-path.md) — **COMPLETE** — resolved via the V4 protocol (`pool_singleton_v4` swap mode), not the originally planned `swap_engine.rue` boundary.
 - **🔥 Build Pool-Controlled TAIL** — [docs/quests/build-forge-pool-controlled-tail.md](quests/build-forge-pool-controlled-tail.md) — foundation completed but security model superseded by the V3 hardening quest; announcement-only authorization is replayable and must not ship to mainnet.
 - **🧊 Forge LP NFT Standard Migration** — [docs/quests/done/forge-lp-nft-standard-migration.md](quests/done/forge-lp-nft-standard-migration.md) — frozen prototype; retain as reusable wallet-visible NFT receipt/container infrastructure for Treasure Chest only
-- **🔐 Cloud Vault + Multisig Pivot** — optional future strategy layer; not required for initial Forge CFMM launch
+- **🔐 Forge Multisig** — ✅ shipped 2026-09-03/04 (testnet, not externally audited): M-of-N safes on CNI's `p2_m_of_n_delegate_direct`, plus newer vault-puzzle locks (singleton + `m_of_n` + `bls_member`). This is custody, not a strategy layer — see [docs/skills/forgeMultisig.md](skills/forgeMultisig.md) and the "three things called vault" note in [docs/skills/README.md](skills/README.md). Not the same idea as the Phase 10 Liquidity Manager below; minimal overlap today, but a multisig safe is the natural custody layer under a future strategy vault. **Planned direction (not yet built):** the vault lock becomes the shared custody layer other Forge features hold assets in — "vault actions" authorized by a vault's owner(s) signing a scoped delegated puzzle, an advantage that holds even at a 1-of-1 safe (address-stable rekey, scoped automation without exposing a master key). See the "Direction" section in [docs/skills/forgeMultisig.md](skills/forgeMultisig.md). **Site:** currently the `🔐` tab inside `forge.awizard.dev`; planned to split into its own subdomain, `lock.awizard.dev` — see [docs/ARCHITECTURE.md](ARCHITECTURE.md#-lockawizarddev--the-lock-multisig--vault-custody).
 - Phase 1: Wallet Connect — integration ready, awaiting testnet wallet testing  
 - **📦 Deployment Quest** — [docs/quests/backlog/deploy-testnet-infrastructure.md](quests/backlog/deploy-testnet-infrastructure.md) — backlogged; infra follow-through remains useful but is not the current Forge ownership lane
 - **🧩 Forge Bootstrap Protocol Reconciliation** — [docs/quests/backlog/reconcile-forge-bootstrap-protocol.md](quests/backlog/reconcile-forge-bootstrap-protocol.md) — backlogged architectural ledger; no longer a separate active implementation lane
@@ -56,7 +58,6 @@
 - `chia-cfmm` → localhost:5182
 - `chia-craft` → localhost:5183
 - `chia-bank` → localhost:5184
-- `chia-stats` → localhost:5185
 
 **📋 Planning Backlog:**
 - Future quests moved to `docs/quests/backlog/` (full Bank build, Aggregator DEX, Portal, Multisig, upgradeable treasury wallet)
@@ -69,13 +70,9 @@
    action coin id, so reserves could be withdrawn with **no LP destroyed at all**. Closed in V9/V10
    by the three-part lock — derived action-coin id, pinned mint/melt inners, and a CAT parent
    required on a melt. See [docs/skills/forgeLpCat.md](skills/forgeLpCat.md).
-1a. **🚀 Deploy the V10 launch matrix** (HIGH — NEXT QUEST)
-  - 16 pools across the routing surface, vaults, weighted, N-asset, and fee edges
-  - every row already deploys through the real creation path in a dry run before coins are spent
-  - re-probe per [docs/skills/clvmPuzzleAudit.md](skills/clvmPuzzleAudit.md) before any pool is minted
-1b. **🛡️ Gate pool creation to an NFT or allowlist** (HIGH)
-  - a pool is permanent, appears beside every audited one, and its creator picks fees and weights
-  - correct default for testnet, wrong one for launch
+1a. **🚀 Deploy the launch matrix** — ✅ DONE under V11 (2026-09-05): 16 pools registered on testnet11 through the registry, lifecycle and every route lane run across them.
+1b. **🛡️ Gate pool creation** — the V11 registry's creation fee is the gate; an NFT or allowlist stays open (phase 8 follow-up)
+1c. **🔁 V10 parity on V11** (HIGH — NEXT) — offer-driven creation through the registry, the interface end to end, the vault wrap leg, Markets tab, fee sizing, wallet-sdk driver, docs; see FORGE_V11_FOUNDATIONS phase 8
 2. **🔀 Wire WalletConnect Add/Remove Liquidity** (HIGH)
    - Step 2 reusable path: any user can add/remove liquidity via WalletConnect
    - Same code path for all future deposits and withdrawals
@@ -101,6 +98,7 @@
 9. **LP puzzle v2 hardening + router zap add** (HIGH)
   - version LP announcements for router-balanced operations
   - ship zap-add-liquidity action using WalletConnect create-offer as user entry
+    - ✅ 2026-09-05 on V11: the routed-deposit lane accepts a sale through the target pool (swap + add in one pool spend), the Liquidity tab races it against the market route and the puzzle's own one-sided join; live at 4,650,545. Finding: on the invariant join the one-sided add already is a zap, so the inside route only ties minus the protocol fee — see `projects/chia-cfmm/docs/FORGE_V11_FOUNDATIONS.md` 8.15
   - add strategy abstraction for v3-like range LP behavior on top of current pool primitives
 
 ## 🏁 Completed
@@ -379,7 +377,12 @@ Portfolio hub — aggregates everything a user owns across all wizard protocols.
 
 ---
 
-### Phase 7 — Analytics Hub (stats.awizard.dev) ✅ COMPLETE
+### Phase 7 — Analytics Hub — **subdomain retired 2026-09-05, kept below as the record**
+
+`stats.awizard.dev` is cut. Its pool-ranking piece (`ForgeAnalytics.tsx` below) duplicated Forge's
+own in-app Markets tab (`FORGE_V11_FOUNDATIONS.md` §8.4 — pool rows, spread, volume, TWAP); its
+cross-protocol TVL rollup piece (`EcosystemOverview.tsx`) folds into `bank.awizard.dev`, which
+already claims "portfolio hub + analytics." No source remains in `projects/chia-stats/` (dist-only).
 
 Unified analytics dashboard — ecosystem observability layer with metrics, charts, and rankings.
 
@@ -417,7 +420,7 @@ Deploy all 11 projects to testnet11 with production CI/CD:
 
 - [x] **Step 1: Domain & Hosting Setup** ✅ COMPLETE
   - [x] Inventory all projects → 11 total (9 Vite frontends + gym-server + bow-app)
-  - [x] Map subdomains: forge/craft/bank/chest/perps/vaults/stats/faucet/map/gym.awizard.dev
+  - [x] Map subdomains: forge/lock/craft/bank/chest/perps/vaults/stats/map/gym.awizard.dev (`chia-faucet` cut, not being built)
   - [x] Create `vercel.json` for all 8 Vite frontends
   - [x] Document `.env.example` files (production-ready)
   - [x] Create WalletConnect Cloud setup guide
@@ -500,6 +503,43 @@ Market balancer — detects price mismatches, routes arbitrage bundles.
 Automated liquidity management strategies for CFMM pools and Treasure Chests — Chia's equivalent
 of Aftermath afLP strategy UX. This is an optional post-launch layer for automated balancing,
 not a required custody system for initial CFMM launch.
+
+**Not the same thing as Forge Multisig's vault locks** (`docs/skills/forgeMultisig.md`), which
+shipped separately and solve custody (M-of-N ownership of a safe), not rebalancing. See the
+"three things called vault" note in [docs/skills/README.md](skills/README.md#forge-defi-primitives).
+
+**This idea predates CHIP-0050's action-layer leaves** (swap/add/remove/observe/collect) and is
+not fully vetted against them — it was designed before Forge had a pluggable action architecture
+to build a rebalancer on top of. It likely does not ship as its own `chia-vaults` product: the
+current thinking is it merges into the Treasure Chest idea (a chest that holds and auto-manages
+a strategy position) rather than staying a separate vault concept. Re-derive this decision after
+V10-parity phase 8 lands, not before.
+
+**Forge's own split-routing balancer already covers most of what the autobalancer was for.**
+See `docs/FORGE_PROTOCOL_STATUS.md` — "a split is a balancer that pays for itself": sending part
+of an order down each of two diverged pools moves both toward each other, so ordinary trading
+flow rebalances a vault pool as a side effect, for free, with no keeper needed. The one case that
+mechanism does **not** cover, by its own documentation: "it does not close a standing gap when
+nobody is trading." That residual case — an active rebalance when there is no organic flow to
+lean on — is the only piece of the original autobalancer idea that isn't already redundant with
+something Forge does natively. Narrow any future work here to that case specifically, rather than
+rebuilding general-purpose rebalancing Forge already has.
+
+**Confirmed in code, not just theory:** Forge's `/balancer` tab (`BalancerPanel.tsx`,
+`lib/balancer/{equilibrium,arbCycle,catCycles}.ts`) already discovers arb cycles across pools and
+plans equilibrium trades — the active rebalancer already exists. Its own source comment names the
+exact remaining gap: "there is no keeper yet, so each one is a deliberate click rather than an
+automatic response to a spread opening." So the only undone piece of the original `chia-vaults`
+autobalancer idea is turning that click into a scheduled/automatic trigger — not building
+rebalancing logic, which is done. See `docs/ARCHITECTURE.md`'s "Forge's own path-domains" section.
+
+**Planned trigger design — future work, after phase 8, not current focus (2026-09-05, not yet
+built):** the automatic trigger is `/multisig`
+gating `/balancer`, not a bare cron job with a hot key. Assets sit in a vault lock; the keeper
+holds a signing view scoped to one delegated-puzzle shape, authorized to fire only when a
+criterion clears first — at minimum, that the cycle's realized output is not less than what the
+vault's own offer/quote already committed to (received units ≥ the offer's stated output). This
+is the named first instance of `docs/skills/forgeMultisig.md`'s "vault actions" direction.
 
 **✅ Delivered (Foundation Complete):**
 - [x] Quest specification with full Aftermath afLP reference (900+ lines) ✅

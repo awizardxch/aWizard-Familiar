@@ -9,7 +9,7 @@
 This repository contains the **agent brain** — specialized VS Code agent configuration with deep domain knowledge:
 
 - **🧙 aWizard Agent** — custom VS Code agent mode with 40+ tools
-- **📚 Skill Library** — 17+ domain reference docs (blockchain, DeFi, Discord, React, battle systems)
+- **📚 Skill Library** — 30+ domain reference docs (blockchain, DeFi, multisig/custody, Discord, React, battle systems)
 - **📋 Documentation** — Architecture guides, workflows, theme system, deployment maps
 - **🎯 Agent Instructions** — Workspace-wide Copilot behavior and mode definitions
 
@@ -58,9 +58,12 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/skills/chiaWalletSdk.md`** — Lower-level wallet-engine reference: spend construction, AggSig, signer behavior, `chia-wallet-sdk` (the library Sage is built on)
 - **`docs/skills/chiaPrimitivesPatterns.md`** — Singleton state machines, CAT issuance, CR-CATs, secure-the-bag distribution
 - **`docs/skills/chiaDevTooling.md`** — Chia docs hub, tracing tools, RPC tooling, package and ops utilities
-- **`docs/skills/forgePuzzleV10.md`** — Forge's shipping pool puzzle (V10): coin layout, curried config/state, the bracketed weighted invariant, vaults, reserve and LP authorisation, the four fees, cutting a revision
+- **`docs/skills/forgePuzzleV11.md`** — Forge's shipping pool puzzle (V11, CHIP-0050 action layer): config and state, the prologue, the five leaves, the finalizer's ordering, the TAIL's locks, the registry, cutting a revision
+- **`docs/skills/forgePuzzleV10.md`** — V10, closed: coin layout, the bracketed weighted invariant (byte-identical in V11), the four fees, cutting a revision
 - **`docs/skills/forgeLpCat.md`** — Pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule) and the mutual handshake
 - **`docs/skills/forgePoolLifecycleTesting.md`** — Forge lanes and endpoints, the guardrails that must never be bypassed, the suite index and what a green run does not prove
+- **`docs/skills/chip0050ActionLayer.md`** — Forge's shipping V11 puzzle set: the CHIP-0050 action layer (registry singleton, leaves, multi-reserve finalizer), the hinted LP CAT genesis path, the keyless responder
+- **`docs/skills/forgeMultisig.md`** — Multisig safes (tab `🔐`) on CNI's `p2_m_of_n_delegate_direct` and the newer vault-puzzle locks: address derivation, the coin-id replay guard, signing views and partial Sage signatures, share verification and assembly, rekey-as-vote, why this is a distinct custody primitive from a Forge vault pool, and the planned direction as the shared custody layer under future vault actions
 
 #### Puzzle Security
 - **`docs/skills/clvmPuzzleAudit.md`** — How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy, ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface. Protocol-agnostic — load it for any puzzle review
@@ -73,7 +76,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/NIGHTSPIRE_THEME.md`** — Nightspire CSS token system for all frontends
 - **`docs/AWIZARD_AGENT.md`** — Agent behavior and mode documentation
 - **`docs/CODE_AUDIT_REPORT.md`** — Code quality baseline and audit results
-- **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V10 shipping, why V4–V9 are unsafe
+- **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V11 (CHIP-0050 action layer) shipping on testnet11, V10 closed as the record, why V4–V9 are unsafe
 - **`docs/FORGE_SECURITY_AUDIT.md`** — Forge findings log: ten findings, severity, how each was closed
 - **`docs/TODO_DEFI.md`** — DeFi build phases tracking
 - **`docs/TODO_WORLD.md`** — World engine development tracking

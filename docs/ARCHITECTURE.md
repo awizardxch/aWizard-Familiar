@@ -13,6 +13,7 @@ awizard.dev  (landing / lore)
 │
 ├── bank.awizard.dev      Bank of Wizards    — portfolio hub
 ├── forge.awizard.dev     The Forge          — liquidity engine (CFMM + NFT vaults)
+├── lock.awizard.dev      The Lock           — multisig / vault custody (splitting out of Forge's 🔐 tab)
 ├── portal.awizard.dev    The Portal         — arbitrage / market balancer
 ├── craft.awizard.dev     The Craft Table    — token + NFT + emoji asset creation
 ├── build.awizard.dev     The Build Registry — developer expansion protocol
@@ -51,6 +52,41 @@ Bank of Wizards
 ## 🔨 forge.awizard.dev — The Forge (CFMM Liquidity Protocol)
 
 The **core liquidity engine** — where value is forged. Handles two vault archetypes:
+
+### Forge's own path-domains
+
+`forge.awizard.dev` is a single site, but it's client-side-routed (`TAB_TO_PATH` /
+`PATH_TO_TAB` in `projects/chia-cfmm/src/App.tsx`) into eight real, deep-linkable paths, each a
+distinct enough surface to work on as its own parallel workstream — the same "parallel-work
+boundary" principle a full subdomain split gets (see Philosophy, below), just at path scope
+instead of DNS scope:
+
+| Path | Tab | Component | What it is |
+|---|---|---|---|
+| `/swap` | Swap | `SwapPanel` | token swap quote + route execution (default landing tab) |
+| `/liquidity` | Liquidity | `LiquidityPanel` | add / remove liquidity |
+| `/deploy` | ⚒️ Deploy Pool | `PoolLaunchWorkspace` + `DeploymentStatusPanel` | pool creation |
+| `/holdings` | Holdings | `HoldingsPortfolio` + `LpPositions` + `OfferRelayPanel` | per-wallet position view — this overlaps Bank of Wizards' stated purpose the same way `chia-stats` overlapped Markets; not yet resolved, worth the same scrutiny later |
+| `/multisig` | 🔐 | `MultisigPanel` | M-of-N safes + vault-puzzle locks — **the one path being externalized**, to `lock.awizard.dev` (see below); everything else here stays a Forge path. **Planned to gate `/balancer`'s automation** — see below |
+| `/offers` | Offers | `OfferRelayPanel` | offer indexing/relay, take/cancel, deep-linkable at `/offers/<id>` |
+| `/markets` | Markets | `MarketsPanel` | pool rows, spread, volume — the surface that absorbed `chia-stats`' `ForgeAnalytics.tsx` scope when that subdomain was retired |
+| `/balancer` | Balancer | `BalancerPanel` (`lib/balancer/{equilibrium,arbCycle,catCycles}.ts`) | arb-cycle discovery + equilibrium planning across pools — **already built**, and already does most of what the `chia-vaults` autobalancer idea was for. Confirmed in its own source comment: "there is no keeper yet, so each one is a deliberate click rather than an automatic response to a spread opening." That sentence names the exact remaining gap precisely — a scheduled/automatic trigger, not the arb-cycle logic itself, which already exists here |
+
+The `/balancer` finding sharpens the `docs/TODO_DEFI.md` Phase 10 note: it isn't only that
+Forge's *passive* split-routing balances pools as a side effect of ordinary flow — Forge already
+has an *active* rebalancer UI too. The only undone piece of the original vault-autobalancer idea
+is automating `/balancer`'s click, not building rebalancing logic from scratch.
+
+**Planned, future work after phase 8 — not current focus (2026-09-05, not yet built): `/multisig`
+gates `/balancer`'s automation.** Current focus is phase 8 (V10 parity on V11); this is documented
+direction, not a near-term task. Assets sit in
+a vault lock; the balancer keeper holds a signing view scoped to one delegated-puzzle shape (the
+arb-cycle spend), authorized to fire only when a criterion clears before signing — at minimum,
+that the cycle's realized output is not less than what the vault's own offer/quote already
+committed to (received units ≥ the offer's stated output). This is the concrete first instance of
+`forgeMultisig.md`'s "vault actions" direction: a keeper that can only ever produce a trade at
+least as good as one the owner already agreed to the shape of, and never holds a key that can do
+anything else.
 
 ### 1. Token Vault — LP Pools
 
@@ -131,6 +167,31 @@ Properties:
 | Use case | AMM liquidity, yield farming | Composable containers, game loot, OTC |
 | Transferability | Split/merge freely | Sell chest = transfer all contents |
 | Game integration | Show LP percentage | Open chest in-world on `map.awizard.dev` |
+
+---
+
+## 🔐 lock.awizard.dev — The Lock (Multisig / Vault Custody)
+
+**Not yet its own site.** Today this is the `🔐` tab inside `forge.awizard.dev` (`chia-cfmm`); the
+plan is to split it into its own subdomain since it is a distinct custody primitive, not a Forge
+pool feature — see the "three things called vault" note in
+[docs/skills/README.md](skills/README.md#forge-defi-primitives).
+
+| Property | Detail |
+|---|---|
+| Puzzle | Legacy: CNI's `p2_m_of_n_delegate_direct`. Current: CNI's vault puzzle (singleton + `m_of_n` merkle root of `bls_member` leaves) |
+| Contracts | `contracts/multisig_tool.py`, `contracts/vault_tool.py`, `contracts/multisig_profile.py` (all in `chia-cfmm`, not yet their own project) |
+| Frontend | `src/lib/multisig.ts`, `src/components/MultisigPanel.tsx` (in `chia-cfmm`) |
+| Status | 🟡 logic and UI exist and work on testnet; not split into a standalone project/subdomain yet |
+| Skill | [docs/skills/forgeMultisig.md](skills/forgeMultisig.md) |
+
+### Functions
+- Create or observe an M-of-N safe (or a vault-puzzle lock); on-chain self-describing manifest, no server-side registry of truth
+- Propose → sign (partial Sage signatures via signing views) → assemble → execute
+- Rekey as a vote on the current lock, not a unilateral mint
+- **Direction:** the intended custody layer under other subdomains' held assets — e.g. Bank's
+  vault positions, or a future Liquidity Manager strategy balance — via scoped "vault actions"
+  that hold even for a 1-of-1 safe. Not yet wired to any of them.
 
 ---
 
@@ -269,6 +330,7 @@ Built on `projects/awizard-gui/`. Start with `docs/ARCHITECTURE_INDEX.md` for ar
 | `projects/chia-cfmm/` | `forge.awizard.dev` | 🟡 Phase 3 |
 | `projects/chia-treasure-chest/` | `forge.awizard.dev` (NFT vaults tab) | 🟡 Phase 2 |
 | `projects/chia-perps/` | `forge.awizard.dev` (leverage tab) | 🔴 Planned |
+| `projects/chia-cfmm/` (Multisig tab) | `lock.awizard.dev` | 🟡 Working, embedded in Forge — split planned |
 | `projects/awizard-gui/` | `nightspire.awizard.dev` | 🟡 In dev |
 | `projects/bow-app/` | `nightspire.awizard.dev` (game backend) | 🟡 In dev |
 | `projects/awizard-bot/` | Discord bot (supports all subdomains) | 🟡 In dev |
@@ -289,3 +351,9 @@ Built on `projects/awizard-gui/`. Start with `docs/ARCHITECTURE_INDEX.md` for ar
 - **Composability** — Treasure Chest NFTs usable in games, Forge LP positions collateralisable
 - **Self-expansion** — `build.awizard.dev` lets anyone add a room to the world
 - **Lore-first** — the metaphor is not decoration, it's the product
+- **Subdomains are a parallel-work boundary, not proof of separate product scope.** A feature can
+  conceptually belong inside another product's domain and still ship from its own subdomain if
+  that unblocks working on it independently — Lock splitting out of Forge is exactly this, not a
+  claim that custody is unrelated to Forge. The inverse also holds: `stats.awizard.dev` was
+  retired and folded into Forge's Markets tab + Bank precisely because it had no independent
+  workstream left to justify the separate site once its scope was redundant.

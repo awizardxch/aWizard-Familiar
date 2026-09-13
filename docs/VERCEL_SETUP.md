@@ -93,7 +93,6 @@ VITE_WC_PROJECT_ID=your_walletconnect_project_id_here
 VITE_CHIA_NETWORK=testnet11
 VITE_FORGE_API_URL=https://forge.awizard.dev/api
 VITE_CHEST_API_URL=https://chest.awizard.dev/api
-VITE_STATS_API_URL=https://stats.awizard.dev/api
 ```
 
 **Custom Domain:** `bank.awizard.dev`
@@ -161,49 +160,6 @@ VITE_CHIA_NETWORK=testnet11
 
 ---
 
-### Project 7: stats.awizard.dev (chia-stats)
-
-**Import Settings:**
-- **Project Name:** `awizard-stats`
-- **Framework Preset:** Vite
-- **Root Directory:** `projects/chia-stats/`
-- **Build Command:** `npm run build`
-- **Output Directory:** `dist`
-- **Install Command:** `npm install --legacy-peer-deps`
-
-**Environment Variables (Production):**
-```env
-VITE_FORGE_RPC_URL=https://forge.awizard.dev/api
-VITE_CRAFT_RPC_URL=https://craft.awizard.dev/api
-VITE_CHIA_NETWORK=testnet11
-```
-
-**Custom Domain:** `stats.awizard.dev`
-
----
-
-### Project 8: faucet.awizard.dev (chia-faucet)
-
-**Import Settings:**
-- **Project Name:** `awizard-faucet`
-- **Framework Preset:** Vite
-- **Root Directory:** `projects/chia-faucet/`
-- **Build Command:** `npm run build`
-- **Output Directory:** `dist`
-- **Install Command:** `npm install --legacy-peer-deps`
-
-**Environment Variables (Production):**
-```env
-VITE_WC_PROJECT_ID=your_walletconnect_project_id_here
-VITE_CHIA_NETWORK=testnet11
-VITE_FAUCET_WALLET_ADDRESS=txch1...
-VITE_COOLDOWN_MS=3600000
-VITE_MAX_REQUEST_XCH=1000000000000
-```
-
-**Custom Domain:** `faucet.awizard.dev`
-
----
 
 ## 🔐 Part 3: Configure Environment Variables (All Projects)
 
@@ -334,9 +290,6 @@ git diff HEAD^ HEAD --quiet projects/chia-cfmm/
 - [ ] **chest.awizard.dev** — Vercel project created, env vars set, domain configured
 - [ ] **perps.awizard.dev** — Vercel project created, env vars set, domain configured
 - [ ] **vaults.awizard.dev** — Vercel project created, env vars set, domain configured
-- [ ] **stats.awizard.dev** — Vercel project created, env vars set, domain configured
-- [ ] **faucet.awizard.dev** — Vercel project created, env vars set, domain configured
-
 ---
 
 ## 🐛 Troubleshooting

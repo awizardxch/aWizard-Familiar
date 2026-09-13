@@ -8,6 +8,11 @@
 
 ## 🌐 Subdomain Deployment Matrix
 
+> `chia-faucet` was cut — not being built. `stats.awizard.dev` (`chia-stats`) was retired
+> 2026-09-05: its pool-ranking piece duplicated Forge's own in-app Markets tab, and the
+> cross-protocol TVL rollup piece folds into `bank.awizard.dev` instead. Both removed from this
+> matrix and every setup guide below.
+
 | Subdomain | Project Folder | Purpose | Stack | Status |
 |-----------|----------------|---------|-------|---------|
 | **forge.awizard.dev** | `projects/chia-cfmm/` | The Forge — Weighted multi-CAT CFMM + LP NFTs | Vite + React 19 + Rue/CLVM | 🟡 Ready to deploy |
@@ -15,9 +20,8 @@
 | **bank.awizard.dev** | `projects/chia-bank/` | Bank of Wizards — Portfolio hub + analytics | Vite + React 19 | 🟡 Ready to deploy |
 | **chest.awizard.dev** | `projects/chia-treasure-chest/` | Treasure Chest — On-chain kiosk storefront | Vite + React 19 + Rue/CLVM | 🟡 Ready to deploy |
 | **perps.awizard.dev** | `projects/chia-perps/` | The Perps Exchange — On-chain perpetuals DEX | Vite + React 19 + Rue/CLVM | 🟡 Ready to deploy |
-| **vaults.awizard.dev** | `projects/chia-vaults/` | The Vaults — NFT position management (duplicate CFMM?) | Vite + React 19 | 🟠 TBD (verify vs forge) |
-| **stats.awizard.dev** | `projects/chia-stats/` | aWizard Analytics — Ecosystem dashboard | Vite + React 19 | 🟡 Ready to deploy |
-| **faucet.awizard.dev** | `projects/chia-faucet/` | aWizard Faucet — Testnet XCH + CAT distribution | Vite + React 19 | 🟡 Ready to deploy |
+| **lock.awizard.dev** | `projects/chia-cfmm/` (Multisig tab, not split out yet) | The Lock — M-of-N safes + vault-puzzle custody | Vite + React 19 + Rue/CLVM | 🔴 Planned split (working today as Forge's `🔐` tab; see `docs/skills/forgeMultisig.md`) |
+| **vaults.awizard.dev** | `projects/chia-vaults/` | Liquidity Manager idea (Aftermath afLP-style auto-rebalancing) — no longer about "vaults" at all: Forge now owns both vault meanings (🫙 pool primitive, 🔐 custody lock), so this project's only remaining differentiator is the rebalancing/strategy automation, not vault creation or custody | Vite + React 19 | 🟠 Purpose needs restating — likely merges into `chest.awizard.dev` (Treasure Chest) as a strategy feature, not a standalone product |
 | **map.awizard.dev** | `projects/awizard-gui/` | The Nightspire — Discord Activity (SNES world) | Vite + React 19 + Discord SDK | 🟡 Ready to deploy |
 | **gym.awizard.dev** | `projects/gym-server/` | Gym Battle Server — PvE battle backend | Express + SQLite + TypeScript | 🟡 Ready to deploy |
 | **bow.awizard.dev** | `projects/bow-app/` | Battle of Wizards — Main game frontend | Next.js 16 + React 19 | 🟢 Already deployed |
@@ -28,7 +32,7 @@
 
 ### Vercel (Static + Serverless)
 All Vite frontends deploy to Vercel with automatic GitHub integration:
-- forge, craft, bank, chest, perps, vaults, stats, faucet, map
+- forge, craft, bank, chest, perps, lock, vaults, map
 - Build command: `npm run build`
 - Output directory: `dist`
 - Framework preset: Vite
@@ -72,7 +76,8 @@ VITE_ENABLE_MOCK_DATA=false     # Disable mocks in production
 ```env
 VITE_FORGE_API_URL=https://forge.awizard.dev/api  # CFMM integration
 VITE_CHEST_API_URL=https://chest.awizard.dev/api  # Kiosk integration
-VITE_STATS_API_URL=https://stats.awizard.dev/api  # Analytics integration
+# Ecosystem-wide TVL/analytics (formerly stats.awizard.dev, now retired — folds in here) reads
+# directly from VITE_FORGE_API_URL / VITE_CHEST_API_URL rather than a separate stats API
 ```
 
 #### perps.awizard.dev (chia-perps)
@@ -97,18 +102,6 @@ FRONTEND_URL=https://map.awizard.dev  # CORS allowlist
 GYM_FINGERPRINT=xxx             # Testnet11 wallet for gym battles
 GITHUB_TOKEN=xxx                # GitHub Models API for wizard AI
 DATABASE_PATH=/data/gym.db      # Persistent volume
-```
-
-#### faucet.awizard.dev (chia-faucet)
-```env
-VITE_FAUCET_WALLET_ADDRESS=xxx  # Faucet distribution wallet
-VITE_COOLDOWN_MS=3600000        # 1 hour cooldown
-```
-
-#### stats.awizard.dev (chia-stats)
-```env
-VITE_FORGE_RPC_URL=https://forge.awizard.dev/api  # CFMM data source
-VITE_CRAFT_RPC_URL=https://craft.awizard.dev/api  # Token data source
 ```
 
 ---
@@ -169,8 +162,6 @@ Each frontend needs a `vercel.json`:
    - `projects/chia-bank/` → bank.awizard.dev
    - `projects/chia-treasure-chest/` → chest.awizard.dev
    - `projects/chia-perps/` → perps.awizard.dev
-   - `projects/chia-stats/` → stats.awizard.dev
-   - `projects/chia-faucet/` → faucet.awizard.dev
    - `projects/awizard-gui/` → map.awizard.dev
 3. Configure root directory detection (monorepo)
 4. Enable preview deployments for PR branches

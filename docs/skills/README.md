@@ -79,7 +79,8 @@ Use this file when:
 | Skill | Use it for |
 | --- | --- |
 | `chip0050ActionLayer.md` | The shipping V11 puzzle set: registry singleton, the six leaves (swap/add/remove/observe/collect/dao_fee), multi-reserve finalizer, hinted LP CAT genesis, the keyless responder |
-| `forgePuzzleV11.md` | **The shipping revision** (CHIP-0050 action layer): config and state, the prologue, the six leaves' rules (V11.1 protocol 12), the finalizer's ordering, the TAIL's locks, the registry, what is not in the puzzle, cutting a revision |
+| `forgePuzzleV12.md` | **The shipping revision** (protocol 13, the CHIP-0062 review revision): the four changes CNI's review forced — eve-bound genesis, birth-bound oracle, `MIN_LOCKED_LP`, reserve parents in state — each with the finding it answers, the solution/record shapes, and what pins it. Read with V11 below, which still describes the shape |
+| `forgePuzzleV11.md` | **Closed 2026-09-11** (two review findings reproduced against it) but still the description of the shape V12 keeps: config and state, the prologue, the six leaves' rules, the finalizer's ordering, the TAIL's locks, the registry, what is not in the puzzle, cutting a revision |
 | `forgePuzzleV10.md` | V10, closed 2026-09-05, the pre-V11 pool shape: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history — still the reference for the math itself |
 | `forgeLpCat.md` | The pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule), the mutual handshake and message format, genesis trust |
 | `forgePoolLifecycleTesting.md` | Lanes and endpoints, the guardrails that must never be bypassed (freshness, snapshot round trip, revision filtering, offer redaction), the suite index and what a green run does not prove |
@@ -116,14 +117,14 @@ Use this file when:
 ### DeFi / Protocol Quest
 - `blockchainDecentralization.md`
 - `chiaPrimitivesPatterns.md`
-- `forgePuzzleV11.md` — if the quest touches the Forge puzzle set (`forgePuzzleV10.md` only for history)
+- `forgePuzzleV12.md` with `forgePuzzleV11.md` — if the quest touches the Forge puzzle set: V12 is the delta, V11 the shape (`forgePuzzleV10.md` only for history)
 - `greenwoodLockbox.md` — if the quest touches Greenwood: Chia custody signed by an Ethereum key
 - `chiaDevTooling.md` — only if tooling/Sage internals are in scope
 - `deploymentInfra.md` — only if deployment is in scope
 
 ### Puzzle Security / Audit Quest
 - `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
-- `forgePuzzleV11.md` — if the target is a Forge pool (`forgePuzzleV10.md` only for history)
+- `forgePuzzleV12.md` with `forgePuzzleV11.md` — if the target is a Forge pool; V12's table maps each CNI finding to its lock and its test (`forgePuzzleV10.md` only for history)
 - `forgeLpCat.md` — if the target is LP supply, the TAIL, or either pinned inner
 - `greenwoodLockbox.md` — if the target is a Greenwood vault or Lockbox; its trust model is that only the MetaMask key can move anything
 - `forgePoolLifecycleTesting.md` — to know which suite already covers the surface

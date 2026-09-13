@@ -1,9 +1,32 @@
-# Forge Protocol Status — V10
+# Forge Protocol Status — V11
 
 Testnet11 only. Nothing here has been audited externally or pushed to mainnet.
 
-**Last updated 2026-08-27**, after the internal audit closed ten findings, V10 shipped, and
-every pre-V10 pool was retired.
+**Last updated 2026-09-05.** V11 — the CHIP-0050 action layer (`contracts/v11`, rue,
+upstream action layer / finalizer / slot pinned) — is the shipping revision: a registry
+singleton, five leaves (swap, add, remove, observe, collect), a multi-reserve finalizer, a
+hinted LP CAT with a genesis path, and a keyless responder with single-pool and route lanes.
+16 pools are registered on testnet11 and every lane has settled Sage offers through the
+responder. **V10 is closed**: retired from the index like V4 to V9, its roadmap frozen with
+dispositions (`projects/chia-cfmm/docs/FORGE_ROADMAP.md`). Record and next phase (V10 parity):
+`projects/chia-cfmm/docs/FORGE_V11_FOUNDATIONS.md`; method: [`skills/chip0050ActionLayer.md`](skills/chip0050ActionLayer.md).
+
+**V11.1 (protocol 12), 2026-09-05.** Live on testnet11: registry `599ba997bc5e…`, the 20-pool matrix re-opened (heights 4,650,811 to 4,650,861), and the DAO lane run end to end on A1 (rate lowered 4,650,872, swap 4,650,884, collect 4,650,887). Phase 8 closed 2026-09-06: every interface lane — swap, add, remove, vault route, balancer flow, routed deposit, multi-hop and zap — settled against V11.1 pools through heights 4,651,405 to 4,651,656. The matrix was then converged and deepened (4,652,673 to 4,652,868): three arbitrage cycles pulled the pools together, then one add per pool reseeded all twenty to a single price per CAT, taking combined depth from 0.0028 to 1.0000 TXCH and the cross-pool spread from 2,782% to 0.00%. The DAO fee field shipped: the recipient is curried
+config, the rate and its owed balance are state, and a sixth leaf lowers the rate on a
+mode-23 message from a coin at the DAO's puzzle hash, so it can only ever fall. The protocol-11
+registry and its 20 pools are retired like V10; the launch matrix is re-created under protocol
+12 (`projects/chia-cfmm/scripts/v11-1-redeploy.sh`). The written CLVM pass over every leaf is
+`projects/chia-cfmm/docs/FORGE_V11_CLVM_PASS.md`.
+The CHIP-facing write-up for the CNI audit request and the community thread (which CHIP
+serves which part, one spend end to end, notes for reviewers, Discord-ready answers) is
+`projects/chia-cfmm/docs/FORGE_CHIP_WORKFLOW.md`.
+
+---
+
+## V10 — closed 2026-09-05 (kept as the record)
+
+**Written 2026-08-27**, after the internal audit closed ten findings, V10 shipped, and
+every pre-V10 pool was retired. V10's maths is byte-identical in V11.
 
 ---
 

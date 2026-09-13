@@ -177,7 +177,7 @@ Facts the first V11 sprint pinned down; each is checked by a suite rather than r
   `forge_action_common.rue`), each curried with `PoolConfig` and every solution a proper list of fixed
   fields. Driver conventions that must match the wallet-sdk: `puzzles` is a list, selectors are 2, 5,
   11, … in order of first use, a proof is `(path . hashes)` from the sdk's midpoint-split tree
-  (`contracts/forge_v11_merkle.py`), and a reserve's delegated puzzle lists its tagged conditions in
+  (`contracts/forge_merkle.py`), and a reserve's delegated puzzle lists its tagged conditions in
   reverse emission order because the finalizer prepends. The observe slot is double-curried like
   upstream's: `(singleton info, nonce)` first, the value hash second.
 - **Every CAT mojo is an XCH mojo.** A mint eve of one mojo minting `lp_delta` LP fails MINTING_COIN
