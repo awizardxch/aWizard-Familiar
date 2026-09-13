@@ -1,6 +1,11 @@
-# Skill: Forge Puzzle V11 — the shipping revision
+# Skill: Forge Puzzle V11 — closed 2026-09-11; the shape V12 keeps
 
-> The Forge pool on the CHIP-0050 action layer, as it runs on testnet11 since 2026-09-05.
+> **V11.1 is closed.** CNI's review of CHIP-0062 reproduced two exploits against it (genesis
+> double-mint, oracle backfill); V12 (protocol 13) replaces it — see `forgePuzzleV12.md` for
+> the four changes. Everything below about the shape, leaves, finalizer, TAIL and drivers
+> still holds for V12 except where that file says otherwise.
+>
+> The Forge pool on the CHIP-0050 action layer, as it ran on testnet11 from 2026-09-05.
 > V10 is closed; V4–V9 are retired. **Not externally audited. Testnet only.**
 > Method: `clvmPuzzleAudit.md`. Findings: `projects/chia-cfmm/docs/FORGE_SECURITY_AUDIT.md`.
 > Full protocol text: `projects/chia-cfmm/docs/FORGE_PUZZLE_V11.md`. Diagrams:
@@ -90,7 +95,7 @@ the index from the browser's cached copy).
 
 ## Proving which assertions carry weight
 
-A refusal test does not say *which* line refused. `scripts/mutate-v11.py` deletes one assertion
+A refusal test does not say *which* line refused. `scripts/mutate-v12.py --project v11` deletes one assertion
 at a time, rebuilds with `rue`, and re-runs the suites; a mutant that still passes is an
 assertion nothing pins. It is multi-suite on purpose — a single suite reported the DAO fee's
 monotonic-decrease guarantee as unpinned when `_test_v11_dao_fee.py` kills it. Point the driver

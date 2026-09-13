@@ -1,6 +1,6 @@
 {
-  "version": 8,
-  "updated": "2026-09-10",
+  "version": 9,
+  "updated": "2026-09-11",
   "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
   "domains": {
     "chia-protocol": [
@@ -9,6 +9,7 @@
       "chiaPrimitivesPatterns.md",
       "chiaDevTooling.md",
       "sageRpc.md",
+      "forgePuzzleV12.md",
       "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
@@ -22,6 +23,7 @@
     ],
     "clvm-audit": [
       "clvmPuzzleAudit.md",
+      "forgePuzzleV12.md",
       "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "chip0050ActionLayer.md"
@@ -31,6 +33,7 @@
       "forgePoolLifecycleTesting.md"
     ],
     "forge-protocol": [
+      "forgePuzzleV12.md",
       "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
@@ -82,6 +85,7 @@
       "bondPvpEconomy.md",
       "nftRewards.md",
       "sageRpc.md",
+      "forgePuzzleV12.md",
       "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgeLpCat.md",
@@ -92,6 +96,7 @@
       "chiaDexieRouting.md",
       "chiaTibetAmm.md",
       "tibetUiFrontend.md",
+      "forgePuzzleV12.md",
       "forgePuzzleV11.md",
       "forgePuzzleV10.md",
       "forgePoolLifecycleTesting.md"

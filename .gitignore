@@ -31,6 +31,15 @@ Thumbs.db
 *.swo
 *~
 
+# Unpublished drafts (publish alongside the CNI audit request, not before)
+X_ARTICLE_FORGE_FIRSTS.md
+
 # Build / temp logs
 build-output.log
 *.log
+
+# Local tooling state, not shared: the agent's launch config, editor tasks, and
+# the small local index the root scripts keep.
+.awizard/
+.claude/
+.vscode/

@@ -42,13 +42,12 @@ To prevent unauthorized usage, whitelist your production domains:
 3. Add the following domains:
    ```
    forge.awizard.dev
+   lock.awizard.dev
    craft.awizard.dev
    bank.awizard.dev
    chest.awizard.dev
    perps.awizard.dev
    vaults.awizard.dev
-   stats.awizard.dev
-   faucet.awizard.dev
    map.awizard.dev
    localhost:5173
    localhost:5174
@@ -92,7 +91,6 @@ Navigate to each Vercel project → **Settings** → **Environment Variables**:
 | chest.awizard.dev | `VITE_WC_PROJECT_ID` | `your_project_id_here` |
 | perps.awizard.dev | `VITE_WC_PROJECT_ID` | `your_project_id_here` |
 | vaults.awizard.dev | `VITE_WC_PROJECT_ID` | `your_project_id_here` |
-| faucet.awizard.dev | `VITE_WC_PROJECT_ID` | `your_project_id_here` |
 
 **Scope:** Production + Preview
 

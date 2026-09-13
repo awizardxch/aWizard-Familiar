@@ -84,7 +84,6 @@ These variables are **identical across all frontends**:
 | `VITE_CHIA_NETWORK` | `testnet11` | ✅ Yes | Network enforcement |
 | `VITE_FORGE_API_URL` | `https://forge.awizard.dev/api` | ✅ Yes | CFMM pool data API |
 | `VITE_CHEST_API_URL` | `https://chest.awizard.dev/api` | ✅ Yes | Kiosk listing data |
-| `VITE_STATS_API_URL` | `https://stats.awizard.dev/api` | ✅ Yes | Analytics data source |
 
 **`.env.example` Status:** ✅ Up to date
 
@@ -131,6 +130,13 @@ These variables are **identical across all frontends**:
 
 ### vaults.awizard.dev (chia-vaults)
 
+**Purpose under review:** Forge now owns both meanings of "vault" (the 🫙 pool primitive and,
+via Multisig, the 🔐 custody lock), and Forge's own split-routing balancer already covers most of
+what this project's autobalancer was meant to do — see the note in `docs/TODO_DEFI.md` Phase 10.
+Current direction: merges into Treasure Chest rather than staying standalone. Chest's own env
+vars below already reference `vaults.awizard.dev` for a vault catalog endpoint, which is existing
+evidence the two were meant to integrate.
+
 **Subdomain:** https://vaults.awizard.dev  
 **Project Folder:** `projects/chia-vaults/`  
 **Hosting:** Vercel
@@ -139,41 +145,6 @@ These variables are **identical across all frontends**:
 |----------|---------------|----------|---------|
 | `VITE_WC_PROJECT_ID` | `a1b2c3d4e5f6...` | ✅ Yes | WalletConnect project ID |
 | `VITE_CHIA_NETWORK` | `testnet11` | ✅ Yes | Network enforcement |
-
-**`.env.example` Status:** ✅ Up to date
-
----
-
-### stats.awizard.dev (chia-stats)
-
-**Subdomain:** https://stats.awizard.dev  
-**Project Folder:** `projects/chia-stats/`  
-**Hosting:** Vercel
-
-| Variable | Example Value | Required | Purpose |
-|----------|---------------|----------|---------|
-| `VITE_FORGE_RPC_URL` | `https://forge.awizard.dev/api` | ✅ Yes | CFMM pool data source |
-| `VITE_CRAFT_RPC_URL` | `https://craft.awizard.dev/api` | ✅ Yes | Token creation data |
-| `VITE_CHIA_NETWORK` | `testnet11` | ✅ Yes | Network enforcement |
-
-**`.env.example` Status:** ✅ Up to date
-
----
-
-### faucet.awizard.dev (chia-faucet)
-
-**Subdomain:** https://faucet.awizard.dev  
-**Project Folder:** `projects/chia-faucet/`  
-**Hosting:** Vercel
-
-| Variable | Example Value | Required | Purpose |
-|----------|---------------|----------|---------|
-| `VITE_WC_PROJECT_ID` | `a1b2c3d4e5f6...` | ✅ Yes | WalletConnect project ID |
-| `VITE_CHIA_NETWORK` | `testnet11` | ✅ Yes | Network enforcement |
-| `VITE_FAUCET_WALLET_ADDRESS` | `txch1abc...` | ✅ Yes | Distribution wallet address |
-| `VITE_COOLDOWN_MS` | `3600000` | ✅ Yes | 1 hour cooldown (ms) |
-| `VITE_MAX_REQUEST_XCH` | `1000000000000` | ✅ Yes | Max 1 XCH per request (mojos) |
-| `VITE_FAUCET_API_URL` | `https://faucet.awizard.dev/api` | ⬜ Future | Serverless faucet backend |
 
 **`.env.example` Status:** ✅ Up to date
 
