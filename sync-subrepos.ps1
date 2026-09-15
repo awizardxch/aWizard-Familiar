@@ -84,7 +84,8 @@ $Repos = [ordered]@{
             "contracts\v12", "contracts\_test_v12_*.py", "contracts\forge_v12_*.py",
             "contracts\_v12_testkit.py", "docs\FORGE_PUZZLE_V12.md",
             "scripts\mutate-v12.py", "scripts\build-v12.py",
-            "docs\FORGE_V11_ARCHITECTURE.md", "docs\FORGE_V11_CLVM_PASS.md"
+            "docs\FORGE_V11_ARCHITECTURE.md", "docs\FORGE_V11_CLVM_PASS.md",
+            "docs\FORGE_DAO_FEE_V11.md"
         )
         Visibility  = "public"
         Slices      = @(
@@ -119,7 +120,7 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\FORGE_MULTISIG.md";        To = "docs\FORGE_MULTISIG.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_LOCK_MIPS.md";       To = "docs\FORGE_LOCK_MIPS.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_LOCK_SAFE_MODEL.md"; To = "docs\FORGE_LOCK_SAFE_MODEL.md" }
-            @{ From = "projects\chia-cfmm\docs\FORGE_DAO_FEE_V11.md";     To = "docs\FORGE_DAO_FEE_V11.md" }
+            @{ From = "projects\chia-cfmm\docs\FORGE_DAO_FEE_V13.md";     To = "docs\FORGE_DAO_FEE_V13.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.SECURITY.md"; To = "docs\FORGE_SECURITY.md" }
             @{ From = "projects\chia-cfmm\docs\chip";  To = "docs\chip" }
             # FORGE_SECURITY.md and the CHIP's Test Cases section both cite this
