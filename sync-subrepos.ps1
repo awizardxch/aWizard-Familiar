@@ -83,7 +83,8 @@ $Repos = [ordered]@{
             # not at all.
             "contracts\v12", "contracts\_test_v12_*.py", "contracts\forge_v12_*.py",
             "contracts\_v12_testkit.py", "docs\FORGE_PUZZLE_V12.md",
-            "scripts\mutate-v12.py", "scripts\build-v12.py"
+            "scripts\mutate-v12.py", "scripts\build-v12.py",
+            "docs\FORGE_V11_ARCHITECTURE.md", "docs\FORGE_V11_CLVM_PASS.md"
         )
         Visibility  = "public"
         Slices      = @(
@@ -107,6 +108,11 @@ $Repos = [ordered]@{
                ExceptFiles = @("_test_v11_*.py", "_test_v12_*.py", "forge_v12_*.py",
                                "_v12_testkit.py", "_curve_mirror_cases.json") }
             @{ From = "projects\chia-cfmm\docs\FORGE_PUZZLE_V13.md";      To = "docs\FORGE_PUZZLE_V13.md" }
+            # The CHIP's Additional Assets links these two by name. Publishing the
+            # specification without them leaves the list pointing at nothing, which is the
+            # failure revision 3 had to correct for the V11 set.
+            @{ From = "projects\chia-cfmm\docs\FORGE_V13_ARCHITECTURE.md"; To = "docs\FORGE_V13_ARCHITECTURE.md" }
+            @{ From = "projects\chia-cfmm\docs\FORGE_V13_CLVM_PASS.md";   To = "docs\FORGE_V13_CLVM_PASS.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_TIBETSWAP.md"; To = "docs\FORGE_AUDIT_TIBETSWAP.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_CHIP_WORKFLOW.md";   To = "docs\FORGE_CHIP_WORKFLOW.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_ROUTER_PROTOCOL_V1.md"; To = "docs\FORGE_ROUTER_PROTOCOL_V1.md" }
