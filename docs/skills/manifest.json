@@ -1,150 +1,155 @@
 {
-  "version": 9,
-  "updated": "2026-09-11",
-  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
-  "domains": {
-    "chia-protocol": [
-      "blockchainDecentralization.md",
-      "chiaWalletSdk.md",
-      "chiaPrimitivesPatterns.md",
-      "chiaDevTooling.md",
-      "sageRpc.md",
-      "forgePuzzleV12.md",
-      "forgePuzzleV11.md",
-      "forgePuzzleV10.md",
-      "forgeLpCat.md",
-      "forgePoolLifecycleTesting.md",
-      "chip0050ActionLayer.md"
-    ],
-    "puzzle-security": [
-      "clvmPuzzleAudit.md",
-      "chiaPrimitivesPatterns.md",
-      "chip0050ActionLayer.md"
-    ],
-    "clvm-audit": [
-      "clvmPuzzleAudit.md",
-      "forgePuzzleV12.md",
-      "forgePuzzleV11.md",
-      "forgePuzzleV10.md",
-      "chip0050ActionLayer.md"
-    ],
-    "adversarial-testing": [
-      "clvmPuzzleAudit.md",
-      "forgePoolLifecycleTesting.md"
-    ],
-    "forge-protocol": [
-      "forgePuzzleV12.md",
-      "forgePuzzleV11.md",
-      "forgePuzzleV10.md",
-      "forgeLpCat.md",
-      "forgePoolLifecycleTesting.md",
-      "clvmPuzzleAudit.md",
-      "chip0050ActionLayer.md",
-      "forgeMultisig.md"
-    ],
-    "wallets-and-signing": [
-      "bowAppReference.md",
-      "chiaWalletSdk.md",
-      "sageRpc.md",
-      "chiaPrimitivesPatterns.md",
-      "chiaDevTooling.md"
-    ],
-    "multisig": [
-      "forgeMultisig.md",
-      "sageRpc.md",
-      "chiaPrimitivesPatterns.md",
-      "clvmPuzzleAudit.md"
-    ],
-    "multi-address-scanning": [
-      "bowAppReference.md",
-      "sageRpc.md"
-    ],
-    "address-management": [
-      "sageRpc.md",
-      "bowAppReference.md"
-    ],
-    "frontend-and-ux": [
-      "nightspireTheme.md",
-      "networkGameplayUX.md",
-      "projectArchitecture.md"
-    ],
-    "discord-activity": [
-      "discordActivityAuth.md",
-      "networkGameplayUX.md"
-    ],
-    "game-systems": [
-      "battleKnowledge.md",
-      "aiSeedModel.md",
-      "apsTierSystem.md",
-      "leaderboardRankings.md",
-      "tournamentSystem.md",
-      "snesWorldEngine.md"
-    ],
-    "defi-and-markets": [
-      "chiaPerpetuals.md",
-      "bondPvpEconomy.md",
-      "nftRewards.md",
-      "sageRpc.md",
-      "forgePuzzleV12.md",
-      "forgePuzzleV11.md",
-      "forgePuzzleV10.md",
-      "forgeLpCat.md",
-      "chiaDexieRouting.md",
-      "chiaTibetAmm.md"
-    ],
-    "external-liquidity-and-routing": [
-      "chiaDexieRouting.md",
-      "chiaTibetAmm.md",
-      "tibetUiFrontend.md",
-      "forgePuzzleV12.md",
-      "forgePuzzleV11.md",
-      "forgePuzzleV10.md",
-      "forgePoolLifecycleTesting.md"
-    ],
-    "external-dex-frontend": [
-      "tibetUiFrontend.md",
-      "chiaDexieRouting.md",
-      "nightspireTheme.md",
-      "networkGameplayUX.md"
-    ],
-    "deployment-and-architecture": [
-      "deploymentInfra.md",
-      "projectArchitecture.md"
-    ],
-    "quest-planning": [
-      "questManagement.md"
-    ],
-    "warp-bridge": [
-      "warpBridge.md"
-    ],
-    "cross-chain-bridge": [
-      "warpBridge.md",
-      "chiaPrimitivesPatterns.md",
-      "greenwoodLockbox.md"
-    ],
-    "chia-evm-bridge": [
-      "warpBridge.md",
-      "bowAppReference.md",
-      "greenwoodLockbox.md"
-    ],
-    "bridge-offer-lifecycle": [
-      "warpBridge.md",
-      "chiaWalletSdk.md"
-    ],
-    "greenwood": [
-      "greenwoodLockbox.md",
-      "chiaPrimitivesPatterns.md",
-      "clvmPuzzleAudit.md",
-      "forgeMultisig.md"
-    ],
-    "evm-signed-chia-custody": [
-      "greenwoodLockbox.md",
-      "forgeMultisig.md",
-      "chiaWalletSdk.md"
-    ],
-    "cross-chain-handover": [
-      "greenwoodLockbox.md",
-      "warpBridge.md"
-    ]
-  }
+ "version": 10,
+ "updated": "2026-09-14",
+ "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
+ "domains": {
+  "chia-protocol": [
+   "blockchainDecentralization.md",
+   "chiaWalletSdk.md",
+   "chiaPrimitivesPatterns.md",
+   "chiaDevTooling.md",
+   "sageRpc.md",
+   "forgePuzzleV13.md",
+   "forgePuzzleV12.md",
+   "forgePuzzleV11.md",
+   "forgePuzzleV10.md",
+   "forgeLpCat.md",
+   "forgePoolLifecycleTesting.md",
+   "chip0050ActionLayer.md"
+  ],
+  "puzzle-security": [
+   "clvmPuzzleAudit.md",
+   "chiaPrimitivesPatterns.md",
+   "chip0050ActionLayer.md"
+  ],
+  "clvm-audit": [
+   "clvmPuzzleAudit.md",
+   "forgePuzzleV13.md",
+   "forgePuzzleV12.md",
+   "forgePuzzleV11.md",
+   "forgePuzzleV10.md",
+   "chip0050ActionLayer.md"
+  ],
+  "adversarial-testing": [
+   "clvmPuzzleAudit.md",
+   "forgePoolLifecycleTesting.md"
+  ],
+  "forge-protocol": [
+   "forgePuzzleV13.md",
+   "forgePuzzleV12.md",
+   "forgePuzzleV11.md",
+   "forgePuzzleV10.md",
+   "forgeLpCat.md",
+   "forgePoolLifecycleTesting.md",
+   "clvmPuzzleAudit.md",
+   "chip0050ActionLayer.md",
+   "forgeMultisig.md"
+  ],
+  "wallets-and-signing": [
+   "bowAppReference.md",
+   "chiaWalletSdk.md",
+   "sageRpc.md",
+   "chiaPrimitivesPatterns.md",
+   "chiaDevTooling.md"
+  ],
+  "multisig": [
+   "forgeMultisig.md",
+   "sageRpc.md",
+   "chiaPrimitivesPatterns.md",
+   "clvmPuzzleAudit.md"
+  ],
+  "multi-address-scanning": [
+   "bowAppReference.md",
+   "sageRpc.md"
+  ],
+  "address-management": [
+   "sageRpc.md",
+   "bowAppReference.md"
+  ],
+  "frontend-and-ux": [
+   "nightspireTheme.md",
+   "networkGameplayUX.md",
+   "projectArchitecture.md"
+  ],
+  "discord-activity": [
+   "discordActivityAuth.md",
+   "networkGameplayUX.md"
+  ],
+  "game-systems": [
+   "battleKnowledge.md",
+   "aiSeedModel.md",
+   "apsTierSystem.md",
+   "leaderboardRankings.md",
+   "tournamentSystem.md",
+   "snesWorldEngine.md"
+  ],
+  "defi-and-markets": [
+   "chiaPerpetuals.md",
+   "bondPvpEconomy.md",
+   "nftRewards.md",
+   "sageRpc.md",
+   "forgePuzzleV13.md",
+   "forgePuzzleV12.md",
+   "forgePuzzleV11.md",
+   "forgePuzzleV10.md",
+   "forgeLpCat.md",
+   "chiaDexieRouting.md",
+   "chiaTibetAmm.md"
+  ],
+  "external-liquidity-and-routing": [
+   "chiaDexieRouting.md",
+   "chiaTibetAmm.md",
+   "tibetUiFrontend.md",
+   "forgePuzzleV13.md",
+   "forgePuzzleV12.md",
+   "forgePuzzleV11.md",
+   "forgePuzzleV10.md",
+   "forgePoolLifecycleTesting.md"
+  ],
+  "external-dex-frontend": [
+   "tibetUiFrontend.md",
+   "chiaDexieRouting.md",
+   "nightspireTheme.md",
+   "networkGameplayUX.md"
+  ],
+  "deployment-and-architecture": [
+   "deploymentInfra.md",
+   "projectArchitecture.md"
+  ],
+  "quest-planning": [
+   "questManagement.md"
+  ],
+  "warp-bridge": [
+   "warpBridge.md"
+  ],
+  "cross-chain-bridge": [
+   "warpBridge.md",
+   "chiaPrimitivesPatterns.md",
+   "greenwoodLockbox.md"
+  ],
+  "chia-evm-bridge": [
+   "warpBridge.md",
+   "bowAppReference.md",
+   "greenwoodLockbox.md"
+  ],
+  "bridge-offer-lifecycle": [
+   "warpBridge.md",
+   "chiaWalletSdk.md"
+  ],
+  "greenwood": [
+   "greenwoodLockbox.md",
+   "chiaPrimitivesPatterns.md",
+   "clvmPuzzleAudit.md",
+   "forgeMultisig.md"
+  ],
+  "evm-signed-chia-custody": [
+   "greenwoodLockbox.md",
+   "forgeMultisig.md",
+   "chiaWalletSdk.md"
+  ],
+  "cross-chain-handover": [
+   "greenwoodLockbox.md",
+   "warpBridge.md"
+  ]
+ }
 }
