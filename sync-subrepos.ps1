@@ -99,7 +99,13 @@ $Repos = [ordered]@{
             # V13 for phantom-reserve admission and imports _v13_testkit.py, which this
             # same list prunes -- so it would have shipped broken AND as exploit mechanics
             # for dead code. Named here so a stray copy cannot come back.
-            "scripts\review-v13-security.py"
+            "scripts\review-v13-security.py",
+            # Dropping a file from the Slices above stops it being COPIED and does not remove
+            # the copy already committed -- the exact gate failure that once left a retired
+            # revision public while the comment said it was not. v14-route-audit.py quotes
+            # routes on live pool states through our wallet driver, no published document
+            # cites it, and it could not run there; it is named here so it actually leaves.
+            "scripts\v14-route-audit.py"
         )
         Visibility  = "public"
         Slices      = @(
@@ -173,7 +179,11 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\scripts\v14-squat-probe.py";      To = "scripts\v14-squat-probe.py" }
             @{ From = "projects\chia-cfmm\scripts\v14-settlement-probe.py"; To = "scripts\v14-settlement-probe.py" }
             @{ From = "projects\chia-cfmm\scripts\v14-slack-probe.py";      To = "scripts\v14-slack-probe.py" }
-            @{ From = "projects\chia-cfmm\scripts\v14-route-audit.py";      To = "scripts\v14-route-audit.py" }
+            # v14-route-audit.py is NOT here. It quotes every route on the LIVE pool states
+            # through our wallet driver, it is cited by no published document, and it could
+            # not run in this repository. The three probes above stay because published
+            # documents cite them as the record of what the node answered; each one now says
+            # in its own header that it reads rather than runs here, and names what does run.
             # The probe that answers the automated review of CHIP-0062 revision 8 on an
             # in-process node. It is self-contained: it drives sim-v14.py and needs no wallet,
             # so a reader can run it. Its LIVE twin, v14-reserve-message-probe.py, is NOT here --
