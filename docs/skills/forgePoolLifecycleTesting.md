@@ -6,6 +6,14 @@
 >
 > **Testnet only, not externally audited.**
 
+> **V11-era tooling.** A few helpers below still carry `v11` in their names and have no
+> V14 counterpart: `scripts/v11_offer_router.py`, `scripts/v11-lp-holders.py`,
+> `scripts/v11-create-pool-keyless.py`, `scripts/v11-respond-offer.mjs` and
+> `scripts/verify-v11-pool.py`. They are named accurately — the files exist — but they
+> predate the V14 lanes; for V14 use `scripts/v14_ops.py`, `scripts/v14-lifecycle-matrix.py`
+> and `scripts/v14-offer-lane-test.py`.
+
+
 ---
 
 ## Domain
@@ -123,28 +131,28 @@ public venue, never render it with a copy button.
 
 ### V11 lanes — `cd projects/chia-cfmm`
 
-Phase 1 of V11 lives in a rue project under `contracts/v11/`; see
+Phase 1 of V11 lives in a rue project under `contracts/v14/`; see
 [`docs/FORGE_V11_FOUNDATIONS.md`](../../projects/chia-cfmm/docs/FORGE_V11_FOUNDATIONS.md).
 
 | step | what it proves |
 |---|---|
-| `python scripts/build-v11.py` | vendored upstream recompiles to the chia-sdk-types 0.36.0 pins; exports each curve function standalone; lifts the same functions out of the V10 puzzle as the reference |
+| `python scripts/build-v14.py` | vendored upstream recompiles to the chia-sdk-types 0.36.0 pins; exports each curve function standalone; lifts the same functions out of the V10 puzzle as the reference |
 | `python scripts/record-v10-corpus.py` | walks every V10 launcher on testnet11 into `contracts/compiled/v10-spend-corpus.json` — raw reveal and solution per generation, decoded config, state, action |
-| `contracts/_test_v11_integrity.py` | source digests unchanged, builds hash to pins, manifest fresh against sources, byte-identical functions still identical, fresh recompile in a scratch copy |
-| `contracts/_test_v11_curve_equivalence.py` | every corpus spend replays through the real V10 puzzle, then V11 accepts the recorded figure and refuses one unit either side; V10 and V11 functions agree on randomized pools; `forge_math` agrees on every real spend |
-| `contracts/_test_v11_finalizer.py` | the multi-reserve finalizer through `chia_rs.get_conditions_from_spendbundle` (the mempool's validator, which enforces message pairing): honest N=2 and N=10, then tag out of range, bad parent ids, unsent delegated puzzles, lying state, cross-pool messages. Harness is `_v11_testkit.py`; it does not check coin existence, so the chain is still the last word |
-| `contracts/_test_v11_actions.py` | each of the five leaves alone through the consensus validator with real settlements and the real LP eve/melt: honest values pinned to `forge_math`, bracket ±1 refused, missing settlements refused, fabricated melt refused inside the TAIL, sixth leaf and wrong proof refused; costs printed |
-| `contracts/_test_v11_registry.py` | the registry singleton: init once, a real pool registered in the same bundle as its launcher and fee settlement (the leaf recomputes the pool's full puzzle hash), duplicate config, non-adjacent neighbours, short fee, mismatched launcher, foreign LP asset id all refused |
-| `python scripts/deploy-v11-testnet.py <registry\|create-pool\|swap\|add\|remove\|observe\|collect\|status>` | the operator flow on testnet11 through `forge_v11_driver.py`: local validation, Sage signing, push, confirmation; state in `.awizard/v11-testnet.json` |
-| `contracts/_test_v11_discoverability.py` | live chain: one hint on the registry launcher returns slots and generations; a pool launcher's hint returns reserves and re-created generations (the eve is the launcher's child, unhinted); the LP recipient's hint finds the LP and its unspent sum equals `total_lp`; every registration's config is readable from the registry spends |
-| `python scripts/v11-lifecycle-matrix.py <adds\|swaps\|collects\|removes\|observe\|multihop\|resync\|report>` | the lifecycle across every registered pool through Sage, via `scripts/v11_ops.py` (any asset in or out, vaults, nested LP, two-pool multi-hop in one bundle); skips pools already carrying a step; `resync` rebuilds records from the chain by re-running each spend's leaves |
+| `contracts/_test_v14_integrity.py` | source digests unchanged, builds hash to pins, manifest fresh against sources, byte-identical functions still identical, fresh recompile in a scratch copy |
+| `contracts/_test_v14_curve_equivalence.py` | every corpus spend replays through the real V10 puzzle, then V11 accepts the recorded figure and refuses one unit either side; V10 and V11 functions agree on randomized pools; `forge_math` agrees on every real spend |
+| `contracts/_test_v14_finalizer.py` | the multi-reserve finalizer through `chia_rs.get_conditions_from_spendbundle` (the mempool's validator, which enforces message pairing): honest N=2 and N=10, then tag out of range, bad parent ids, unsent delegated puzzles, lying state, cross-pool messages. Harness is `_v11_testkit.py`; it does not check coin existence, so the chain is still the last word |
+| `contracts/_test_v14_actions.py` | each of the five leaves alone through the consensus validator with real settlements and the real LP eve/melt: honest values pinned to `forge_math`, bracket ±1 refused, missing settlements refused, fabricated melt refused inside the TAIL, sixth leaf and wrong proof refused; costs printed |
+| `contracts/_test_v14_registry.py` | the registry singleton: init once, a real pool registered in the same bundle as its launcher and fee settlement (the leaf recomputes the pool's full puzzle hash), duplicate config, non-adjacent neighbours, short fee, mismatched launcher, foreign LP asset id all refused |
+| `python scripts/deploy-v14-testnet.py <registry\|create-pool\|swap\|add\|remove\|observe\|collect\|status>` | the operator flow on testnet11 through `forge_v14_driver.py`: local validation, Sage signing, push, confirmation; state in `.awizard/v14-testnet.json` |
+| `contracts/_test_v14_discoverability.py` | live chain: one hint on the registry launcher returns slots and generations; a pool launcher's hint returns reserves and re-created generations (the eve is the launcher's child, unhinted); the LP recipient's hint finds the LP and its unspent sum equals `total_lp`; every registration's config is readable from the registry spends |
+| `python scripts/v14-lifecycle-matrix.py <adds\|swaps\|collects\|removes\|observe\|multihop\|resync\|report>` | the lifecycle across every registered pool through Sage, via `scripts/v14_ops.py` (any asset in or out, vaults, nested LP, two-pool multi-hop in one bundle); skips pools already carrying a step; `resync` rebuilds records from the chain by re-running each spend's leaves |
 | `python scripts/v11_offer_router.py <make-swap\|make-add\|make-remove\|swap\|add\|remove>` | the offer flow: Sage builds the trader's offer at the current pool state; the router takes it (inputs from the offer's settlement coins, payouts through the requested notarized payments, surplus to the router, only the router's fee coin signed here and aggregated with the offer's signature) |
-| `node scripts/import-v11-pools.mjs [--dry-run]` | imports the registry driver's record into the deployment index (V11 snapshots, one plan per pool); with `FORGE_PROTOCOL_VERSION` at 11 the write retires V10 batches, after a timestamped backup |
-| `node scripts/v11-respond-offer.mjs --launcher <id> --action swap\|add\|remove --offer <bech32\|@file> [--dry-run] [--wait]` | the responder itself (`respondToForgeOffer`) on an offer: preflight, keyless build via `forge_stdin.py` → `forge_v11_offer.py`, push, persist; the trader's offer carries the fee (`make-* --fee`) |
+| `node scripts/import-v14-pools.mjs [--dry-run]` | imports the registry driver's record into the deployment index (V11 snapshots, one plan per pool); with `FORGE_PROTOCOL_VERSION` at 11 the write retires V10 batches, after a timestamped backup |
+| `node scripts/v11-respond-offer.mjs --launcher <id> --action swap\|add\|remove --offer <bech32\|@file> [--dry-run] [--wait]` | the responder itself (`respondToForgeOffer`) on an offer: preflight, keyless build via `forge_stdin.py` → `forge_v14_offer.py`, push, persist; the trader's offer carries the fee (`make-* --fee`) |
 | `python scripts/v11_offer_router.py make-route\|make-vault-route\|make-split\|make-flow\|make-deposit ... --fee <mojos>` | Sage-built trader offers for the route lanes, quoted against the recorded pool states (run the lifecycle `resync` first) |
-| `node scripts/v11-respond-offer.mjs --action multihop\|vault-route\|split\|flow\|deposit [--spec <json\|@file>] --offer ... [--dry-run] [--wait]` | the responder's route lanes on an offer (`forge_stdin.py` → `forge_v11_route.py`) |
+| `node scripts/v11-respond-offer.mjs --action multihop\|vault-route\|split\|flow\|deposit [--spec <json\|@file>] --offer ... [--dry-run] [--wait]` | the responder's route lanes on an offer (`forge_stdin.py` → `forge_v14_route.py`) |
 | `python scripts/v11-create-pool-keyless.py --assets t14,T11 --reserves 30000,30000 [--name --symbol]` | keyless creation as the frontend will do it: the wallet signs only its own coins (`prepare-create` → Sage `sign_coin_spends` → `create` → push → `commit-create`), the builder does launcher, eve mint, LP payment, fee, slots, register |
-| `python contracts/forge_v11_resync.py < {launcher_id, pool}` | replays the on-chain spends between a V11 snapshot and the tip (the action layer's solution carries the leaves) and returns the rebuilt snapshot; `forge_resync.py` dispatches here for V11 |
+| `python contracts/forge_v14_resync.py < {launcher_id, pool}` | replays the on-chain spends between a V11 snapshot and the tip (the action layer's solution carries the leaves) and returns the rebuilt snapshot; `forge_resync.py` dispatches here for V11 |
 | `python scripts/v11-lp-holders.py <launcher>` | rebuilds a pool's LP coin history from its eves: holder (the CHIP-0020 hint), amount, from height, to height; the transient melt coin is classified, not flagged |
 | `python scripts/verify-v11-pool.py <launcher>` | walks a V11 pool's generations on chain: prev_root chain, oracle height, total_lp against the LP each leaf authorized |
 | `python scripts/probe-chip0025-testnet11.py` | pushes a mode-23 message pair and waits for confirmation; `--dry-run` signs without pushing |
