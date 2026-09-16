@@ -177,6 +177,10 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\scripts\check-doc-links.py";      To = "scripts\check-doc-links.py" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.README.md"; To = "README.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.gitignore"; To = ".gitignore" }
+            # Line endings are pinned because the manifest hashes puzzle sources for
+            # provenance. Without it a Windows checkout rewrites them and 11 of 41 source
+            # hashes stop matching the blob, which is exactly what the fourth review hit.
+            @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.gitattributes"; To = ".gitattributes" }
         )
     }
 
