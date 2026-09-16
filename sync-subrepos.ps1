@@ -174,6 +174,13 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\scripts\v14-settlement-probe.py"; To = "scripts\v14-settlement-probe.py" }
             @{ From = "projects\chia-cfmm\scripts\v14-slack-probe.py";      To = "scripts\v14-slack-probe.py" }
             @{ From = "projects\chia-cfmm\scripts\v14-route-audit.py";      To = "scripts\v14-route-audit.py" }
+            # The probe that answers the automated review of CHIP-0062 revision 8 on an
+            # in-process node. It is self-contained: it drives sim-v14.py and needs no wallet,
+            # so a reader can run it. Its LIVE twin, v14-reserve-message-probe.py, is NOT here --
+            # it drives our testnet wallet through deploy-v14-testnet.py, which stays private,
+            # and a reader could not sign from our wallet anyway. Both build the same
+            # construction; only one of them is runnable by someone else.
+            @{ From = "projects\chia-cfmm\scripts\sim-v14-review-derivations.py"; To = "scripts\sim-v14-review-derivations.py" }
             @{ From = "projects\chia-cfmm\scripts\check-doc-links.py";      To = "scripts\check-doc-links.py" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.README.md"; To = "README.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.gitignore"; To = ".gitignore" }
