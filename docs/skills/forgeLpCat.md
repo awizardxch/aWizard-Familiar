@@ -93,13 +93,13 @@ parent the TAIL scores `amount + delta` rather than `delta`. Without this line a
 `CREATE_COIN` at the melt puzzle hash out of ordinary mojos and pick `delta = -2 * amount` to
 make `effective_delta` equal whatever burn the pool asked for.
 
-**Be precise about what that buys them (run 2026-09-11, `_test_v11_lp_receive_forgery.py`
+**Be precise about what that buys them (run 2026-09-11, `_test_v14_lp_receive_forgery.py`
 case C):** against a TAIL with this line deleted the bundle is accepted — and it is an honest
 burn. CAT2's ring charges for that `delta`, so a real sibling LP coin has to shrink by `burn`
 for the ring to close; supply falls by exactly what the pool paid out and the attacker has
 wasted mojos. The pool is not drained. This line is defence in depth: it removes the dependence
 on the ring's sign convention and requires the messaged coin to hold real supply. It was also
-unpinned until case C — the finding-4 probe in `_test_v11_actions.py` uses `delta = -burn`,
+unpinned until case C — the finding-4 probe in `_test_v14_actions.py` uses `delta = -burn`,
 which the delta lock (part 2) refuses first, so a mutation run showed this line surviving.
 
 A melt destroys supply, so it can only come from a coin that held supply. Minting stays open

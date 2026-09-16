@@ -7,6 +7,12 @@
 > `projects/chia-cfmm/docs/FORGE_PUZZLE_V13.md`. Everything in `forgePuzzleV11.md` still
 > describes the shape, the leaves, the finalizer and the TAIL, and `forgePuzzleV12.md`
 > describes the four CNI fixes V13 carries unchanged; this file is the delta.
+> **Retired 2026-09-15.** A fourth review found that `register` takes the reserve parent
+> on the registrant's word, so a market key can be taken permanently by a pool nobody can
+> spend. V13's liquidity is drained. **V14 (protocol 15) is built and live on testnet11
+> since 2026-09-16** — load `forgePuzzleV14.md` for the delta. Everything below still
+> describes V13 accurately and is the base V14 changes from; V14's `before_after` suite
+> runs each change against this build and V14's, so the difference is measured.
 > **Not externally audited. Testnet only.**
 
 ---

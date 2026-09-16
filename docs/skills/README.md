@@ -79,7 +79,10 @@ Use this file when:
 | Skill | Use it for |
 | --- | --- |
 | `chip0050ActionLayer.md` | The shipping V11 puzzle set: registry singleton, the six leaves (swap/add/remove/observe/collect/dao_fee), multi-reserve finalizer, hinted LP CAT genesis, the keyless responder |
-| `forgePuzzleV12.md` | **The shipping revision** (protocol 13, the CHIP-0062 review revision): the four changes CNI's review forced — eve-bound genesis, birth-bound oracle, `MIN_LOCKED_LP`, reserve parents in state — each with the finding it answers, the solution/record shapes, and what pins it. Read with V11 below, which still describes the shape |
+| `forgePuzzleV14.md` | **The live revision** (protocol 15, the fourth-review revision): the reserve launcher and the reserve parent derived rather than claimed, the settlement's amount bound in the puzzle (and what that does *not* guarantee), `LOCKED_BURN = 1`, the UNREACHED mutation rule, and two traps that are not in the puzzles. Read with V11 below, which still describes the shape |
+| `forgePuzzleV13.md` | Protocol 14, retired 2026-09-15 after a fourth review: `register` took the reserve parent on the registrant's word. Kept for the five fixes V14 carries unchanged |
+| *(no skill yet)* | **V14 is specified but not built** (protocol 15): the reserve parent derived rather than claimed, and the locked floor cut to 1. Spec: `projects/chia-cfmm/docs/FORGE_PUZZLE_V14_SPEC.md`; the route simulations are `contracts/_sim_v14_r1_routes.py` and `contracts/_sim_v14_r1_candidates.py`. A skill lands when the build does |
+| `forgePuzzleV12.md` | Protocol 13, retired 2026-09-14 after a second independent review demonstrated a drain. Kept for the four CNI fixes V13 carries unchanged |
 | `forgePuzzleV11.md` | **Closed 2026-09-11** (two review findings reproduced against it) but still the description of the shape V12 keeps: config and state, the prologue, the six leaves' rules, the finalizer's ordering, the TAIL's locks, the registry, what is not in the puzzle, cutting a revision |
 | `forgePuzzleV10.md` | V10, closed 2026-09-05, the pre-V11 pool shape: coin layout, curried config and state, the bracketed weighted invariant, swap/mint/burn, vaults, reserve and LP authorisation, the four fees, modes, cutting a revision, version history — still the reference for the math itself |
 | `forgeLpCat.md` | The pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule), the mutual handshake and message format, genesis trust |
@@ -117,14 +120,14 @@ Use this file when:
 ### DeFi / Protocol Quest
 - `blockchainDecentralization.md`
 - `chiaPrimitivesPatterns.md`
-- `forgePuzzleV12.md` with `forgePuzzleV11.md` — if the quest touches the Forge puzzle set: V12 is the delta, V11 the shape (`forgePuzzleV10.md` only for history)
+- `forgePuzzleV14.md` with `forgePuzzleV11.md` — if the quest touches the Forge puzzle set: V14 is the delta, V11 the shape (V13/V12/V10 only for history)
 - `greenwoodLockbox.md` — if the quest touches Greenwood: Chia custody signed by an Ethereum key
 - `chiaDevTooling.md` — only if tooling/Sage internals are in scope
 - `deploymentInfra.md` — only if deployment is in scope
 
 ### Puzzle Security / Audit Quest
 - `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
-- `forgePuzzleV12.md` with `forgePuzzleV11.md` — if the target is a Forge pool; V12's table maps each CNI finding to its lock and its test (`forgePuzzleV10.md` only for history)
+- `forgePuzzleV14.md` with `forgePuzzleV11.md` — if the target is a Forge pool; V14's table maps each review finding to its lock and its test, and carries the correction about what the settlement binding does not guarantee (V13/V12/V10 only for history)
 - `forgeLpCat.md` — if the target is LP supply, the TAIL, or either pinned inner
 - `greenwoodLockbox.md` — if the target is a Greenwood vault or Lockbox; its trust model is that only the MetaMask key can move anything
 - `forgePoolLifecycleTesting.md` — to know which suite already covers the surface
