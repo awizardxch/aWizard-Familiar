@@ -93,7 +93,13 @@ $Repos = [ordered]@{
             "contracts\v13", "contracts\_test_v13_*.py", "contracts\forge_v13_*.py",
             "contracts\_v13_testkit.py", "docs\FORGE_PUZZLE_V13.md",
             "docs\FORGE_V13_ARCHITECTURE.md", "docs\FORGE_V13_CLVM_PASS.md",
-            "docs\FORGE_DAO_FEE_V13.md", "scripts\mutate-v13.py", "scripts\build-v13.py"
+            "docs\FORGE_DAO_FEE_V13.md", "scripts\mutate-v13.py", "scripts\build-v13.py",
+            # review-v13-security.py was sitting UNTRACKED in the public clone, named by
+            # no slice, and `git add -A` would have published it. It probes the retired
+            # V13 for phantom-reserve admission and imports _v13_testkit.py, which this
+            # same list prunes -- so it would have shipped broken AND as exploit mechanics
+            # for dead code. Named here so a stray copy cannot come back.
+            "scripts\review-v13-security.py"
         )
         Visibility  = "public"
         Slices      = @(
@@ -126,6 +132,17 @@ $Repos = [ordered]@{
                                "_v13_testkit.py", "_curve_mirror_cases.json",
                                "_sim_future_*", "_sim_v14_vault_*", "_sim_v14_rcat_*",
                                "_sim_v14_layered_*", "_sim_v14_matrix*") }
+               # NOT pruned, and the comment above would otherwise be false: nine
+               # contracts\forge_v11_*.py modules plus _v11_testkit.py and
+               # v11_create_bridge.py stay public, because live code still needs them.
+               # forge_v11_names.py is the ONLY name resolver there has ever been and
+               # forge_v14_index.chain_names calls it; _v11_testkit.py is the control in
+               # _test_v14_consensus_timelocks.py, which proves V11 asserted no birth
+               # height where V14 does. What is excluded is what makes V11 runnable as a
+               # protocol: contracts\v11 (its compiled puzzles) and _test_v11_*.py. So
+               # v11_available() is false here and that control skips.
+               # Worth fixing properly: rename forge_v11_names.py to forge_names.py, so a
+               # version-agnostic helper stops being filed under a retired revision.
             @{ From = "projects\chia-cfmm\docs\FORGE_PUZZLE_V14.md";      To = "docs\FORGE_PUZZLE_V14.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_PUZZLE_V14_SPEC.md"; To = "docs\FORGE_PUZZLE_V14_SPEC.md" }
             # The CHIP's Additional Assets links these two by name. Publishing the
