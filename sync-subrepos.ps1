@@ -146,9 +146,18 @@ $Repos = [ordered]@{
                # CATs (FORGE_PROJECTS.md) -- and the matrix JSON the simulator page reads.
                # _test_v13_second_review.py is superseded by _test_v14_second_review.py and
                # _test_v14_before_after.py, which run both builds.
+               # _test_v14_chip0062_audit.py is named for V14 and so would have been
+               # copied by the pattern below, but it BUILDS the CHIP-0062 audit's
+               # findings against contracts11 before refusing them on V14 -- the two
+               # genesis eves, the cross-leaf drain -- and imports _v11_testkit, which
+               # this list already prunes. It would have shipped both broken and as
+               # working exploit mechanics for a retired revision, which is the one
+               # thing this slice exists to prevent. Its V14 half is public anyway, in
+               # _test_v14_second_review.py and _test_v14_before_after.py.
                ExceptFiles = @("_test_v11_*.py", "_test_v12_*.py", "forge_v12_*.py",
                                "_v12_testkit.py", "_test_v13_*.py", "forge_v13_*.py",
-                               "_v13_testkit.py", "_curve_mirror_cases.json",
+                               "_v13_testkit.py", "_test_v14_chip0062_audit.py",
+                               "_curve_mirror_cases.json",
                                "_sim_future_*", "_sim_v14_vault_*", "_sim_v14_rcat_*",
                                "_sim_v14_layered_*", "_sim_v14_matrix*") }
                # NOT pruned, and the comment above would otherwise be false: nine
