@@ -1,4 +1,4 @@
-# sync-subrepos.ps1
+﻿# sync-subrepos.ps1
 #
 # Publishes slices of this monorepo into the standalone sub-repos.
 #
@@ -56,9 +56,22 @@ $AlwaysExclude = @(
 # a repository someone has been asked to audit -- and `debug_bundle.json` reads
 # like an invitation to look at the wrong thing.
 $AlwaysExcludeFiles = @(
-    ".env", "*.log", "debug_*.json", "*_error_*.json",
+    # ".env.*" covers the per-host files scripts/make-deploy-env.mjs writes.
+    # They hold a whole deployment's configuration and belong in a dashboard,
+    # not in a repository. The template still travels: it is named as its own
+    # file slice, and a file slice is copied directly rather than through the
+    # exclusion filter.
+    ".env", ".env.*", "*.log", "debug_*.json", "*_error_*.json",
     "cancel_body*.json", "cancel_result*.json", "lifecycle_*.json"
 )
+
+# forge-ui is the deployment repo: the newest revision and the files the host
+# and router need, nothing else. What contracts/ leaves behind is declared in
+# the project rather than here, so the sync and the check that guards it cannot
+# disagree -- api/__checks__/uiSliceClosure.check.mjs reads the same file and
+# fails if a pattern would remove something the responder imports.
+$ForgeUiPruneFile = Join-Path $MainDir "projects\chia-cfmm\docs\subrepo\forge-ui.contracts-prune.json"
+$ForgeUiPrune = Get-Content $ForgeUiPruneFile -Raw | ConvertFrom-Json
 
 # ── the slices ──────────────────────────────────────────────────────────────
 #
@@ -210,6 +223,39 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\api";     To = "api" }
             @{ From = "projects\chia-cfmm\public";  To = "public" }
             @{ From = "projects\chia-cfmm\scripts"; To = "scripts" }
+            # ── the responder half ───────────────────────────────────────────────
+            #
+            # Vercel serves the UI from this repo and Railway runs the responder from
+            # the same commit, so both halves have to be here. .vercelignore keeps
+            # everything below out of the Vercel upload; nixpacks builds all of it.
+            #
+            # contracts/ is the whole reason this cannot be a serverless deploy: every
+            # settling route shells out to Python in it. Only the shipping revision
+            # travels -- the 46 modules the responder imports, plus contracts/v14 and
+            # contracts/compiled. The suites, the simulators and every retired revision
+            # are maintained in the monorepo and audited from forge-puzzles.
+            @{ From = "projects\chia-cfmm\contracts"; To = "contracts"
+               Except      = $ForgeUiPrune.excludeDirs
+               ExceptFiles = $ForgeUiPrune.excludeFiles }
+            @{ From = "projects\chia-cfmm\local-test-host.mjs"; To = "local-test-host.mjs" }
+            @{ From = "projects\chia-cfmm\requirements.txt";    To = "requirements.txt" }
+            # A Dockerfile rather than a builder's guess: Node and Python together
+            # defeat language detection, and the builder that handled both is
+            # deprecated. See docs/FORGE_HOSTING_SPLIT.md.
+            @{ From = "projects\chia-cfmm\Dockerfile";    To = "Dockerfile" }
+            @{ From = "projects\chia-cfmm\railpack.json";  To = "railpack.json" }
+            @{ From = "projects\chia-cfmm\.dockerignore"; To = ".dockerignore" }
+            # Named one file at a time on purpose: .awizard\ is in $AlwaysExclude
+            # because it is live state and the place a key would end up. These three
+            # hold none -- pool records, lock records, and registry slot ids, all of
+            # which the responder already serves publicly -- and without them a fresh
+            # container comes up with no pools at all. The host copies them into
+            # AWIZARD_STATE_DIR once, only where that file does not exist yet.
+            @{ From = "projects\chia-cfmm\.awizard\deployment-index.json"; To = "data\state-seed\deployment-index.json" }
+            @{ From = "projects\chia-cfmm\.awizard\multisig-index.json";   To = "data\state-seed\multisig-index.json" }
+            @{ From = "projects\chia-cfmm\.awizard\v14-testnet.json";      To = "data\state-seed\v14-testnet.json" }
+            @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.vercelignore"; To = ".vercelignore" }
+            @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.npmrc"; To = ".npmrc" }
             # Not the monorepo's package.json: that one is named chia-cfmm-local and its
             # scripts reach into contracts\ and ..\..\.venv, neither of which exists here.
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.package.json"; To = "package.json" }
@@ -226,7 +272,12 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\FORGE_MARKETS.md";   To = "docs\FORGE_MARKETS.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_BALANCER.md";  To = "docs\FORGE_BALANCER.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_DEPLOY_POOL.md"; To = "docs\FORGE_DEPLOY_POOL.md" }
+            # How the UI half here is hosted apart from the responder half, which
+            # lives in the Forge repo because this slice carries no contracts.
+            @{ From = "projects\chia-cfmm\docs\FORGE_HOSTING_SPLIT.md"; To = "docs\FORGE_HOSTING_SPLIT.md" }
+            @{ From = "projects\chia-cfmm\docs\FORGE_REVISION_UPGRADE.md"; To = "docs\FORGE_REVISION_UPGRADE.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.README.md"; To = "README.md" }
+            @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.env.example"; To = ".env.example" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.gitignore"; To = ".gitignore" }
         )
     }
@@ -298,6 +349,31 @@ function Copy-Slice {
               '/XD') + $exclude + @('/XF') + $excludeFiles
     & robocopy @args | Out-Null
     if ($LASTEXITCODE -gt 7) { throw "robocopy failed for $($Slice.From) (exit $LASTEXITCODE)" }
+
+    # /PURGE removes what the source no longer has; it does NOT remove what an
+    # exclusion skipped, because robocopy never looks inside an excluded path.
+    # So a pattern added today leaves yesterday's copies sitting in the sub-repo
+    # -- which is how a repo that is meant to carry one revision keeps shipping
+    # three. Exclusions have to be authoritative, so they are applied to the
+    # destination too.
+    # Only the slice's OWN exclusions are enforced here. $AlwaysExclude covers
+    # node_modules, dist and .awizard -- the destination's local working state,
+    # which this script has no business deleting. "Never copy this" and "this
+    # must not exist there" are different statements.
+    foreach ($dir in @($Slice.Except | Where-Object { $_ })) {
+        Get-ChildItem -Path $target -Directory -Recurse -Force -Filter $dir -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                if ($Detailed) { Write-Status "    prune dir  $($_.FullName.Substring($target.Length + 1))" "DarkYellow" }
+                Remove-Item -Recurse -Force $_.FullName -ErrorAction SilentlyContinue
+            }
+    }
+    foreach ($pattern in @($Slice.ExceptFiles | Where-Object { $_ })) {
+        Get-ChildItem -Path $target -File -Recurse -Force -Filter $pattern -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                if ($Detailed) { Write-Status "    prune file $($_.FullName.Substring($target.Length + 1))" "DarkYellow" }
+                Remove-Item -Force $_.FullName -ErrorAction SilentlyContinue
+            }
+    }
 }
 
 function Sync-Repo {
