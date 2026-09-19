@@ -95,7 +95,7 @@ create,index,resync}.py`, `forge_merkle.py` (shared, was `forge_v11_merkle`),
 v12-lifecycle-matrix,v12_ops,v12-sage-labels,import-v12-pools.mjs,live_v12_probe}`,
 record `.awizard/v12-testnet.json`, `FORGE_PROTOCOL_VERSION = 13` in
 `api/_forgeVersion.js` and `src/lib/poolIndexer.ts`, create endpoint
-`api/forge-v12-create.js` with `src/lib/forgeV12Create.ts`.
+`api/forge-create.js` with `src/lib/forgeCreate.ts` (both were per-revision files, `api/forge-v12-create.js` and `src/lib/forgeV12Create.ts`, until the four lanes were consolidated into one revision-agnostic pair on 2026-09-18).
 
 **Registry history.** A V11-to-V12 rename corrected a stale string inside
 `forge_registry_register` and enriched that announcement, so the registry root moved

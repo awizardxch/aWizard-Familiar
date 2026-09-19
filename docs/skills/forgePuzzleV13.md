@@ -92,8 +92,9 @@ defence-in-depth twins whose brackets already refuse.
 v13-lifecycle-matrix,v13_ops,v13-sage-labels,import-v13-pools.mjs,live_v13_probe}`,
 `scripts/v12-drain.py` (the V11 drain generalized to the locked floor), record
 `.awizard/v13-testnet.json`, `FORGE_PROTOCOL_VERSION = 14` in `api/_forgeVersion.js` and
-`src/lib/poolIndexer.ts`, create endpoint `api/forge-v13-create.js` with
-`src/lib/forgeV13Create.ts`.
+`src/lib/poolIndexer.ts`, create endpoint `api/forge-create.js` with
+`src/lib/forgeCreate.ts` (per-revision until 2026-09-18: this revision's were
+`api/forge-v13-create.js` and `src/lib/forgeV13Create.ts`).
 
 **A new test leaf.** `passthrough_action.rue` now takes a curried config, and
 `passthrough_observe.rue` joins it, because the finalizer's root assertion means a test

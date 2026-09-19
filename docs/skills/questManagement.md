@@ -107,7 +107,7 @@ Context for why this quest matters.
 ✅ Criterion 2
 ```
 
-**File location:** `docs/quests/backlog/build-feature-name.md`
+**File location:** `docs/quests/backlog/build-<feature-name>.md`
 
 ---
 
@@ -191,7 +191,7 @@ Add completion summary at bottom:
 
 #### Step 4b: Create Enhancement Backlog Quest
 
-Create `docs/quests/backlog/enhance-feature-name.md`:
+Create `docs/quests/backlog/enhance-<feature-name>.md`:
 
 ```markdown
 # Quest: Enhance [Feature Name] — Advanced Features
