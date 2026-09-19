@@ -66,7 +66,15 @@ Use this file when:
 
 | Skill | Use it for |
 | --- | --- |
-| `clvmPuzzleAudit.md` | How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy (coin vs puzzle), the ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface |
+| `clvmPuzzleAudit.md` | How to audit a CLVM/Rue puzzle: probe the compiled hex, pick the lane that can answer the question, the announcement-binding taxonomy (coin vs puzzle vs CHIP-0025 message, and why a broadcast is neither), the sixteen recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface |
+
+**Companion runbook, outside this repo.** `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md`
+is the operational half: the lane to pick, the model pipeline (Fable, Astra, Opus), the strict
+finding format, and the completion gate. It is tracked with the puzzles and published in
+`awizardxch/forge-puzzles` as `skills/n-asset-pool-audit/SKILL.md`, so an outside auditor is
+working from it and can correct it by pull request. This is a **pointer**, per the rule below —
+the method and the defect catalogue stay inline in `clvmPuzzleAudit.md`, which ships here. When
+the two disagree, the published runbook is what someone else is reading: fix `clvmPuzzleAudit.md`.
 
 ### Forge DeFi Primitives
 
@@ -127,6 +135,10 @@ Use this file when:
 
 ### Puzzle Security / Audit Quest
 - `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
+- `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md` — load second when the quest is an
+  audit rather than a review: it carries the routine, the finding format and the completion
+  gate, and it is the document an outside auditor is working from (pointer; monorepo or
+  `awizardxch/forge-puzzles`)
 - `forgePuzzleV14.md` with `forgePuzzleV11.md` — if the target is a Forge pool; V14's table maps each review finding to its lock and its test, and carries the correction about what the settlement binding does not guarantee (V13/V12/V10 only for history)
 - `forgeLpCat.md` — if the target is LP supply, the TAIL, or either pinned inner
 - `greenwoodLockbox.md` — if the target is a Greenwood vault or Lockbox; its trust model is that only the MetaMask key can move anything
@@ -191,6 +203,8 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `docs/QUEST_WORKFLOW.md` — quest lifecycle and backlog movement rules
 - `docs/FORGE_PROTOCOL_STATUS.md` — Forge protocol status (V10) and why V4–V9 are unsafe
 - `docs/FORGE_SECURITY_AUDIT.md` — the findings log the audit skill generalises from
+- `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md` — the audit runbook, published with
+  the puzzles as `skills/n-asset-pool-audit/SKILL.md` (pointer: not in this repo)
 
 ## Skills Must Stand Alone
 
