@@ -147,13 +147,17 @@ $Repos = [ordered]@{
                # _test_v13_second_review.py is superseded by _test_v14_second_review.py and
                # _test_v14_before_after.py, which run both builds.
                # _test_v14_chip0062_audit.py is named for V14 and so would have been
-               # copied by the pattern below, but it BUILDS the CHIP-0062 audit's
-               # findings against contracts11 before refusing them on V14 -- the two
-               # genesis eves, the cross-leaf drain -- and imports _v11_testkit, which
-               # this list already prunes. It would have shipped both broken and as
-               # working exploit mechanics for a retired revision, which is the one
-               # thing this slice exists to prevent. Its V14 half is public anyway, in
-               # _test_v14_second_review.py and _test_v14_before_after.py.
+               # copied by the pattern below, but it BUILDS the CHIP-0062 audit's findings
+               # against contracts\v11 before refusing them on V14 -- the two genesis
+               # eves, the cross-leaf drain -- which is working exploit mechanics for a
+               # retired revision, the one thing this slice exists to prevent. Its V14 half
+               # is public anyway, in _test_v14_second_review.py and _test_v14_before_after.py.
+               # An earlier version of this comment added that the file would ship BROKEN
+               # too, because _v11_testkit.py is pruned. It is NOT -- see the note under
+               # ExceptFiles, which exists to keep exactly that claim true. The testkit is
+               # public and the attacks are built through the production driver, so the file
+               # would have RUN there and reproduced them. That makes the exclusion more
+               # necessary, not less.
                ExceptFiles = @("_test_v11_*.py", "_test_v12_*.py", "forge_v12_*.py",
                                "_v12_testkit.py", "_test_v13_*.py", "forge_v13_*.py",
                                "_v13_testkit.py", "_test_v14_chip0062_audit.py",
@@ -186,6 +190,11 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\FORGE_LOCK_SAFE_MODEL.md"; To = "docs\FORGE_LOCK_SAFE_MODEL.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_DAO_FEE_V14.md";     To = "docs\FORGE_DAO_FEE_V14.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.SECURITY.md"; To = "docs\FORGE_SECURITY.md" }
+            # The audit runbook travels with the puzzles it audits: the method that
+            # finds defects in this code should be as public as the code, and as open
+            # to correction. A directory rather than a file, so a model that discovers
+            # skills by convention finds it and a contributor can add one beside it.
+            @{ From = "projects\chia-cfmm\skills"; To = "skills" }
             @{ From = "projects\chia-cfmm\docs\chip";  To = "docs\chip" }
             # FORGE_SECURITY.md and the CHIP's Test Cases section both cite this
             # by path; it ships so those references resolve.
