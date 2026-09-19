@@ -10,6 +10,7 @@ sync-repos.ps1
 REPOSITORY_SPLIT_GUIDE.md
 .gitignore.familiar
 .gitignore.forge
+.gitattributes.forge
 .vite/
 memories/
 
