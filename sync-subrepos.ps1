@@ -189,6 +189,10 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\FORGE_LOCK_MIPS.md";       To = "docs\FORGE_LOCK_MIPS.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_LOCK_SAFE_MODEL.md"; To = "docs\FORGE_LOCK_SAFE_MODEL.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_DAO_FEE_V14.md";     To = "docs\FORGE_DAO_FEE_V14.md" }
+            # The record of an audit run made with the runbook in skills/, against the
+            # exact commit of this repository it names. Published so a reader can check
+            # the run against the tree rather than take the summary on trust.
+            @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RUN_V14_2026-09-19.md"; To = "docs\FORGE_AUDIT_RUN_V14_2026-09-19.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.SECURITY.md"; To = "docs\FORGE_SECURITY.md" }
             # The audit runbook travels with the puzzles it audits: the method that
             # finds defects in this code should be as public as the code, and as open
@@ -222,6 +226,10 @@ $Repos = [ordered]@{
             # and a reader could not sign from our wallet anyway. Both build the same
             # construction; only one of them is runnable by someone else.
             @{ From = "projects\chia-cfmm\scripts\sim-v14-review-derivations.py"; To = "scripts\sim-v14-review-derivations.py" }
+            # The CHIP-0062 audit findings a node has to judge (M-2 ephemeral chaining, C-1 two
+            # eves, M-3 squat, L-6 slot), against V14 only, on a simulator. Published so the
+            # 2026-09-19 audit run is reproducible from this tree.
+            @{ From = "projects\chia-cfmm\scripts\sim-v14-chip0062.py"; To = "scripts\sim-v14-chip0062.py" }
             @{ From = "projects\chia-cfmm\scripts\check-doc-links.py";      To = "scripts\check-doc-links.py" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.README.md"; To = "README.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.gitignore"; To = ".gitignore" }
