@@ -1,7 +1,16 @@
 {
- "version": 10,
- "updated": "2026-09-14",
+ "version": 11,
+ "updated": "2026-09-19",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
+ "companions": {
+  "n-asset-pool-audit": {
+   "path": "projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md",
+   "published_as": "skills/n-asset-pool-audit/SKILL.md in awizardxch/forge-puzzles",
+   "pairs_with": "clvmPuzzleAudit.md",
+   "use_for": "running an audit end to end: the lane to pick, the model pipeline, the strict finding format, the completion gate",
+   "note": "Pointer only -- monorepo or the public puzzle repo. The method and the defect catalogue stay inline in clvmPuzzleAudit.md, which ships with this repo."
+  }
+ },
  "domains": {
   "chia-protocol": [
    "blockchainDecentralization.md",
