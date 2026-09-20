@@ -230,6 +230,13 @@ $Repos = [ordered]@{
             # eves, M-3 squat, L-6 slot), against V14 only, on a simulator. Published so the
             # 2026-09-19 audit run is reproducible from this tree.
             @{ From = "projects\chia-cfmm\scripts\sim-v14-chip0062.py"; To = "scripts\sim-v14-chip0062.py" }
+            # The 2026-09-20 run's record, and the tool that makes its revision
+            # fingerprint recomputable by whoever reads it. The digest is the
+            # answer to "which build did you test", so shipping the record
+            # without the command that produces it publishes a number no
+            # outside auditor can check -- which was that run's own A-1.
+            @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RUN_V14_2026-09-20.md"; To = "docs\FORGE_AUDIT_RUN_V14_2026-09-20.md" }
+            @{ From = "projects\chia-cfmm\scripts\revision-fingerprint.py"; To = "scripts\revision-fingerprint.py" }
             @{ From = "projects\chia-cfmm\scripts\check-doc-links.py";      To = "scripts\check-doc-links.py" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.README.md"; To = "README.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.gitignore"; To = ".gitignore" }
