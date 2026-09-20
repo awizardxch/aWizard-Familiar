@@ -36,6 +36,7 @@ Use this file when:
 | --- | --- |
 | `bowAppReference.md` | WalletConnect, CHIP-0002, state channels, tracker patterns, battle state, multi-address scanning |
 | `sageRpc.md` | Sage RPC address derivations, `increase_derivation_index`, gap-limit scan, operator patterns |
+| `sageAppLane.md` | Packaging the Forge UI as a Sage app: `/sage/` publishing, manifest facts the guides get wrong, SDK 0.13.1 breaks, the loopback cert-trust step, two origin spellings, debugging inside the webview |
 | `discordActivityAuth.md` | Discord Activity auth, OAuth2, embedded app flow |
 | `networkGameplayUX.md` | Loading states, spell-cast UX, network feedback, multiplayer responsiveness |
 | `nightspireTheme.md` | Canonical Nightspire design language, tokens, component styling |

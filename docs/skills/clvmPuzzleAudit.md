@@ -350,6 +350,31 @@ built its object in memory and handed it straight to a builder. Production seria
 reloads between *every* pair of actions, and that step had no coverage at all. Round-trip
 the persisted form — twice in succession — and assert the derived hash is unchanged.
 
+**Identify the revision with a number the reader can recompute.** The 2026-09-19 record
+named its build with a digest described in prose — "sha256 over every `.rue`, `.hex`,
+`.hash` and the manifest, sorted" — that reproduced under none of its readings and
+appeared nowhere but the record quoting it. "Which build did you test" is the question
+every other answer depends on. Ship the command (`scripts/revision-fingerprint.py`,
+per-file LF-normalised digests so a mismatch names the file) and cite it beside the
+number. Runbook rule 8.
+
+**A failure must say whether the record is stale or the system is broken.** A suite that
+compares a local record against the chain fails for two unrelated reasons: the record is
+behind (a fact about the checkout) or the chain never had what the record claims (serious).
+`_test_v14_discoverability.py` printed one line for both, so 42 ordinary drift failures
+looked like 42 missing reserves until a chain query per coin said otherwise — in a suite
+that already held the spent flag. If a check can fail boringly and alarmingly, it says
+which, and names the remedy (`v14-resync-records.py` then `import-v14-pools.mjs`).
+Runbook rule 9.
+
+**Run tools at the coverage the audit claims, not at their defaults.** The testnet probe's
+`--pools` defaults to 8 of 32. Run plainly it covered a quarter of the pools, and the
+first draft of the 2026-09-20 record explained that shortfall with the index drift it had
+just been looking at — a tidy story reached without reading the argument parser. Check
+what produced a number before explaining it; state the coverage actually exercised.
+Runbook rule 10. The same failure in miniature: `curl -k` passes exactly the certificate
+check a webview fails, and `$?` after a pipe is `tail`'s exit, not the suite's.
+
 **Duplicated consensus logic diverges.** One redemption path existed in three copies and
 the revision updated none of them. Delete the copies; import one implementation.
 
@@ -442,10 +467,20 @@ Rules that follow:
     bytes, and one non-canonically encoded integer.
 13. **Mutation run** — every assert deleted in turn, with each survivor argued in writing
     beside the line or killed by a new vector.
+14. **Fingerprint** — `scripts/revision-fingerprint.py` before and after; identical means
+    no artefact moved, and the number is one the reader can recompute.
+15. **No silent skips, full coverage** — provenance with `FORGE_REPO=<a clone tracking
+    contracts/v14>` so it checks git rather than the working copy; chain probes at their
+    full pool count (`--pools 32`), not their default. A record that reads "all pass" with
+    a skip or a default hidden inside it has not earned the phrase.
 
 Publish the findings log with severity, revision introduced, revision fixed, the proof
 file, and the reasoning that turned out to be wrong. That document is what an external
-auditor reads first.
+auditor reads first. Publish it as a **named-model pass** — say who ran it and why a
+different model running the same runbook matters — scrubbed of personal and operational
+detail (no paths, hosts, names; "the checkout's index", not this machine), with every
+script it cites added to the publish slice and `scripts/check-doc-links.py` run, since the
+gate is the real slice now rather than a copy of it.
 
 ---
 
