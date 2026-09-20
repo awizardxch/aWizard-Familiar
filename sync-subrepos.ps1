@@ -291,6 +291,13 @@ $Repos = [ordered]@{
             # before transforming a single module.
             @{ From = "projects\chia-cfmm\tsconfig.node.json"; To = "tsconfig.node.json" }
             @{ From = "projects\chia-cfmm\vite.config.ts";    To = "vite.config.ts" }
+            # The Sage app is the same bundle with a different base and output dir.
+            # `npm run build:site` builds it into dist/sage/ after the website, so
+            # Vercel publishes it as static files and Sage installs it from
+            # https://forge.awizard.dev/sage/. Only the manifest travels from
+            # sage-app/ -- its dist/, build/ and node_modules/ are build output.
+            @{ From = "projects\chia-cfmm\vite.config.sage.ts"; To = "vite.config.sage.ts" }
+            @{ From = "projects\chia-cfmm\sage-app\sage-manifest.json"; To = "sage-app\sage-manifest.json" }
             @{ From = "projects\chia-cfmm\index.html";        To = "index.html" }
             @{ From = "projects\chia-cfmm\vercel.json";       To = "vercel.json" }
             @{ From = "projects\chia-cfmm\docs\FORGE_SWAP.md";      To = "docs\FORGE_SWAP.md" }
