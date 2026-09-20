@@ -189,6 +189,19 @@ npx tsc --noEmit
 - **Symmetry hides arithmetic bugs.** Equal weights hide the exponent, a balanced deposit hides
   the imbalance-fee share, a V7 vault hides the vault branch. Probe the asymmetric shape.
 - **In-memory fixtures skip the round trip** production performs between every pair of actions.
+- **Forty-two discoverability failures of one shape is the record, not the pools.** There are
+  three stores — the deploy record, the website index, and the hosted responder's own index —
+  and the app's trades advance only the last. After a session of app trading the local
+  `_test_v14_discoverability.py` fails "recorded reserve … is a live hinted coin" for every
+  traded pool. On 2026-09-20: 38 of 69 recorded reserves spent, 0 missing, every one with a
+  live successor at the same reserve puzzle hash — trading, not drain. The suite now says
+  which case it is; `python scripts/v14-resync-records.py && node scripts/import-v14-pools.mjs`
+  took it 322 → 364/364 with no puzzle touched.
+- **A green settle proves nothing about the next quote.** `forgeAdapter.poolStates` has no
+  TTL and `loadPool()` returns early for a held pool; the cache was cleared only after the
+  confirmation poll (up to 100 × 3 s). A quote 101 seconds after a settled split priced
+  pre-trade reserves and was refused at settlement as "route releases X, trader asks Y".
+  Cleared at push time now. Test consecutive trades inside the confirmation window.
 
 ---
 
@@ -196,8 +209,11 @@ npx tsc --noEmit
 
 A failed live run is more often infrastructure than contract logic. Check in this order:
 
+0. The local index may simply be behind the chain (see above) — resync and import before
+   reading any "already spent" or "route releases less than asked" as a defect.
 1. Sage may be synced locally while lacking peers for transaction submission
-   (`contracts/check_sage_rpc_status.py`).
+   (`contracts/check_sage_rpc_status.py`). A container has no local wallet at all: that is
+   exit 2 / `reason: no-local-wallet` / HTTP 200, not a 503, since 2026-09-20.
 2. If a new LP CAT asset never lands in the wallet, any validation depending on LP preview spends
    cannot proceed truthfully.
 3. Mempool contention on the pool coin — a second action on the same launcher is serialised by

@@ -164,6 +164,23 @@ When using Chia tooling, assume:
 - tracing tools need a running synced full node
 - Python helpers often pin specific `chia-blockchain` versions
 - simulator-first validation is the safest path before testnet or mainnet use
+- Coinset's testnet11 API returns `403` to a bare `urllib` request; send a `User-Agent`.
+  `chia_rs` 0.27 raises `TypeError: 12` where 0.48 raises
+  `ValueError("ValidationError", 12, ...)` — normalise at one funnel, not per suite.
+
+Verification rules that cost a night to learn (2026-09-19/20):
+- **Never verify with a flag that disables the check under test.** `curl -k` passed a
+  self-signed certificate the webview was failing; every "the lane works" was false.
+- **Read the body, not the status.** A `200` was an SPA's `index.html`; a `503` was our
+  own wallet probe. Print `head -c 300` and the `Content-Type` before judging a host.
+- **`$?` after a pipe is the last stage's exit.** Use `${PIPESTATUS[0]}`.
+- **In this Windows workspace `/tmp` is two places** — Git Bash's and what Windows
+  Python opens — so a file written by one is missing to the other. Use the project or
+  scratchpad directory. And Bash-heredoc Python corrupts backslashes (`\v` in a path
+  became a vertical tab, twice): use the Write tool or raw-string files for any patch
+  containing one.
+- **Check what produced a number before explaining it.** A probe's `--pools` default of 8
+  was explained as index drift; a "6-mojo" gap was the whole 0.5% router fee.
 
 ## Quick Decision Guide
 

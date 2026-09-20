@@ -1,6 +1,6 @@
 {
- "version": 11,
- "updated": "2026-09-19",
+ "version": 12,
+ "updated": "2026-09-20",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "n-asset-pool-audit": {
@@ -59,7 +59,8 @@
    "chiaWalletSdk.md",
    "sageRpc.md",
    "chiaPrimitivesPatterns.md",
-   "chiaDevTooling.md"
+   "chiaDevTooling.md",
+   "sageAppLane.md"
   ],
   "multisig": [
    "forgeMultisig.md",

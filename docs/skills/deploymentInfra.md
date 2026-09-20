@@ -35,7 +35,31 @@ Hosted RPC (Coinset.org — no node required)
 
 Vercel (Separate Project)
   \- bow-app (Next.js, port 3000)
+
+Forge (two hosts from one repo, forge-ui)
+  |- forge.awizard.dev      Vercel, STATIC ONLY -- .vercelignore keeps api/ off it
+  |    |- /                  the website (SPA; /(.*) rewrites to index.html)
+  |    \- /sage/             the Sage app package, built into dist/sage/ by
+  |                          `npm run build:site`; install URL has the trailing slash
+  \- forge-responder.up.railway.app   the responder (local-test-host.mjs + Python)
+       every /api/... call, every settlement; keeps its own deployment index
 ```
+
+**There is no API on forge.awizard.dev.** Every `/api/...` path there falls through the
+SPA rewrite and answers `200` with `index.html`. A probe that reads only the status — or
+only the CORS header, which the static host also sends — reports a healthy API that does
+not exist. Read the body. Likewise the responder's `/api/sage-status` answers for a local
+desktop wallet a container cannot have; that is `reason: no-local-wallet` and a 200 now,
+and was a 503 that got Railway called "down" twice while it was serving 32 pools.
+
+**Sage app origins come in two spellings.** An installed app runs at
+`sage-app://<uuid>.<identity>` on macOS/Linux and `https://sage-app.<uuid>.<identity>` on
+Windows. The responder's `FORGE_ALLOWED_ORIGINS` entry `sage-app://` matches both since
+2026-09-20; a proxy in front of it has to know both or the app works everywhere except
+Windows. Deploying forge-ui also needs `vite.config.sage.ts` and
+`sage-app/sage-manifest.json` in the slice, and the scripts in
+`docs/subrepo/forge-ui.package.json` — the deployment repo does not use the monorepo's
+`package.json`. See `sageAppLane.md` and `projects/chia-cfmm/docs/FORGE_HOSTING_SPLIT.md`.
 
 ## Deployment Pipeline
 
