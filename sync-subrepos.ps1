@@ -162,8 +162,14 @@ $Repos = [ordered]@{
                                "_v12_testkit.py", "_test_v13_*.py", "forge_v13_*.py",
                                "_v13_testkit.py", "_test_v14_chip0062_audit.py",
                                "_curve_mirror_cases.json",
-                               "_sim_future_*", "_sim_v14_vault_*", "_sim_v14_rcat_*",
+                               "_sim_future_*", "_sim_v14_vault_*", "_sim_v14_rcat_loop.py",
                                "_sim_v14_layered_*", "_sim_v14_matrix*") }
+               # _sim_v14_rcat_imprint.py is the one rCAT simulation that DOES publish, and the
+               # pattern above was narrowed from `_sim_v14_rcat_*` to let it through. It is the
+               # offline lane of the 2026-09-24 audit run (the rCAT imprint question from the
+               # AMA): every probe in it is against V14 or a design nobody runs, and the run's
+               # record cites it. The rCAT loop stays private as an unbuilt idea; the layered-CAT
+               # simulation stays private and would not run here (it imports _v13_testkit.py).
                # NOT pruned, and the comment above would otherwise be false: nine
                # contracts\forge_v11_*.py modules plus _v11_testkit.py and
                # v11_create_bridge.py stay public, because live code still needs them.
@@ -237,6 +243,14 @@ $Repos = [ordered]@{
             # outside auditor can check -- which was that run's own A-1.
             @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RUN_V14_2026-09-20.md"; To = "docs\FORGE_AUDIT_RUN_V14_2026-09-20.md" }
             @{ From = "projects\chia-cfmm\scripts\revision-fingerprint.py"; To = "scripts\revision-fingerprint.py" }
+            # The 2026-09-24 run: the rCAT imprint question from the AMA, against V14 on every
+            # lane. The simulator probe runs here; the two testnet scripts are READINGS, as
+            # v14-settlement-probe.py is -- they reach the chain through deploy-v14-testnet.py,
+            # which stays private, and each says so in its own header.
+            @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RUN_V14_2026-09-24.md"; To = "docs\FORGE_AUDIT_RUN_V14_2026-09-24.md" }
+            @{ From = "projects\chia-cfmm\scripts\sim-v14-rcat-imprint.py";        To = "scripts\sim-v14-rcat-imprint.py" }
+            @{ From = "projects\chia-cfmm\scripts\v14-rcat-imprint-live-probe.py"; To = "scripts\v14-rcat-imprint-live-probe.py" }
+            @{ From = "projects\chia-cfmm\scripts\v14-rcat-imprint-testnet.py";    To = "scripts\v14-rcat-imprint-testnet.py" }
             @{ From = "projects\chia-cfmm\scripts\check-doc-links.py";      To = "scripts\check-doc-links.py" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.README.md"; To = "README.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.gitignore"; To = ".gitignore" }
