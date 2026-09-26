@@ -200,6 +200,9 @@ $Repos = [ordered]@{
             # the run against the tree rather than take the summary on trust.
             @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RUN_V14_2026-09-19.md"; To = "docs\FORGE_AUDIT_RUN_V14_2026-09-19.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.SECURITY.md"; To = "docs\FORGE_SECURITY.md" }
+            # The offline suites, on every push (2026-09-26 external review, last recommendation).
+            @{ From = "projects\chia-cfmm\docs\subrepo\forge-puzzles.checks.yml"; To = ".github\workflows\checks.yml" }
+            @{ From = "projects\chia-cfmm\requirements.txt"; To = "requirements.txt" }
             # The audit runbook travels with the puzzles it audits: the method that
             # finds defects in this code should be as public as the code, and as open
             # to correction. A directory rather than a file, so a model that discovers
@@ -335,6 +338,10 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\FORGE_REVISION_UPGRADE.md"; To = "docs\FORGE_REVISION_UPGRADE.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.README.md"; To = "README.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.env.example"; To = ".env.example" }
+            # The Node checks and typecheck, on every push (2026-09-26 external review).
+            @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.checks.yml"; To = ".github\workflows\checks.yml" }
+            # The response to that review: what changed and the check that proves each fix.
+            @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RESPONSE_2026-09-26.md"; To = "docs\FORGE_AUDIT_RESPONSE_2026-09-26.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.gitignore"; To = ".gitignore" }
         )
     }
