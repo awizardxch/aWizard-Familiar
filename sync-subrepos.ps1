@@ -342,6 +342,8 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.checks.yml"; To = ".github\workflows\checks.yml" }
             # The response to that review: what changed and the check that proves each fix.
             @{ From = "projects\chia-cfmm\docs\FORGE_AUDIT_RESPONSE_2026-09-26.md"; To = "docs\FORGE_AUDIT_RESPONSE_2026-09-26.md" }
+            # What a Spellbook agent must do to trade here, with the acceptance tests.
+            @{ From = "projects\chia-cfmm\docs\FORGE_SPELLBOOK_AGENT_SPEC.md"; To = "docs\FORGE_SPELLBOOK_AGENT_SPEC.md" }
             @{ From = "projects\chia-cfmm\docs\subrepo\forge-ui.gitignore"; To = ".gitignore" }
         )
     }
