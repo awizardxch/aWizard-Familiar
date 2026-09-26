@@ -86,7 +86,13 @@ snapshot.
 deterministic snapshot the builder returned. There is no chain-sync path that reconstructs pool
 state — the V2-era `sync_pool_from_chain.py` is archived and was removed from `api/pools.js`,
 where it had been failing with `ENOENT`, being caught, and reporting `success: true` while doing
-nothing.
+nothing. A **second** caller survived that removal for a month: `api/forge-swap.js`'s `plan-live`
+preflight, answering 502 on every swap while the site warned and proceeded. Found 2026-09-25 only
+because the agent API tried to use it. When something is archived, grep for *every* caller of its
+old path, and give any preflight a caller may tolerate failing a check that fails when it does.
+`plan-live` now runs `contracts/forge_plan_live.py` — the settle lane's own three lines over the
+persisted state, router carve on the correct side — and matches the quote and the composer to the
+mojo (42/42).
 
 **The snapshot round trip is load-bearing.** `persistSuccessor` writes `_pool_json(successor)`;
 `findForgePool` hands that same field back to `_pool()` on the next action. Config is positional

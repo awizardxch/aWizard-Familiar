@@ -326,6 +326,9 @@ $Repos = [ordered]@{
             @{ From = "projects\chia-cfmm\docs\FORGE_MARKETS.md";   To = "docs\FORGE_MARKETS.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_BALANCER.md";  To = "docs\FORGE_BALANCER.md" }
             @{ From = "projects\chia-cfmm\docs\FORGE_DEPLOY_POOL.md"; To = "docs\FORGE_DEPLOY_POOL.md" }
+            # The agent surface's contract: what a program calls to quote, build,
+            # settle and confirm, and the signed dry-run that verified it.
+            @{ From = "projects\chia-cfmm\docs\FORGE_AGENT_API.md"; To = "docs\FORGE_AGENT_API.md" }
             # How the UI half here is hosted apart from the responder half, which
             # lives in the Forge repo because this slice carries no contracts.
             @{ From = "projects\chia-cfmm\docs\FORGE_HOSTING_SPLIT.md"; To = "docs\FORGE_HOSTING_SPLIT.md" }
