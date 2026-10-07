@@ -63,7 +63,8 @@ Domain knowledge lives in `docs/skills/`. Load **1–2 skills per task**, not th
 ## Puzzle work is audit work
 
 Any change that touches a CLVM/Rue puzzle, its builders, or its quoting mirrors follows
-`docs/skills/clvmPuzzleAudit.md`. The rules that cost real findings:
+`docs/skills/clvmPuzzleAudit.md`, with `docs/skills/chialisp-audit/spec.md` beside it for the rows
+the official Chialisp docs establish (cite the row in every finding). The rules that cost real findings:
 
 - **Probe the compiled puzzle, never the source.** Reading it and reasoning produces confident
   wrong answers.

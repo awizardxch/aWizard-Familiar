@@ -67,6 +67,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 
 #### Puzzle Security
 - **`docs/skills/clvmPuzzleAudit.md`** — How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy, ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface. Protocol-agnostic — load it for any puzzle review
+- **`docs/skills/chialisp-audit/spec.md`** — The checklist chialisp.com's own documentation implies, as PASS/FAIL rows with the page each one cites: solution trust, unchecked-width hashing, announcements vs messages, the AGG_SIG table, time and ephemeral semantics, singleton/CAT/offer invariants, cost and DoS, language footguns, the toolchain probe. Load with `clvmPuzzleAudit.md`; first choice for puzzles written elsewhere
 
 #### Warp Bridge (Cross-Chain)
 - **`docs/skills/warpBridge.md`** — Complete Chia↔EVM bridge system: 4-step wizard, lockCATs/burnCATs/unlockCATs/mintCATs driver selection, EVM wagmi entry (bridgeEtherToChia/bridgeToChia/bridgeBack), all 3 wallet adapters (Sage WC, Ozone WC, Goby extension), NOSTR validator signature collection, portal singleton mechanics, key puzzle hashes, mainnet contract addresses. Source project: `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love`. Full constants: `warp-ui-love/docs/agent-swarm/IMPLEMENTATION_CONSTANTS.md`
@@ -78,6 +79,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/CODE_AUDIT_REPORT.md`** — Code quality baseline and audit results
 - **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V11 (CHIP-0050 action layer) shipping on testnet11, V10 closed as the record, why V4–V9 are unsafe
 - **`docs/FORGE_SECURITY_AUDIT.md`** — Forge findings log: ten findings, severity, how each was closed
+- **`docs/CHIALISP_AUDIT_2026-10-07.md`** — The chialisp.com-rows audit of forge-puzzles, forge-ui, Spellbook and Nightspire-Market: findings by row, what passed, what was not evaluated
 - **`docs/TODO_DEFI.md`** — DeFi build phases tracking
 - **`docs/TODO_WORLD.md`** — World engine development tracking
 - **`docs/QUEST_WORKFLOW.md`** — Foundation-First pattern quick reference

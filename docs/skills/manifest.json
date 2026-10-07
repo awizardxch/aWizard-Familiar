@@ -1,6 +1,6 @@
 {
- "version": 12,
- "updated": "2026-09-20",
+ "version": 13,
+ "updated": "2026-10-07",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "n-asset-pool-audit": {
@@ -28,11 +28,13 @@
   ],
   "puzzle-security": [
    "clvmPuzzleAudit.md",
+   "chialisp-audit/spec.md",
    "chiaPrimitivesPatterns.md",
    "chip0050ActionLayer.md"
   ],
   "clvm-audit": [
    "clvmPuzzleAudit.md",
+   "chialisp-audit/spec.md",
    "forgePuzzleV13.md",
    "forgePuzzleV12.md",
    "forgePuzzleV11.md",
@@ -41,6 +43,7 @@
   ],
   "adversarial-testing": [
    "clvmPuzzleAudit.md",
+   "chialisp-audit/spec.md",
    "forgePoolLifecycleTesting.md"
   ],
   "forge-protocol": [
@@ -66,7 +69,8 @@
    "forgeMultisig.md",
    "sageRpc.md",
    "chiaPrimitivesPatterns.md",
-   "clvmPuzzleAudit.md"
+   "clvmPuzzleAudit.md",
+   "chialisp-audit/spec.md"
   ],
   "multi-address-scanning": [
    "bowAppReference.md",
@@ -150,6 +154,7 @@
    "greenwoodLockbox.md",
    "chiaPrimitivesPatterns.md",
    "clvmPuzzleAudit.md",
+   "chialisp-audit/spec.md",
    "forgeMultisig.md"
   ],
   "evm-signed-chia-custody": [
@@ -160,6 +165,15 @@
   "cross-chain-handover": [
    "greenwoodLockbox.md",
    "warpBridge.md"
+  ],
+  "chialisp-docs-rules": [
+   "chialisp-audit/spec.md",
+   "clvmPuzzleAudit.md",
+   "chiaPrimitivesPatterns.md"
+  ],
+  "htlc-cross-chain": [
+   "chialisp-audit/spec.md",
+   "clvmPuzzleAudit.md"
   ]
  }
 }

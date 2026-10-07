@@ -68,6 +68,7 @@ Use this file when:
 | Skill | Use it for |
 | --- | --- |
 | `clvmPuzzleAudit.md` | How to audit a CLVM/Rue puzzle: probe the compiled hex, pick the lane that can answer the question, the announcement-binding taxonomy (coin vs puzzle vs CHIP-0025 message, and why a broadcast is neither), the sixteen recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface |
+| `chialisp-audit/spec.md` | The checklist the official Chialisp docs (chialisp.com) imply, as rows an audit marks PASS/FAIL: solution trust (the password coin is the HTLC), unchecked-width hashing, announcements vs messages and the in-puzzle brick, the AGG_SIG table and signature subtraction, previous-block time semantics and ephemeral limits, singleton/CAT/offer invariants, cost caps and backref bombs, language footguns, the toolchain probe. Protocol-agnostic; written for classic Chialisp and Rue alike |
 
 **Companion runbook, outside this repo.** `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md`
 is the operational half: the lane to pick, the model pipeline (Fable, Astra, Opus), the strict
@@ -136,6 +137,7 @@ the two disagree, the published runbook is what someone else is reading: fix `cl
 
 ### Puzzle Security / Audit Quest
 - `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
+- `chialisp-audit/spec.md` — load with it: the rows the language's own documentation establishes, each citing its chialisp.com page, plus the toolchain probe that verifies an artefact before any source is read. First choice when the target was not written here (a counterparty's HTLC, a vendored puzzle, an off-chain service handling offers or CLVM)
 - `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md` — load second when the quest is an
   audit rather than a review: it carries the routine, the finding format and the completion
   gate, and it is the document an outside auditor is working from (pointer; monorepo or
@@ -204,6 +206,7 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `docs/QUEST_WORKFLOW.md` — quest lifecycle and backlog movement rules
 - `docs/FORGE_PROTOCOL_STATUS.md` — Forge protocol status (V10) and why V4–V9 are unsafe
 - `docs/FORGE_SECURITY_AUDIT.md` — the findings log the audit skill generalises from
+- `docs/CHIALISP_AUDIT_2026-10-07.md` — the chialisp.com-rows pass over forge-puzzles, forge-ui, Spellbook and Nightspire-Market: findings by row, PASS tables, what was not evaluated
 - `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md` — the audit runbook, published with
   the puzzles as `skills/n-asset-pool-audit/SKILL.md` (pointer: not in this repo)
 
