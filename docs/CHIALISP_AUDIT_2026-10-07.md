@@ -7,7 +7,14 @@ re-read at its cited lines by a second pass; the ones marked **re-verified** wer
 re-executed from a clean scratch copy before being written here. Findings carry the spec's row id
 so a reader can go from the claim to the documentation rule it rests on.
 
-**Status: 4 repositories, 32 findings (3 Critical, 4 High, 5 Medium, 8 Low, 12 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager. Nothing here has been fixed yet.**
+**Status: 4 repositories, 32 findings (3 Critical, 4 High, 5 Medium, 8 Low, 12 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager.**
+
+**Fixed and merged 2026-10-07:** Nightspire-Market N1–N5, N7, N8 in
+[awizardxch/Nightspire-Market#12](https://github.com/awizardxch/Nightspire-Market/pull/12)
+(N6, N9, N10 left as design decisions); Spellbook S1–S8 in
+[awizardxch/Spellbook#109](https://github.com/awizardxch/Spellbook/pull/109) (S4 as a document
+amendment). Both PRs carry the simulator suites that show the pre-fix acceptances turning into
+pinned refusals. **Open:** forge-puzzles F1–F8 and forge-ui U1–U7.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
 
