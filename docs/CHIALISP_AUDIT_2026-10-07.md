@@ -17,8 +17,7 @@ amendment). Both PRs carry the simulator suites that show the pre-fix acceptance
 pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
 [awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
 `055a161`) and F3 by [awizardxch/Forge#86](https://github.com/awizardxch/Forge/pull/86) (main
-`399afbf`), both verified below. **Open:** forge-puzzles F4, F6, F7 (revision-candidate draft Forge#94, no version bump, maintainer's call; F5's docs half and F8 in Forge#92; the `announcement_binds` 0xcb filter found alongside F4 is Forge#95 against main), forge-ui U5–U7 (U1 fix in Forge#87, U2 in Forge#90, U3 in Forge#91, U4 in Forge#89, U8 fixed in
-Forge#84, U9 in Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
+`399afbf`), both verified below. **Open:** forge-puzzles F4, F6, F7 (revision-candidate draft Forge#94, no version bump, maintainer's call), the `announcement_binds` 0xcb filter found alongside F4 (Forge#95 against main), and forge-ui U5–U7. **Merged on Forge main:** F5's documents and F8 (Forge#92), U1 (Forge#87), U2 (Forge#90), U3 (Forge#91), U4 (Forge#89), U8 (Forge#84), U9 and the duplicated unit constants (Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
 
