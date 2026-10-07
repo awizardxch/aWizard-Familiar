@@ -17,7 +17,7 @@ amendment). Both PRs carry the simulator suites that show the pre-fix acceptance
 pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
 [awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
 `055a161`) and F3 by [awizardxch/Forge#86](https://github.com/awizardxch/Forge/pull/86) (main
-`399afbf`), both verified below. **Open:** forge-puzzles F4, F6, F7 (one revision-candidate draft PR, pending; F5's docs half and F8 are in a Forge PR), forge-ui U5–U7 (U1 fix in Forge#87, U2, U3 and U4 in Forge PRs, U8 fixed in
+`399afbf`), both verified below. **Open:** forge-puzzles F4, F6, F7 (revision-candidate draft Forge#94, no version bump, maintainer's call; F5's docs half and F8 in Forge#92; the `announcement_binds` 0xcb filter found alongside F4 is Forge#95 against main), forge-ui U5–U7 (U1 fix in Forge#87, U2 in Forge#90, U3 in Forge#91, U4 in Forge#89, U8 fixed in
 Forge#84, U9 in Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
@@ -537,6 +537,20 @@ I2 passes on this path. Use `run_with_cost(11_000_000_000, …)` or
   other derivations (`common.rue:442`, `registry_common.rue:158`, `finalizer.rue:133,175`) already
   use `coinid`, which hard-rejects wrong widths and non-canonical amounts and is cheaper. Finish
   the job.
+- **Fix proposed (draft [awizardxch/Forge#94](https://github.com/awizardxch/Forge/pull/94),
+  `d69a489`).** Both derivations now call `coinid`; `add`, `remove` and `register` move, so the
+  six-leaf root, the registry root and the revision fingerprint (`6298777e…` →
+  `ce72d7f7…`) move with them. Opened as a draft with no `PROTOCOL_VERSION` bump: cutting the
+  revision is the maintainer's decision. New `_test_v14_coinid_derivations.py` (79 checks, with
+  `--before <compiled dir>` to run the same probes against another build) shows the width and
+  leading-zero refusals moving from downstream message pairing / `valid_pool` to `coinid` itself.
+- **Collateral, fixed in [awizardxch/Forge#95](https://github.com/awizardxch/Forge/pull/95)
+  against main.** Rebuilding for F4 landed the new registry hash on a `0xcb` first byte and
+  creation was refused with "announces nothing": `announcement_binds` in `forge_v14_create.py`
+  (from Forge#83) skipped every announcement whose message began `0xcb`, meaning to leave only
+  the CAT ring's own 33-byte one alone. One creation in 256 on main hit the same latent refusal
+  for any registry or pool hash with that first byte. The filter now requires a CAT spend, a
+  coin announcement and a 33-byte message. `_test_v14_create.py` 29/29 on main's compiled set.
 
 ### F5 — The "one time in 256" rationale for the announcement prefix is wrong (Info)
 
@@ -547,11 +561,15 @@ I2 passes on this path. Use `run_with_cost(11_000_000_000, …)` or
   hash is never refused. The 49-byte `"forge-reserve-v14" ‖ hash` is fine as a namespace; the
   stated reason is not.
 
+- **Fix proposed:** the two documents in Forge#92, the `.rue` comment in Forge#94 (`ac198a8`).
+
 ### F6 — Stale comments in shipping sources (Info)
 
 `forge_multi_reserve_finalizer.rue:13` says the reserve id is "derived from the reserve's parent
 id (solution)" while `:224-225` reads `old_state.reserve_parents` from the truth;
 `forge_lp_cat_tail.rue:24-25` cites `_test_v12_*` suites the repo does not ship.
+
+- **Fix proposed** in Forge#94 (`dbf8256`, comment-only, no hex moves).
 
 ### F7 — Non-canonical `h` stored raw in state (Info, provisional)
 
@@ -561,10 +579,17 @@ id (solution)" while `:224-225` reads `old_state.reserve_parents` from the truth
   mempool validator refuses `ASSERT_HEIGHT_ABSOLUTE` with such an atom, so it cannot be pushed;
   block-mode validation by a farmer was not evaluated. Cheap hardening: store `h` after
   arithmetic.
+- **Fix proposed** in Forge#94 (`486b692`): `let height = h + 0` in the shared prologue and
+  `let bps = new_bps + 0` in `dao_fee`, so the hashed state, the truth and `ASSERT_HEIGHT_ABSOLUTE`
+  always carry canonical atoms. All six leaves move (shared prologue). Behaviour note: a spend
+  carrying a leading-zero `h` is now accepted as the canonical spend it is, where before it was
+  refused in mempool mode (code 14); nothing honest changes.
 
 ### F8 — `_test_v14_consensus_timelocks.py` blames an absent V14 build when the blocker is the private V11 control (Info)
 
 Runbook rule 9 asks a failure to say which of two reasons it has; this skip names the wrong one.
+
+- **Fix proposed** in [awizardxch/Forge#92](https://github.com/awizardxch/Forge/pull/92), together with F5's two documents.
 
 ### forge-puzzles — rows that pass
 
