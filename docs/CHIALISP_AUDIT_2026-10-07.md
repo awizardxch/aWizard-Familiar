@@ -7,7 +7,7 @@ re-read at its cited lines by a second pass; the ones marked **re-verified** wer
 re-executed from a clean scratch copy before being written here. Findings carry the spec's row id
 so a reader can go from the claim to the documentation rule it rests on.
 
-**Status: 4 repositories, 33 findings (3 Critical, 4 High, 5 Medium, 8 Low, 13 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager.**
+**Status: 4 repositories, 34 findings (3 Critical, 4 High, 5 Medium, 9 Low, 13 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager.**
 
 **Fixed and merged 2026-10-07:** Nightspire-Market N1–N5, N7, N8 in
 [awizardxch/Nightspire-Market#12](https://github.com/awizardxch/Nightspire-Market/pull/12)
@@ -57,7 +57,8 @@ testnet11, Nightspire-Market has no deployment of any kind.
 | S6 | Spellbook | recursive CLVM walker bounded by Python recursion | Low | confirmed |
 | F4 | forge-puzzles | two `sha256` derivations where `coinid` belongs | Low | confirmed, fail-closed |
 | U2, U3, U4 | forge-ui | multisig board serves offers and partial signatures; backref parser and version-dependent cost cap; one unredacted offer reader | Low | confirmed / provisional |
-| S7, N7–N10, F5–F8, U5–U8 | all four | documentation contradicted by code, dead announcements, stale comments, logging, test hygiene, a dead swap panel with a fixed 3-decimal input scale | Info | — |
+| U9 | forge-ui | liquidity panel mirrors V12/V13's 1000-mojo locked floor on V14 pools, whose floor is 1 | Low | fix in Forge#85 |
+| S7, N7–N10, F5–F8, U5–U8 | all four | documentation contradicted by code, dead announcements, stale comments, logging, test hygiene, a dead swap panel with a fixed 3-decimal input scale | Info | U8 fix in Forge#84 |
 
 Three Critical findings, four High, five Medium. Across the four repositories 61 rows were marked
 PASS with a citation each (the per-repository tables below); the rows that could not be evaluated
@@ -740,6 +741,16 @@ Three Info-level nits, none a ratio defect:
   constant would keep them that way.
 - Nightspire's `cat_usage.md` composition (now hinted, N3) and Spellbook's native lane (XCH only)
   raise no ratio question.
+
+Both nits are now PRs on the monorepo: [awizardxch/Forge#84](https://github.com/awizardxch/Forge/pull/84)
+removes `SwapPanel` (U8); [awizardxch/Forge#85](https://github.com/awizardxch/Forge/pull/85) gives the
+unit constants one definition each. Consolidating them surfaced one more finding:
+
+- **U9 (Low)** `LiquidityPanel.tsx` capped withdrawals at `total_lp − 1000` for every pool at
+  protocol 13 or later, mirroring V12/V13's `MIN_LOCKED_LP`; V14 (protocol 15) cut the floor to
+  `LOCKED_BURN = 1` (`forge_action_common.rue:110`, `forge_v14_driver.py:69`). On V14 pools the
+  panel left the last 0.999 LP unwithdrawable through the UI. Mirror drift of a puzzle constant
+  (`clvmPuzzleAudit.md` class 7/9); fixed per protocol version in Forge#85's second commit.
 
 ## Simulator verification
 
