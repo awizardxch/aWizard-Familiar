@@ -7,7 +7,7 @@ re-read at its cited lines by a second pass; the ones marked **re-verified** wer
 re-executed from a clean scratch copy before being written here. Findings carry the spec's row id
 so a reader can go from the claim to the documentation rule it rests on.
 
-**Status: 4 repositories, 32 findings (3 Critical, 4 High, 5 Medium, 8 Low, 12 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager.**
+**Status: 4 repositories, 33 findings (3 Critical, 4 High, 5 Medium, 8 Low, 13 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager.**
 
 **Fixed and merged 2026-10-07:** Nightspire-Market N1–N5, N7, N8 in
 [awizardxch/Nightspire-Market#12](https://github.com/awizardxch/Nightspire-Market/pull/12)
@@ -57,7 +57,7 @@ testnet11, Nightspire-Market has no deployment of any kind.
 | S6 | Spellbook | recursive CLVM walker bounded by Python recursion | Low | confirmed |
 | F4 | forge-puzzles | two `sha256` derivations where `coinid` belongs | Low | confirmed, fail-closed |
 | U2, U3, U4 | forge-ui | multisig board serves offers and partial signatures; backref parser and version-dependent cost cap; one unredacted offer reader | Low | confirmed / provisional |
-| S7, N7–N10, F5–F8, U5–U7 | all four | documentation contradicted by code, dead announcements, stale comments, logging, test hygiene | Info | — |
+| S7, N7–N10, F5–F8, U5–U8 | all four | documentation contradicted by code, dead announcements, stale comments, logging, test hygiene, a dead swap panel with a fixed 3-decimal input scale | Info | — |
 
 Three Critical findings, four High, five Medium. Across the four repositories 61 rows were marked
 PASS with a citation each (the per-repository tables below); the rows that could not be evaluated
@@ -711,6 +711,35 @@ whether any deployment actually runs the responder beside a Sage wallet, which d
 severity.
 
 ---
+
+### G4 addendum — 1 CAT = 1000 mojos, checked across Forge (2026-10-07, after the main pass)
+
+The one `cats` row the main pass left unevaluated: "Chia Network has made the design decision to
+map 1 CAT to 1,000 XCH mojos … the official Chia wallet will not support CATs with a ratio other
+than 1:1000." Checked read-only across forge-ui `52218f4` and forge-puzzles `84ce05c`.
+
+**PASS.** Every live path holds the ratio:
+
+| where | evidence |
+|---|---|
+| unit constants | `src/lib/coinUtils.ts:12` `MOJOS_PER_CAT = 1_000n`, `MOJOS_PER_XCH = 1_000_000_000_000n` |
+| CAT and LP display | `formatCatAmount(mojos, decimals = 3)` (`src/lib/cfmm.ts:693`); LP rendered with `LP_DECIMALS = 3` in `LiquidityPanel.tsx` and `poolAnalytics.ts`, and `PoolStats.tsx:88` |
+| per-asset decimals | 12 for the native asset, 3 for every CAT, at every source: `createPoolFlow.ts:129,139`, `poolIndexer.ts:1299`, `agent/serverQuote.ts:103`, `offerAssets.ts:71-77`, `RouteBreakdown.tsx:decimalsFor`; no token record in `data/` carries any other value |
+| agent API | amounts are mojo strings; pool slots carry `decimals` 12 / 3 (`docs/FORGE_AGENT_API.md:16,104-105`) |
+| LP accounting | LP is a CAT: one LP mojo is one XCH mojo of backing (`forge_create_pool.py:296-340`, `createPoolFlow.ts:189-195`); `lpRatio` changes granularity only, is single-asset-vault-only, and is refused on baskets (`_test_lp_ratio.py`) — the ratio to XCH mojos is untouched, so wallets display LP correctly as a 3-decimal CAT |
+
+Three Info-level nits, none a ratio defect:
+
+- **U8 (Info)** `src/components/SwapPanel.tsx:37` parses the typed amount as `parseFloat(x) * 1000`
+  regardless of the input asset, so an XCH input would be scaled at 3 decimals instead of 12.
+  The component is imported by nothing (dead code since the aggregator-based swap replaced it);
+  delete it or scale by the slot's `decimals` as line 167 of the same file already does.
+- `MOJOS_PER_CAT` is defined twice (`coinUtils.ts:12`, `types.ts:9`) and `LP_DECIMALS` twice
+  (`LiquidityPanel.tsx:64`, `poolAnalytics.ts:23`), with literal `3` beside them in
+  `LiquidityPanel.tsx:778,965,1070,1117` and `PoolStats.tsx:88`. All agree today; one exported
+  constant would keep them that way.
+- Nightspire's `cat_usage.md` composition (now hinted, N3) and Spellbook's native lane (XCH only)
+  raise no ratio question.
 
 ## Simulator verification
 
