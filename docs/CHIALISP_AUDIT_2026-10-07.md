@@ -14,7 +14,10 @@ so a reader can go from the claim to the documentation rule it rests on.
 (N6, N9, N10 left as design decisions); Spellbook S1–S8 in
 [awizardxch/Spellbook#109](https://github.com/awizardxch/Spellbook/pull/109) (S4 as a document
 amendment). Both PRs carry the simulator suites that show the pre-fix acceptances turning into
-pinned refusals. **Open:** forge-puzzles F1–F8 and forge-ui U1–U7.
+pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
+[awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
+`055a161`), verified below; F3's fix is in progress. **Open:** forge-puzzles F3–F8 and forge-ui
+U1–U7, and the public `forge-puzzles` slice until the next sync carries #83.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
 
@@ -43,12 +46,12 @@ testnet11, Nightspire-Market has no deployment of any kind.
 | N1 | Nightspire-Market | HTLC claim has no preimage length bound; the EVM and Solana legs take exactly 32 bytes, so a maker can take the Chia leg and strand the taker | **Critical** when wired | confirmed on the simulator |
 | S3 | Spellbook | a crafted offer string crashes the daemon (uncaught `OfferError`) | High | confirmed (PoC) |
 | S4 | Spellbook | proposed `forge_swap` signs responder-built spends the daemon does not decode | High | provisional (design) |
-| F1 | forge-puzzles | the creation bundle's binding spends are unsigned and separable; a farmer takes every genesis reserve and the fee | High | confirmed on the simulator |
+| F1 | forge-puzzles | the creation bundle's binding spends are unsigned and separable; a farmer takes every genesis reserve and the fee | High | fixed in Forge#83, refusal verified on the simulator |
 | U1 | forge-ui | `POST /api/push-tx` has the host's Sage wallet sign caller-supplied spends | High | provisional |
 | N2 | Nightspire-Market | claim and refund overlap forever after the timelock; the docs claim they do not | Medium | confirmed on the simulator |
 | N3 | Nightspire-Market | `CREATE_COIN` without a hint makes CAT payouts invisible to wallets | Medium | provisional |
 | S5 | Spellbook | `offer_delete` on the Sage path makes a live offer uncancellable through the daemon | Medium | provisional |
-| F2 | forge-puzzles | untrusted offer puzzle reveals run with no cost cap | Medium | confirmed |
+| F2 | forge-puzzles | untrusted offer puzzle reveals run with no cost cap | Medium | fixed in Forge#83 |
 | F3 | forge-puzzles | route-lane payout coin: router fee and trader refund redirectable by a farmer; trader's request untouched | Medium | confirmed on the simulator |
 | N4, N5, N6 | Nightspire-Market | malleable unused solution fields; test runner overwrites the hex it should compare; classic Chialisp without a sigil | Low | confirmed / provisional |
 | S6 | Spellbook | recursive CLVM walker bounded by Python recursion | Low | confirmed |
@@ -501,7 +504,9 @@ conditions = Program.from_bytes(bytes(spend.puzzle_reveal)).run(Program.from_byt
 ```
 
 chia-blockchain 2.5.6's `Program.run` takes `max_cost=INFINITE_COST`; the maker's spends come from
-a user-supplied offer. `forge_offer.py:263-267` beside it passes `11_000_000_000`. A maker puzzle
+a user-supplied offer. **Fixed in Forge#83:** `_reveal_conditions` runs the reveal with
+`run_with_cost(MAX_REVEAL_COST = 11_000_000_000, …)` and returns `None` past the cap;
+`_test_surplus_refund_binding.py` checks the cap and that a reveal past it is `None`, not a hang. `forge_offer.py:263-267` beside it passes `11_000_000_000`. A maker puzzle
 that loops stalls the responder in `_asserted_announcements`; the surrounding `except Exception`
 never returns. `Program.from_bytes` here uses the non-backref parser, so the deserialiser half of
 I2 passes on this path. Use `run_with_cost(11_000_000_000, …)` or
@@ -797,6 +802,28 @@ fee, with the creator's two signed spends reused byte for byte under their genui
 signature. The half attack pins the mechanism: with the registry spend present, rewriting a
 launcher's target is refused by `register`'s announcement assertion
 (`ASSERT_ANNOUNCE_CONSUMED_FAILED`); drop that spend and nothing else objects.
+
+**Fix verified (Forge#83, main `055a161`).** The creator's XCH spend now asserts, read off the
+router spends as built (`announcement_binds` in `forge_v14_create.py`), the singleton launcher's
+coin announcement, each reserve launcher's coin announcement (whose message names the created
+puzzle hash, so a redirected launcher changes the message), the fee settlement's puzzle
+announcement and the registry's own `forge-registered-v14` puzzle announcement. The same probe
+against the fixed composer:
+
+```
+CONTROL: honest creation bundle on a fresh simulator
+  push_tx verdict: SUCCESS  cost 339,830,730
+  pool singleton on chain: True   both reserves on chain: [True, True]   registry child on chain: True
+ATTACK (full): drop register + slots, redirect reserves + fee to the attacker
+  push_tx verdict: FAILED / ASSERT_ANNOUNCE_CONSUMED_FAILED
+HALF ATTACK: keep register + slots, rewrite ONLY the reserve launcher targets
+  push_tx verdict: FAILED / ASSERT_ANNOUNCE_CONSUMED_FAILED
+```
+
+The repo's own `_test_v14_create.py` carries the three farmer variants (drop and redirect, drop
+only, redirect only) and reports `29/29`; no puzzle changed, so the revision fingerprint is
+unchanged. The before-and-after rule holds: the shipped probe is the one that was accepted on
+`84ce05c` and is refused on `055a161`.
 
 One refinement to the finding's description: the attack does not abort the creation. The eve
 singleton is still minted and the creator still receives LP, so F1 is a *reserve and fee

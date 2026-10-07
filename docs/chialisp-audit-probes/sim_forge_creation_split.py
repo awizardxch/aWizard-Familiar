@@ -312,10 +312,9 @@ async def run_attack():
         print(f"  dropped unsigned spends: {dropped}")
         bundle = SpendBundle([*plan.creator_spends, *attack_spends], sig)
         status, error = await client.push_tx(bundle)
-        conds, _ = drv.validate(bundle)
-        print(f"  push_tx verdict: {verdict((status, error))}  cost {conds.cost:,}")
+        print(f"  push_tx verdict: {verdict((status, error))}")
         if status != MempoolInclusionStatus.SUCCESS:
-            print("  -> REFUSED on the simulator; the finding must be downgraded.")
+            print("  -> REFUSED on the simulator: the creation bundle can no longer be split.")
             return False
         await sim.farm_block()
         att_xch = await additions_at(client, ATTACKER_PH)
