@@ -17,7 +17,7 @@ amendment). Both PRs carry the simulator suites that show the pre-fix acceptance
 pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
 [awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
 `055a161`) and F3 by [awizardxch/Forge#86](https://github.com/awizardxch/Forge/pull/86) (main
-`399afbf`), both verified below. **Open:** forge-puzzles F4–F8 and forge-ui U3, U5–U7 (U1 fix in Forge#87, U2 and U4 in Forge PRs, U8 fixed in
+`399afbf`), both verified below. **Open:** forge-puzzles F4 (draft PR cutting a revision, pending) and F5–F8, forge-ui U5–U7 (U1 fix in Forge#87, U2, U3 and U4 in Forge PRs, U8 fixed in
 Forge#84, U9 in Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
@@ -57,7 +57,7 @@ testnet11, Nightspire-Market has no deployment of any kind.
 | N4, N5, N6 | Nightspire-Market | malleable unused solution fields; test runner overwrites the hex it should compare; classic Chialisp without a sigil | Low | confirmed / provisional |
 | S6 | Spellbook | recursive CLVM walker bounded by Python recursion | Low | confirmed |
 | F4 | forge-puzzles | two `sha256` derivations where `coinid` belongs | Low | confirmed, fail-closed |
-| U2, U3, U4 | forge-ui | multisig board serves offers and partial signatures; backref parser and version-dependent cost cap; one unredacted offer reader | Low | U2 fix in a Forge PR (no partial signatures over HTTP; bundle and offer file only with an owner proof); U4 fix in Forge#89 (router-taker redacts, check guards every reader); U3 open |
+| U2, U3, U4 | forge-ui | multisig board serves offers and partial signatures; backref parser and version-dependent cost cap; one unredacted offer reader | Low | U2 fix in a Forge PR (no partial signatures over HTTP; bundle and offer file only with an owner proof); U4 fix in Forge#89 (router-taker redacts, check guards every reader); U3 fix in a Forge PR (backref-free parse, capped runs, child bound, INFINITE_COST pinned) |
 | U9 | forge-ui | liquidity panel mirrors V12/V13's 1000-mojo locked floor on V14 pools, whose floor is 1 | Low | fix in Forge#85 |
 | S7, N7–N10, F5–F8, U5–U8 | all four | documentation contradicted by code, dead announcements, stale comments, logging, test hygiene, a dead swap panel with a fixed 3-decimal input scale | Info | U8 fix in Forge#84 |
 
