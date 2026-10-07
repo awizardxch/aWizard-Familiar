@@ -17,7 +17,7 @@ amendment). Both PRs carry the simulator suites that show the pre-fix acceptance
 pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
 [awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
 `055a161`) and F3 by [awizardxch/Forge#86](https://github.com/awizardxch/Forge/pull/86) (main
-`399afbf`), both verified below. **Open:** forge-puzzles F4–F8 and forge-ui U1–U7 (U8 fixed in
+`399afbf`), both verified below. **Open:** forge-puzzles F4–F8 and forge-ui U2–U7 (U1 fix in a Forge PR, U8 fixed in
 Forge#84, U9 in Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
@@ -48,7 +48,7 @@ testnet11, Nightspire-Market has no deployment of any kind.
 | S3 | Spellbook | a crafted offer string crashes the daemon (uncaught `OfferError`) | High | confirmed (PoC) |
 | S4 | Spellbook | proposed `forge_swap` signs responder-built spends the daemon does not decode | High | provisional (design) |
 | F1 | forge-puzzles | the creation bundle's binding spends are unsigned and separable; a farmer takes every genesis reserve and the fee | High | fixed in Forge#83, refusal verified on the simulator |
-| U1 | forge-ui | `POST /api/push-tx` has the host's Sage wallet sign caller-supplied spends | High | provisional |
+| U1 | forge-ui | `POST /api/push-tx` has the host's Sage wallet sign caller-supplied spends | High | fix in Forge PR (route deleted, public-surface check guards it) |
 | N2 | Nightspire-Market | claim and refund overlap forever after the timelock; the docs claim they do not | Medium | confirmed on the simulator |
 | N3 | Nightspire-Market | `CREATE_COIN` without a hint makes CAT payouts invisible to wallets | Medium | provisional |
 | S5 | Spellbook | `offer_delete` on the Sage path makes a live offer uncancellable through the daemon | Medium | provisional |
