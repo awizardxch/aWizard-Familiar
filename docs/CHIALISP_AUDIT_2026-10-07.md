@@ -16,8 +16,9 @@ so a reader can go from the claim to the documentation rule it rests on.
 amendment). Both PRs carry the simulator suites that show the pre-fix acceptances turning into
 pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
 [awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
-`055a161`), verified below; F3's fix is in progress. **Open:** forge-puzzles F3–F8 and forge-ui
-U1–U7, and the public `forge-puzzles` slice until the next sync carries #83.
+`055a161`) and F3 by [awizardxch/Forge#86](https://github.com/awizardxch/Forge/pull/86) (main
+`399afbf`), both verified below. **Open:** forge-puzzles F4–F8 and forge-ui U1–U7 (U8 fixed in
+Forge#84, U9 in Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
 
@@ -52,7 +53,7 @@ testnet11, Nightspire-Market has no deployment of any kind.
 | N3 | Nightspire-Market | `CREATE_COIN` without a hint makes CAT payouts invisible to wallets | Medium | provisional |
 | S5 | Spellbook | `offer_delete` on the Sage path makes a live offer uncancellable through the daemon | Medium | provisional |
 | F2 | forge-puzzles | untrusted offer puzzle reveals run with no cost cap | Medium | fixed in Forge#83 |
-| F3 | forge-puzzles | route-lane payout coin: router fee and trader refund redirectable by a farmer; trader's request untouched | Medium | confirmed on the simulator |
+| F3 | forge-puzzles | route-lane payout coin: router fee and trader refund redirectable by a farmer; trader's request untouched | Medium | fixed in Forge#86, refusal verified on the simulator |
 | N4, N5, N6 | Nightspire-Market | malleable unused solution fields; test runner overwrites the hex it should compare; classic Chialisp without a sigil | Low | confirmed / provisional |
 | S6 | Spellbook | recursive CLVM walker bounded by Python recursion | Low | confirmed |
 | F4 | forge-puzzles | two `sha256` derivations where `coinid` belongs | Low | confirmed, fail-closed |
@@ -897,6 +898,28 @@ router fee plus the trader's slippage refund, bounded by `fee_bps` and the quote
 notarized request itself is bound and cannot be moved. Severity raised from Low to **Medium**: it
 is a live theft of protocol revenue and of the trader's refund on every route-lane swap, not a
 hypothetical.
+
+**Fix verified (Forge#86 "Exact settlement", main `399afbf`).** The lane no longer carves a
+fee or refund out of the payout coin. A pool pays exactly what it releases, to exactly the groups
+the maker's signed spends assert (`bound_groups`, `exact_payout_solution`); the router's fee on an
+XCH output is a requested payment to the router inside the trader's own group, and on an input
+leg it is paid by the trader's own spend (`router_fee_paid`). An offer that asks for less than the
+release, or omits the fee payment, is refused by the lane itself before anything is built ("quote
+again" / "rebuild the offer with the fee payment"). The original probe no longer applies, since
+its under-asking offer is refused at the lane; the adapted probe
+(`sim_forge_payout_redirect_exact.py`) builds the exact offer and attacks the payout coin's
+solution:
+
+```
+CONTROL  trader 947,710 + router fee 29,310 in the trader's one group: SUCCESS; paid as asked, attacker 0
+ATTACK A redirect the router's fee payment:   FAILED / ASSERT_ANNOUNCE_CONSUMED_FAILED
+ATTACK B redirect the trader's payment:        FAILED / ASSERT_ANNOUNCE_CONSUMED_FAILED
+ATTACK C add an unsigned group (1 mojo):       FAILED / MINTING_COIN
+```
+
+Every mutation leaves every other spend byte-identical, so the refusals are the maker's own
+`ASSERT_PUZZLE_ANNOUNCEMENT` over the whole group and the pool's exact release, not a harness
+artefact. No puzzle changed.
 
 
 ## What the run says about the spec
