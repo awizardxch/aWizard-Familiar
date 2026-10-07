@@ -7,7 +7,7 @@ re-read at its cited lines by a second pass; the ones marked **re-verified** wer
 re-executed from a clean scratch copy before being written here. Findings carry the spec's row id
 so a reader can go from the claim to the documentation rule it rests on.
 
-**Status: 4 repositories, 32 findings (3 Critical, 4 High, 4 Medium, 9 Low, 12 Info). Nothing here has been fixed yet.**
+**Status: 4 repositories, 32 findings (3 Critical, 4 High, 5 Medium, 8 Low, 12 Info); the seven that the simulator lane can judge (S1, N1, N2, N4, N8, F1, F3) are confirmed on the real mempool manager. Nothing here has been fixed yet.**
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
 
@@ -31,24 +31,25 @@ testnet11, Nightspire-Market has no deployment of any kind.
 
 | id | repository | finding | severity | status |
 |---|---|---|---|---|
-| S1 | Spellbook | the daemon's "curried" standard puzzle is not the standard curry; every address it derives matches no wallet | **Critical** | confirmed, re-verified |
+| S1 | Spellbook | the daemon's "curried" standard puzzle is not the standard curry; every address it derives matches no wallet | **Critical** | confirmed on the simulator |
 | S2 | Spellbook | `offer_make` lets the request-token agent choose the payee of the requested leg; the approver never sees it | **Critical** | confirmed (PoC) |
-| N1 | Nightspire-Market | HTLC claim has no preimage length bound; the EVM and Solana legs take exactly 32 bytes, so a maker can take the Chia leg and strand the taker | **Critical** when wired | confirmed |
+| N1 | Nightspire-Market | HTLC claim has no preimage length bound; the EVM and Solana legs take exactly 32 bytes, so a maker can take the Chia leg and strand the taker | **Critical** when wired | confirmed on the simulator |
 | S3 | Spellbook | a crafted offer string crashes the daemon (uncaught `OfferError`) | High | confirmed (PoC) |
 | S4 | Spellbook | proposed `forge_swap` signs responder-built spends the daemon does not decode | High | provisional (design) |
-| F1 | forge-puzzles | the creation bundle's binding spends are unsigned and separable; a farmer takes every genesis reserve and the fee | High | confirmed, re-verified |
+| F1 | forge-puzzles | the creation bundle's binding spends are unsigned and separable; a farmer takes every genesis reserve and the fee | High | confirmed on the simulator |
 | U1 | forge-ui | `POST /api/push-tx` has the host's Sage wallet sign caller-supplied spends | High | provisional |
-| N2 | Nightspire-Market | claim and refund overlap forever after the timelock; the docs claim they do not | Medium | confirmed |
+| N2 | Nightspire-Market | claim and refund overlap forever after the timelock; the docs claim they do not | Medium | confirmed on the simulator |
 | N3 | Nightspire-Market | `CREATE_COIN` without a hint makes CAT payouts invisible to wallets | Medium | provisional |
 | S5 | Spellbook | `offer_delete` on the Sage path makes a live offer uncancellable through the daemon | Medium | provisional |
 | F2 | forge-puzzles | untrusted offer puzzle reveals run with no cost cap | Medium | confirmed |
+| F3 | forge-puzzles | route-lane payout coin: router fee and trader refund redirectable by a farmer; trader's request untouched | Medium | confirmed on the simulator |
 | N4, N5, N6 | Nightspire-Market | malleable unused solution fields; test runner overwrites the hex it should compare; classic Chialisp without a sigil | Low | confirmed / provisional |
 | S6 | Spellbook | recursive CLVM walker bounded by Python recursion | Low | confirmed |
-| F3, F4 | forge-puzzles | unsigned route-lane fee/refund group; two `sha256` derivations where `coinid` belongs | Low | provisional / confirmed |
+| F4 | forge-puzzles | two `sha256` derivations where `coinid` belongs | Low | confirmed, fail-closed |
 | U2, U3, U4 | forge-ui | multisig board serves offers and partial signatures; backref parser and version-dependent cost cap; one unredacted offer reader | Low | confirmed / provisional |
 | S7, N7–N10, F5–F8, U5–U7 | all four | documentation contradicted by code, dead announcements, stale comments, logging, test hygiene | Info | — |
 
-Three Critical findings, four High, four Medium. Across the four repositories 61 rows were marked
+Three Critical findings, four High, five Medium. Across the four repositories 61 rows were marked
 PASS with a citation each (the per-repository tables below); the rows that could not be evaluated
 are listed at the end of each section, most often because the artefact could not be rebuilt from
 source on a clean box or because the code the row concerns is not in the repository.
@@ -499,7 +500,7 @@ never returns. `Program.from_bytes` here uses the non-backref parser, so the des
 I2 passes on this path. Use `run_with_cost(11_000_000_000, …)` or
 `conditions_dict_for_solution(…, 11_000_000_000)` as the sibling file does.
 
-### F3 — Route-lane payout coin: the router fee and trader refund groups are bound by nothing signed (Low, provisional)
+### F3 — Route-lane payout coin: the router fee and trader refund groups are bound by nothing signed (Medium, confirmed on the simulator)
 
 - Docs row: **A2 / A3**. `contracts/forge_v14_offer.py:300-316` appends `[surplus_ph, fee]` and
   `[back, refund]` to a `(payout_coin.name() . payments)` group that the trader's offer does not
@@ -507,7 +508,7 @@ I2 passes on this path. Use `run_with_cost(11_000_000_000, …)` or
   trader's requested payment stays intact, so the bundle stays valid. Review finding 14 (a
   relayer-prepended requested group) is fixed in `_trader_ph`; this redirection is not recorded.
   Have a signed coin assert the `OFFER_MOD` announcement for the group, or route fee and refund
-  through the trader's requested groups, which the maker asserts. Read, not executed.
+  through the trader's requested groups, which the maker asserts. Confirmed on the simulator — see Simulator verification.
 
 ### F4 — Two coin-id derivations use `sha256` over solution bytes where the repo's own rule says `coinid` (Low, fail-closed)
 
@@ -796,7 +797,33 @@ redirection that leaves a registered-looking pool with no reserves*, not a denia
 The remediation stands as written — link the creator's signed spends to the registry spend and
 to each launcher's announcement.
 
-SIM_F3_PLACEHOLDER
+**F3 — `sim_forge_payout_redirect.py`** (same lane and funding as the repo's `scripts/sim-v14.py`;
+a CAT→XCH swap through `forge_v14_offer.settle_swap` with a 300 bps router fee, so the payout coin
+carries both a fee group and a refund group; each phase in a fresh simulator):
+
+```
+CONTROL  push honest -> status=SUCCESS
+  TRADER xch sum=947,710 (want 946,710 + refund 1,000) | ROUTER sum=29,310 | ATTACKER sum=0
+ATTACK A  redirect BOTH fee+refund -> ATTACKER (every non-payout spend byte-identical: True)
+  push -> status=SUCCESS
+  TRADER sum=946,710 | ROUTER sum=0 | ATTACKER sum=30,310
+ATTACK B  keep the fee group, redirect ONLY the refund -> ATTACKER
+  push -> status=SUCCESS
+  TRADER sum=946,710 | ROUTER sum=29,310 | ATTACKER sum=1,000
+```
+
+F3 moves from PROVISIONAL to **confirmed on the simulator**, re-run independently. The reading
+behind it also held up: the swap leaf asserts only the *input* settlement's announcement
+(`forge_action_swap.rue:90-99` emits `settlement_binding(asset_in, …)` and a bare `CreateCoin` of
+the payout coin), the trader's offer asserts only its own requested group
+(`forge_v14_offer.py:238-252`), and the group with nonce `payout_coin.name()` is asserted by no
+spend in the bundle. The payout coin is a `settlement_payments` coin, keyless by design on mainnet
+too, so the harness's keyless trader takes nothing away from the result. What is stealable is the
+router fee plus the trader's slippage refund, bounded by `fee_bps` and the quote's overage; the
+notarized request itself is bound and cannot be moved. Severity raised from Low to **Medium**: it
+is a live theft of protocol revenue and of the trader's refund on every route-lane swap, not a
+hypothetical.
+
 
 ## What the run says about the spec
 
