@@ -757,7 +757,46 @@ recovery failure the finding describes, demonstrated end to end.
 
 ### forge-puzzles — F1 and F3
 
-SIM_FORGE_PLACEHOLDER
+**F1 — `sim_forge_creation_split.py`** (run from the checkout's `contracts/` directory;
+builds the pool through the production `forge_v14_create` lane with a keyed
+`p2_delegated_puzzle_or_hidden_puzzle` creator and real `AGG_SIG_ME` signatures, a permissive
+test CAT issued as the repo's own `_sim_harness` does, and the registry minted as `scripts/sim-v14.py`
+does; each phase runs in a fresh simulator):
+
+```
+CONTROL: honest creation bundle on a fresh simulator
+  bundle has 11 spends (2 creator / 9 router)
+  push_tx verdict: SUCCESS  cost 337,504,530
+  pool singleton on chain: True
+  both reserves on chain:  [True, True]
+  registry child on chain: True
+ATTACK (full): drop register + slots, redirect reserves + fee to the attacker
+  dropped unsigned spends: ['63af391c', 'ae4efe04', 'ab3477cb']
+  push_tx verdict: SUCCESS  cost 181,484,318
+  XCH coins now at ATTACKER_PH:            [100000000, 1000000]
+  CAT(d036c44f) coins at ATTACKER_PH: [50000]
+  pool eve singleton created:              True
+  creator still receives genesis LP:       [49999]
+  reserve coins the pool state names exist: [False, False]
+HALF ATTACK: keep register + slots, rewrite ONLY the reserve launcher targets
+  push_tx verdict: FAILED / ASSERT_ANNOUNCE_CONSUMED_FAILED
+```
+
+F1 is **confirmed on the simulator**, re-run independently of the pass that wrote it. The real
+mempool — coin existence, lineage, ephemeral rules and signature verification all enforced —
+accepts the full attack and pays the attacker the native reserve, the CAT reserve and the creation
+fee, with the creator's two signed spends reused byte for byte under their genuine aggregate
+signature. The half attack pins the mechanism: with the registry spend present, rewriting a
+launcher's target is refused by `register`'s announcement assertion
+(`ASSERT_ANNOUNCE_CONSUMED_FAILED`); drop that spend and nothing else objects.
+
+One refinement to the finding's description: the attack does not abort the creation. The eve
+singleton is still minted and the creator still receives LP, so F1 is a *reserve and fee
+redirection that leaves a registered-looking pool with no reserves*, not a denial of creation.
+The remediation stands as written — link the creator's signed spends to the registry spend and
+to each launcher's announcement.
+
+SIM_F3_PLACEHOLDER
 
 ## What the run says about the spec
 
