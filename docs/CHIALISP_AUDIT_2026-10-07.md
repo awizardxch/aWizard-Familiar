@@ -699,6 +699,66 @@ severity.
 
 ---
 
+## Simulator verification
+
+The simulator lane (`clvmPuzzleAudit.md` Rule 0.5): `chia._tests.util.spend_sim`, the real mempool
+manager and coin store, chia-blockchain 2.5.6, with real BLS `AGG_SIG_ME` signatures where a puzzle
+asks for one. Every probe below carries its honest control in the same run and pins the refusal
+code. The scripts ship in [`docs/chialisp-audit-probes/`](chialisp-audit-probes/); each takes the
+path to the audited checkout as its argument and modifies nothing in it.
+
+### Nightspire-Market — `sim_nightspire_htlc.py <path to contracts/chia/htlc.hex>`
+
+```
+== control: 32-byte preimage claim; wrong preimage refused
+  [ok ] wrong preimage (32 bytes): REFUSED GENERATOR_RUNTIME_ERROR
+  [ok ] correct 32-byte preimage: ACCEPTED
+== N1: preimage width is unbounded (EVM/Solana legs take exactly 32 bytes)
+  [ok ] claim with 1-byte preimage: ACCEPTED
+  [ok ] claim with 33-byte preimage: ACCEPTED
+  [ok ] claim with 64-byte preimage: ACCEPTED
+  [ok ] claim with 1000-byte preimage: ACCEPTED
+== N2: claim and refund overlap after TIMELOCK; refund refused before it
+  [ok ] refund before timelock: REFUSED ASSERT_SECONDS_RELATIVE_FAILED
+  claim after timelock: SUCCESS; refund after timelock: SUCCESS  (both in mempool together)
+== N4: refund PAYLOAD is unconstrained; a relayer can rewrite it under the same signature
+  [ok ] refund with 500-byte junk PAYLOAD: ACCEPTED
+  [ok ] refund with a list PAYLOAD: ACCEPTED
+== N8: AMOUNT below the coin's value is accepted; the remainder goes to the farmer
+  [ok ] claim with AMOUNT = coin.amount - 12345: ACCEPTED   (12345 mojos became fee)
+  [ok ] claim with AMOUNT = coin.amount + 1: REFUSED MINTING_COIN
+```
+
+N1, N2, N4 and N8 move from "confirmed offline" to **confirmed on the simulator**. The N2 run is
+the one the offline lane could not give: after `pass_time(TIMELOCK + 60)` and a block, a claim on
+one HTLC coin and a refund on a sibling coin of the same puzzle sat in the mempool together and
+both settled in the next block. The control for E2 also holds: a refund before the timelock is
+refused with `ASSERT_SECONDS_RELATIVE_FAILED`, not with a generic runtime error.
+
+### Spellbook — `sim_spellbook_curry.py <path to spellbook/src>`
+
+```
+synthetic pk equal to chia-blockchain's: True
+spellbook puzzle hash : b101c4876bcec381613a844d5f7596a932c13491fd8df34d2d02f3a84b0ffcdb
+standard  puzzle hash : 3cdc48afc736233e5c9739adb28ae7f940d4be38f8904bb4141245e5e522001f
+same address: False
+[control] daemon reveal spends daemon coin: SUCCESS
+[S1] daemon spending a coin at the standard address for its own key: refused by its own builder — coin puzzle hash does not match this key/index
+[S1] standard wallet reveal spending the daemon's coin: FAILED WRONG_PUZZLE_HASH
+[control] standard wallet reveal spends standard-address coin: SUCCESS
+```
+
+S1 is **confirmed on the simulator** in both directions, and the shape of the defect is now
+exact: the *key* half agrees with chia-blockchain (the synthetic public key is identical), the
+*puzzle* half does not. The daemon's coins are not lost — its own reveal spends them — but a coin
+sent to the address a stock wallet derives from the same key is invisible to the daemon's builder,
+and a stock wallet's reveal cannot spend the daemon's coin (`WRONG_PUZZLE_HASH`). That is the
+recovery failure the finding describes, demonstrated end to end.
+
+### forge-puzzles — F1 and F3
+
+SIM_FORGE_PLACEHOLDER
+
 ## What the run says about the spec
 
 - **The password-coin row is the HTLC row.** Nightspire's puzzles pass A1 exactly the way the
