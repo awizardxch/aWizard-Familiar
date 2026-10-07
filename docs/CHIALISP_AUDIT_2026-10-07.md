@@ -17,7 +17,7 @@ amendment). Both PRs carry the simulator suites that show the pre-fix acceptance
 pinned refusals. Forge F1 and F2 are fixed in the private monorepo by
 [awizardxch/Forge#83](https://github.com/awizardxch/Forge/pull/83) (merged 2026-10-07, main
 `055a161`) and F3 by [awizardxch/Forge#86](https://github.com/awizardxch/Forge/pull/86) (main
-`399afbf`), both verified below. **Open:** forge-puzzles F4, F6, F7 (revision-candidate draft Forge#94, no version bump, maintainer's call), the `announcement_binds` 0xcb filter found alongside F4 (Forge#95 against main), and forge-ui U5–U7. **Merged on Forge main:** F5's documents and F8 (Forge#92), U1 (Forge#87), U2 (Forge#90), U3 (Forge#91), U4 (Forge#89), U8 (Forge#84), U9 and the duplicated unit constants (Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
+`399afbf`), both verified below. **Open:** forge-puzzles F4, F6, F7 (revision-candidate draft Forge#94, no version bump, maintainer's call), the `announcement_binds` 0xcb filter found alongside F4 (Forge#95 against main), and forge-ui U5 (Forge#98), U6 (Forge#96) and U7 (Forge#97), all open against main. **Merged on Forge main:** F5's documents and F8 (Forge#92), U1 (Forge#87), U2 (Forge#90), U3 (Forge#91), U4 (Forge#89), U8 (Forge#84), U9 and the duplicated unit constants (Forge#85), and the public `forge-puzzles` slice until the next sync carries them.
 Nothing in any of the four repositories is deployed to mainnet; Forge and Spellbook's Chia lane are
 testnet11, Nightspire-Market has no deployment of any kind.
 
@@ -700,11 +700,19 @@ suites that live in forge-puzzles, not here; `scripts/run-checks.mjs` fails on a
 `chia_rs` for a reason unrelated to quoting. Point the doc at forge-puzzles; skip, not fail, the
 api section when `PYTHON_BIN` lacks `chia_rs`.
 
+- **Fix proposed in [awizardxch/Forge#98](https://github.com/awizardxch/Forge/pull/98).** Reproduced
+  on main: 71 quoting checks green, 11 api checks red, every one a `ModuleNotFoundError` for
+  `chia_rs` or `chia`. The runner now probes the builders' interpreter and skips the api section
+  with a notice naming the interpreter and the fix; under `CI` or `FORGE_CHECKS_REQUIRE_PYTHON=1`
+  it fails instead, so the workflow that installs `requirements.txt` still enforces the lane.
+  The audit response's verification block says where each line runs.
+
 ### U6 — The browser console logs the wallet's aggregated signature (Info)
 
 - Docs row: **D2** ("presume that all signatures are public" is the docs' stance; the UI should
   still not widen it). `src/lib/walletConnect.ts:2517` logs `aggregated_signature` in production
   builds. Guard with `import.meta.env.DEV` like the debug-capture posts.
+- **Fix proposed in [awizardxch/Forge#96](https://github.com/awizardxch/Forge/pull/96)**: the one log line is behind `import.meta.env.DEV`; `tsc --noEmit` clean.
 
 ### U7 — Owner proof signs an `AGG_SIG_UNSAFE` digest with a ten-minute replay window (Info, recorded)
 
@@ -712,6 +720,12 @@ api section when `PYTHON_BIN` lacks `chia_rs`.
   under `(49 key digest)`; `api/_multisigAuth.js` `PROOF_WINDOW_MS = 10 min`. The prefix and
   `issuedAt` are the binding D1 asks for; a captured proof replays only the same idempotent action
   for ten minutes. Documented under review finding 11; acceptable.
+- **Hardened anyway in [awizardxch/Forge#97](https://github.com/awizardxch/Forge/pull/97)**, since the
+  read gate now serves a bearer offer file (U2): the gate remembers each accepted `(key, digest)`
+  until its window closes and refuses a second use with 403, recorded only after the signature
+  verified. In-process, like the per-launcher lock. Every client already signs a fresh proof per
+  request, so nothing honest changes. `multisigAuth.check.mjs` 10/10 with the replay case (a
+  mutation and the read gate), `multisigProposalPrivacy.check.mjs` 5/5, real BLS signatures.
 
 ### forge-ui — rows that pass
 
