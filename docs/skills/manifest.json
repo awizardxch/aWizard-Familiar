@@ -1,6 +1,6 @@
 {
- "version": 12,
- "updated": "2026-09-20",
+ "version": 13,
+ "updated": "2026-10-07",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "n-asset-pool-audit": {
@@ -24,12 +24,14 @@
    "forgePuzzleV10.md",
    "forgeLpCat.md",
    "forgePoolLifecycleTesting.md",
-   "chip0050ActionLayer.md"
+   "chip0050ActionLayer.md",
+   "chiaDgxchUtils.md"
   ],
   "puzzle-security": [
    "clvmPuzzleAudit.md",
    "chiaPrimitivesPatterns.md",
-   "chip0050ActionLayer.md"
+   "chip0050ActionLayer.md",
+   "chiaDgxchUtils.md"
   ],
   "clvm-audit": [
    "clvmPuzzleAudit.md",
@@ -60,7 +62,8 @@
    "sageRpc.md",
    "chiaPrimitivesPatterns.md",
    "chiaDevTooling.md",
-   "sageAppLane.md"
+   "sageAppLane.md",
+   "chiaDgxchUtils.md"
   ],
   "multisig": [
    "forgeMultisig.md",

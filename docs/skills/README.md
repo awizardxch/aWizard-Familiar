@@ -26,6 +26,7 @@ Use this file when:
 | `chiaPrimitivesPatterns.md` | Singleton patterns, CAT issuance, CR-CATs, secure-the-bag, asset architecture |
 | `chiaWalletSdk.md` | Standard lower-level wallet-engine reference for signer behavior, spend construction, and Sage-under-the-hood work |
 | `chiaDevTooling.md` | Chia docs hub, tracing tools, RPC tooling, `chia-wallet-sdk`, and package and ops utilities |
+| `chiaDgxchUtils.md` | dg_xch_utils, an independent Rust Chia implementation used as a cross-check: network constants and header hashes, AGG_SIG messages, condition edge cases, XCH/CAT2 offer make/take/cancel/encoding, CAT2 rings, mempool and RBF rules, a spend-level `CoinsetSimulator` |
 | `chiaPerpetuals.md` | Perps market design, margin, funding, liquidation, oracle architecture |
 | `nftRewards.md` | Chia NFT minting patterns, DID/royalties, reward collection design |
 | `bondPvpEconomy.md` | Escrow, mutual signing, PvP settlement economics |
@@ -167,6 +168,7 @@ Use `forgeMultisig.md` for anything touching `contracts/multisig_tool.py`, `cont
 Use `bowAppReference.md` first for all WalletConnect and CHIP-0002 UI flows, including `chip0002_getPublicKeys` multi-address patterns.
 Use `sageRpc.md` for backend/operator flows that call Sage RPC directly (`/get_derivations`, `/increase_derivation_index`).
 Use `chiaWalletSdk.md` only when the quest requires raw spend construction or wallet engine internals below Sage.
+Add `chiaDgxchUtils.md` when a constant, signing message, offer encoding or mempool rule needs a second, independent reading.
 Only add `blockchainDecentralization.md` + `chiaPrimitivesPatterns.md` if the quest also touches protocol design or asset architecture.
 
 Use `chiaDexieRouting.md` when the wallet flow must end in a Chia offer submitted to an external venue.
