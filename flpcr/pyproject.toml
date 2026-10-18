@@ -1,0 +1,12 @@
+[project]
+name = "flpcr"
+version = "0.1.0"
+description = "Forge Liquidity Pool Campaign Rewards: incentive campaigns for Forge liquidity and Chia CATs"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest", "clvm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
