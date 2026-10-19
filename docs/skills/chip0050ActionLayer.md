@@ -13,8 +13,11 @@
 > V14 counterpart: `scripts/v11_offer_router.py`, `scripts/v11-lp-holders.py`,
 > `scripts/v11-create-pool-keyless.py`, `scripts/v11-respond-offer.mjs` and
 > `scripts/verify-v11-pool.py`. They are named accurately — the files exist — but they
-> predate the V14 lanes; for V14 use `scripts/v14_ops.py`, `scripts/v14-lifecycle-matrix.py`
-> and `scripts/v14-offer-lane-test.py`.
+> predate the V14 lanes. The shipping revision is **V16** (protocol 17): use
+> `scripts/deploy-v16-testnet.py`, `scripts/v16-lifecycle-matrix.py`,
+> `scripts/v16-resync-records.py` + `import-v16-pools.mjs` (see `forgePuzzleV16.md`);
+> the kept V15 and V14 pools keep their own `v15_`/`v14_` scripts (`v15_ops.py`,
+> `v15-offer-lane-test.py`, `v14_ops.py`, `v14-offer-lane-test.py`).
 
 
 ---

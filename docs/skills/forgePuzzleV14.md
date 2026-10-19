@@ -1,5 +1,9 @@
 # Skill: Forge Puzzle V14 — the fourth-review revision
 
+> **Status (2026-10-18): kept live on testnet11, not on mainnet.** The shipping revision is
+> **V16** (protocol 17): read `forgePuzzleV16.md` for what V15 and V16 changed. This file
+> still describes the architecture they keep.
+
 > The Forge pool on the CHIP-0050 action layer, revised after a fourth independent review
 > of V13 (Chia-Network/chips#217, trgarrett, 2026-09-15) and a fifth review of the
 > published documents. Protocol **15**, live on testnet11 since 2026-09-16 with 32 pools.

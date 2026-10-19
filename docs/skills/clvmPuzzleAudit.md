@@ -31,7 +31,8 @@ Use this skill when the quest is:
 - reviewing the off-chain surface (offer storage, HTTP reads, routers) around a puzzle
 
 Do **not** use it as a puzzle reference for a specific protocol — see
-`forgePuzzleV14.md` for Forge's shipping shape (`forgePuzzleV10.md` through
+`forgePuzzleV16.md` for Forge's shipping revision and `forgePuzzleV14.md` for the
+architecture it keeps (`forgePuzzleV10.md` through
 `forgePuzzleV13.md` remain as the retired ones, and a finding demonstrated against a
 retired revision still needs its "before" built there).
 
@@ -531,6 +532,6 @@ The operational runbook that pairs with this method —
 format, the completion gate, and the runnable entry points. This document is the *why*
 and the catalogue; that one is the *how*, and it is the one an outside auditor reads.
 
-Related skills: `forgePuzzleV14.md` (the shipping shape), `forgeLpCat.md` (the LP
+Related skills: `forgePuzzleV16.md` (the shipping revision), `forgePuzzleV14.md` (its architecture), `forgeLpCat.md` (the LP
 handshake in detail), `forgePoolLifecycleTesting.md` (what to run), and
 `chiaPrimitivesPatterns.md` (singleton and CAT fundamentals).
