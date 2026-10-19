@@ -1,5 +1,5 @@
 {
- "version": 14,
+ "version": 15,
  "updated": "2026-10-19",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
@@ -29,6 +29,7 @@
   ],
   "puzzle-security": [
    "clvmPuzzleAudit.md",
+   "thermoNuclearCodeReview.md",
    "chiaPrimitivesPatterns.md",
    "chip0050ActionLayer.md",
    "chiaDgxchUtils.md"
@@ -40,6 +41,10 @@
    "forgePuzzleV11.md",
    "forgePuzzleV10.md",
    "chip0050ActionLayer.md"
+  ],
+  "code-quality-review": [
+   "thermoNuclearCodeReview.md",
+   "clvmPuzzleAudit.md"
   ],
   "adversarial-testing": [
    "clvmPuzzleAudit.md",

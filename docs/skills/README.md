@@ -69,6 +69,7 @@ Use this file when:
 | Skill | Use it for |
 | --- | --- |
 | `clvmPuzzleAudit.md` | How to audit a CLVM/Rue puzzle: probe the compiled hex, pick the lane that can answer the question, the announcement-binding taxonomy (coin vs puzzle vs CHIP-0025 message, and why a broadcast is neither), the sixteen recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface |
+| `thermoNuclearCodeReview.md` | The harsh **maintainability** half of a "thermonuclear review" (vendored from Cursor's team kit, MIT): code-judo restructurings, the 1k-line rule, spaghetti conditionals, thin wrappers, boundaries, plus our notes on puzzle-hash and CLVM-cost impact and intentional mirrors. Run it alongside `clvmPuzzleAudit.md`, never instead of it |
 
 **Companion runbook, outside this repo.** `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md`
 is the operational half: the lane to pick, the model pipeline (Fable, Astra, Opus), the strict
@@ -138,6 +139,7 @@ the two disagree, the published runbook is what someone else is reading: fix `cl
 
 ### Puzzle Security / Audit Quest
 - `clvmPuzzleAudit.md` — load first, always; the method is protocol-agnostic
+- `thermoNuclearCodeReview.md` — when the quest is a full pre-launch ("thermonuclear") review: the code-quality lane next to the security lanes
 - `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md` — load second when the quest is an
   audit rather than a review: it carries the routine, the finding format and the completion
   gate, and it is the document an outside auditor is working from (pointer; monorepo or

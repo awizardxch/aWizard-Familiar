@@ -68,6 +68,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 
 #### Puzzle Security
 - **`docs/skills/clvmPuzzleAudit.md`** — How to audit a CLVM/Rue puzzle: probe the compiled hex, the announcement-binding taxonomy, ten recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface. Protocol-agnostic — load it for any puzzle review
+- **`docs/skills/thermoNuclearCodeReview.md`** — Cursor's thermo-nuclear code quality review (MIT, vendored): code-judo restructurings, the 1k-line rule, spaghetti and boundary checks, with our notes on puzzle hashes and CLVM cost. The maintainability lane of a pre-launch review; pair with `clvmPuzzleAudit.md`
 
 #### Warp Bridge (Cross-Chain)
 - **`docs/skills/warpBridge.md`** — Complete Chia↔EVM bridge system: 4-step wizard, lockCATs/burnCATs/unlockCATs/mintCATs driver selection, EVM wagmi entry (bridgeEtherToChia/bridgeToChia/bridgeBack), all 3 wallet adapters (Sage WC, Ozone WC, Goby extension), NOSTR validator signature collection, portal singleton mechanics, key puzzle hashes, mainnet contract addresses. Source project: `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love`. Full constants: `warp-ui-love/docs/agent-swarm/IMPLEMENTATION_CONSTANTS.md`

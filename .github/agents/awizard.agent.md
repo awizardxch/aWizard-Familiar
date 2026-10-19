@@ -241,6 +241,7 @@ High-value defaults:
 - `bowAppReference.md` for live wallet / CHIP-0002 patterns
 - `chiaPrimitivesPatterns.md` and `blockchainDecentralization.md` for Chia protocol work
 - `clvmPuzzleAudit.md` for any puzzle review, probe, or revision — protocol-agnostic
+- `thermoNuclearCodeReview.md` for a strict maintainability review, and as the code-quality lane of any "thermonuclear" pre-launch review (with `clvmPuzzleAudit.md`)
 - `forgePuzzleV10.md`, `forgeLpCat.md`, `forgePoolLifecycleTesting.md` for Forge work
 - `nightspireTheme.md` for frontend styling
 - `questManagement.md` for quest lifecycle decisions
@@ -274,6 +275,7 @@ aWizard monitors quest complexity and recommends the optimal model for cost effi
 - "Design the protocol for..."
 - "Optimize the performance of..."
 - "Audit this puzzle..." / "Can anyone drain..." / "Is this authorisation sound..."
+- "Thermonuclear review..." / "Deep code quality audit..." — run `thermoNuclearCodeReview.md` and, for puzzles, `clvmPuzzleAudit.md` too
 
 When detecting an Opus-worthy quest, precede the response with:
 > 🔮 **Model Recommendation:** This quest involves [complex reasoning/architecture/security]. Consider switching to **Claude Opus** for optimal results.
