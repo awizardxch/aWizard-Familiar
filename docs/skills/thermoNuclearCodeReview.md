@@ -4,7 +4,8 @@
 > conditionals, thin wrappers, boundary and type cleanliness, canonical layers, atomic updates.
 > Vendored from Cursor's team kit:
 > <https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md>
-> (MIT, per the kit's README). The rubric below the line is upstream's, unchanged except for the
+> (MIT). The whole kit is vendored at `vendor/cursor-team-kit/`; this rubric matches its
+> `skills/thermo-nuclear-code-quality-review/SKILL.md`. The rubric below the line is upstream's, unchanged except for the
 > front matter; the section directly below is ours.
 
 ## Using it in this workspace

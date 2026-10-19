@@ -69,7 +69,7 @@ Use this file when:
 | Skill | Use it for |
 | --- | --- |
 | `clvmPuzzleAudit.md` | How to audit a CLVM/Rue puzzle: probe the compiled hex, pick the lane that can answer the question, the announcement-binding taxonomy (coin vs puzzle vs CHIP-0025 message, and why a broadcast is neither), the sixteen recurring defect classes, harness and bundle-audit shape, test hygiene, the off-chain bearer-instrument surface |
-| `thermoNuclearCodeReview.md` | The harsh **maintainability** half of a "thermonuclear review" (vendored from Cursor's team kit, MIT): code-judo restructurings, the 1k-line rule, spaghetti conditionals, thin wrappers, boundaries, plus our notes on puzzle-hash and CLVM-cost impact and intentional mirrors. Run it alongside `clvmPuzzleAudit.md`, never instead of it |
+| `thermoNuclearCodeReview.md` | The harsh **maintainability** half of a "thermonuclear review" (from Cursor's team kit, vendored at `vendor/cursor-team-kit/`, MIT): code-judo restructurings, the 1k-line rule, spaghetti conditionals, thin wrappers, boundaries, plus our notes on puzzle-hash and CLVM-cost impact and intentional mirrors. Run it alongside `clvmPuzzleAudit.md`, never instead of it |
 
 **Companion runbook, outside this repo.** `projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md`
 is the operational half: the lane to pick, the model pipeline (Fable, Astra, Opus), the strict
@@ -78,6 +78,35 @@ finding format, and the completion gate. It is tracked with the puzzles and publ
 working from it and can correct it by pull request. This is a **pointer**, per the rule below —
 the method and the defect catalogue stay inline in `clvmPuzzleAudit.md`, which ships here. When
 the two disagree, the published runbook is what someone else is reading: fix `clvmPuzzleAudit.md`.
+
+### Engineering Workflow — Cursor Team Kit (vendored)
+
+> Cursor's team kit, vendored verbatim at `vendor/cursor-team-kit/` (MIT; upstream commit and update
+> steps in its `UPSTREAM.md`). These are general engineering workflows, not Chia knowledge. Skills that
+> say `gh` assume the GitHub CLI; where it is unavailable (cloud sessions use the GitHub MCP tools),
+> follow the same steps with whatever GitHub access the session has. Agents and rules are Cursor
+> formats: read them as guidance.
+
+| Skill (`vendor/cursor-team-kit/skills/<name>/SKILL.md`) | Use it for |
+| --- | --- |
+| `thermo-nuclear-code-quality-review` | Strict maintainability review. **Load our `thermoNuclearCodeReview.md` instead**: the same rubric plus notes on puzzle hashes, CLVM cost and intentional mirrors |
+| `verify-this` | Prove or disprove a claim with baseline and treatment evidence; returns VERIFIED / NOT VERIFIED / INCONCLUSIVE. Pairs well with a review finding before it goes in a report |
+| `review-and-ship` | Review a branch for bugs, intent fit and test coverage, then commit and open or update a PR (`gh`) |
+| `deslop` | Strip AI-generated slop and style noise from a diff |
+| `check-compiler-errors` | Run compile and type-check commands and report failures |
+| `fix-ci` / `loop-on-ci` | Find failing PR checks and fix them; loop until green (`gh`) |
+| `fix-merge-conflicts` | Resolve conflicts non-interactively, then validate build and tests |
+| `get-pr-comments` | Fetch and summarize review comments on the active PR (`gh`) |
+| `make-pr-easy-to-review` | Tidy history, description and reviewer guidance without changing behavior |
+| `new-branch-and-pr` | Fresh branch, do the work, open a PR (`gh`) |
+| `pr-review-canvas` | Interactive HTML walkthrough of a PR (`renderer.js`, `styles.css`, `template.html` alongside) |
+| `run-smoke-tests` | Run Playwright smoke tests, debug and verify fixes |
+| `control-cli` / `control-ui` | Local harnesses to drive and profile a CLI/TUI, or a web/Electron UI over CDP |
+| `what-did-i-get-done` / `weekly-review` | Summaries of authored commits over a period |
+| `workflow-from-chats` | Mine past chats for durable preferences and turn them into skills or rules (written for Cursor chats) |
+
+Also in the kit: agents `ci-watcher` and `thermo-nuclear-code-quality-review` (`agents/`), rules
+`no-inline-imports` and `typescript-exhaustive-switch` (`rules/*.mdc`).
 
 ### Forge DeFi Primitives
 
