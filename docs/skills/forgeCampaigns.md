@@ -79,8 +79,12 @@ After `end + claim_window` the creator may reclaim everything left; until they d
   orphans every launched distributor's puzzles.
 - **Upstream puzzles are never edited:** slot-machine@2d37ba1, built with rue 0.8.4 (upstream says 0.9.0;
   0.8.4 reproduces the hashes).
-- **Two actions in one spend must not touch the same slot.** A slot created in a spend cannot be spent
-  in the same block.
+- **A slot this spend creates can be spent in the same bundle** (ephemerally). A slot proof must never be
+  satisfiable by the spend's own output: the spent and recreated values must differ. Delegation slots
+  currently break this (review FLPCR-02).
+- **Equal outputs collide.** Two actions in one spend must not touch the same slot, recreate the same
+  delegation, or pay the same `(puzzle hash, amount)` (`DuplicateOutput`); two first claims sharing a
+  neighbour collide too.
 
 ## Evidence
 
@@ -95,6 +99,9 @@ the height pin. Same lesson as `forgePuzzleV14.md` §4.
 
 ## Still open
 
+- **The 2026-10-19 pre-testnet review** (`reviews/2026-10-19/FINDINGS.md` in forge-campaign): five
+  High findings, none of them a drain. Fix FLPCR-02, -03, -05 and -07, and the engine's FLPCR-01, before
+  real users. FLPCR-04, -06, -07 and -12 wait on decisions.
 - Testnet deployment with real keys.
 - The dev multisig address.
 - A live engine `Source` and a node adapter for NFTs.
