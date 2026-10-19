@@ -28,7 +28,8 @@ Load with `chip0050ActionLayer.md` for the action layer, `clvmPuzzleAudit.md` fo
 ## The shape in one paragraph
 
 A creator deposits a reward (XCH or a CAT in a Forge registry pool) on a target: a Forge pool's LP
-holders, or a CAT's holders, over `[start, end)` blocks. 3% is the **dev fee**, paid in the create spend
+holders (V16 pools, the shipping revision, plus the V15 and V14 pools kept live; the distributor uses the
+same pinned action-layer puzzles as V16), or a CAT's holders, over `[start, end)` blocks. 3% is the **dev fee**, paid in the create spend
 to the Speechless dev multisig (`dev_fee_ph`); the rest is the budget. An off-chain engine scores
 holders per block (share of eligible supply; optionally fee-weighted, gated, boosted) and the operator
 posts a cumulative claim tree to the **distributor**:
