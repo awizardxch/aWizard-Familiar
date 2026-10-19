@@ -63,6 +63,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/skills/forgeLpCat.md`** — Pool-controlled LP CAT TAIL: the three-part lock (derived action-coin id, pinned mint/melt inners, CAT-parent melt rule) and the mutual handshake
 - **`docs/skills/forgePoolLifecycleTesting.md`** — Forge lanes and endpoints, the guardrails that must never be bypassed, the suite index and what a green run does not prove
 - **`docs/skills/chip0050ActionLayer.md`** — Forge's shipping V11 puzzle set: the CHIP-0050 action layer (registry singleton, leaves, multi-reserve finalizer), the hinted LP CAT genesis path, the keyless responder
+- **`docs/skills/forgeCampaigns.md`** — FLPCR incentive campaigns (repo `awizardxch/forge-campaign`): distributor singleton on the CHIP-0050 action layer, holder- and creator-only payouts with delegates, the emission ceiling, the 3% dev fee paid at creation, NFT/CAT gates and boosts, address links, agent tools, testnet status
 - **`docs/skills/forgeMultisig.md`** — Multisig safes (tab `🔐`) on CNI's `p2_m_of_n_delegate_direct` and the newer vault-puzzle locks: address derivation, the coin-id replay guard, signing views and partial Sage signatures, share verification and assembly, rekey-as-vote, why this is a distinct custody primitive from a Forge vault pool, and the planned direction as the shared custody layer under future vault actions
 
 #### Puzzle Security

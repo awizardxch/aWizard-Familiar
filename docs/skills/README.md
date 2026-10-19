@@ -88,6 +88,7 @@ the two disagree, the published runbook is what someone else is reading: fix `cl
 
 | Skill | Use it for |
 | --- | --- |
+| `forgeCampaigns.md` | **FLPCR**, Merkl-style incentive campaigns on Forge LP and CATs (repo `awizardxch/forge-campaign`): the distributor's eight leaves, who may do what, the emission ceiling, claim and delegation slots, the dev fee paid at creation, gates and boosts by NFT collection (minter DID) or CAT, address links, the `flpcr.*` agent tools, and the traps the simulator found |
 | `chip0050ActionLayer.md` | The shipping V11 puzzle set: registry singleton, the six leaves (swap/add/remove/observe/collect/dao_fee), multi-reserve finalizer, hinted LP CAT genesis, the keyless responder |
 | `forgePuzzleV14.md` | **The live revision** (protocol 15, the fourth-review revision): the reserve launcher and the reserve parent derived rather than claimed, the settlement's amount bound in the puzzle (and what that does *not* guarantee), `LOCKED_BURN = 1`, the UNREACHED mutation rule, and two traps that are not in the puzzles. Read with V11 below, which still describes the shape |
 | `forgePuzzleV13.md` | Protocol 14, retired 2026-09-15 after a fourth review: `register` took the reserve parent on the registrant's word. Kept for the five fixes V14 carries unchanged |

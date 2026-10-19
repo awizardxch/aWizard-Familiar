@@ -1,6 +1,6 @@
 {
- "version": 13,
- "updated": "2026-10-07",
+ "version": 14,
+ "updated": "2026-10-19",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "n-asset-pool-audit": {
@@ -54,7 +54,8 @@
    "forgePoolLifecycleTesting.md",
    "clvmPuzzleAudit.md",
    "chip0050ActionLayer.md",
-   "forgeMultisig.md"
+   "forgeMultisig.md",
+   "forgeCampaigns.md"
   ],
   "wallets-and-signing": [
    "bowAppReference.md",
@@ -107,7 +108,8 @@
    "forgePuzzleV10.md",
    "forgeLpCat.md",
    "chiaDexieRouting.md",
-   "chiaTibetAmm.md"
+   "chiaTibetAmm.md",
+   "forgeCampaigns.md"
   ],
   "external-liquidity-and-routing": [
    "chiaDexieRouting.md",
@@ -163,6 +165,14 @@
   "cross-chain-handover": [
    "greenwoodLockbox.md",
    "warpBridge.md"
+  ],
+  "incentive-campaigns": [
+   "forgeCampaigns.md",
+   "chip0050ActionLayer.md",
+   "clvmPuzzleAudit.md",
+   "forgeMultisig.md",
+   "sageRpc.md",
+   "nftRewards.md"
   ]
  }
 }

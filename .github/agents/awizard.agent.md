@@ -144,6 +144,12 @@ You understand the full Arcane BOW + Chia DeFi workspace:
 - Source at `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love`
 - Full constants (puzzle hashes, network addresses, NOSTR relays, validator keys, token assetIds): `warp-ui-love/docs/agent-swarm/IMPLEMENTATION_CONSTANTS.md`
 - For any quest touching the bridge: load `docs/skills/warpBridge.md` first
+
+**FLPCR campaign notes:**
+- Own repo, `awizardxch/forge-campaign` (engine, puzzles, simulator suites). Read its `CLAUDE.md` first
+- For any quest touching incentive campaigns, rewards claiming, gates/boosts or the distributor: load
+  `docs/skills/forgeCampaigns.md`, with `chip0050ActionLayer.md` for the action layer
+- Agent tools and what each needs signed: `forge-campaign/docs/AGENT_TOOLS.md`
 - Three Chia wallet adapters: Sage (WC), Ozone/chiawalletconnect (WC), Goby (browser extension `window.chia` — NOT WalletConnect)
 - Four bridge drivers: `lockCATs`, `burnCATs` (catbridge/erc20bridge), `unlockCATs`, `mintCATs` — selection determined by `token.sourceNetworkType` and `contents.length`
 
