@@ -242,7 +242,7 @@ High-value defaults:
 - `chiaPrimitivesPatterns.md` and `blockchainDecentralization.md` for Chia protocol work
 - `clvmPuzzleAudit.md` for any puzzle review, probe, or revision — protocol-agnostic
 - `thermoNuclearCodeReview.md` for a strict maintainability review, and as the code-quality lane of any "thermonuclear" pre-launch review (with `clvmPuzzleAudit.md`)
-- `vendor/cursor-team-kit/skills/` for general engineering workflows (verify-this, review-and-ship, deslop, CI and PR loops); routing in `docs/skills/README.md`
+- `cursorTeamKit.md` for general engineering workflows (verify-this, review-and-ship, deslop, CI and PR loops): where they live in `cursor/plugins` and how to fetch them
 - `forgePuzzleV10.md`, `forgeLpCat.md`, `forgePoolLifecycleTesting.md` for Forge work
 - `nightspireTheme.md` for frontend styling
 - `questManagement.md` for quest lifecycle decisions

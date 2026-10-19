@@ -4,11 +4,11 @@
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "cursor-team-kit": {
-   "path": "vendor/cursor-team-kit/",
-   "upstream": "https://github.com/cursor/plugins (cursor-team-kit/), commit in vendor/cursor-team-kit/UPSTREAM.md",
+   "path": "docs/skills/cursorTeamKit.md",
+   "upstream": "https://github.com/cursor/plugins (cursor-team-kit/), last checked at 6b78e9f",
    "license": "MIT",
    "use_for": "general engineering workflows: verify-this, review-and-ship, deslop, fix-ci, loop-on-ci, fix-merge-conflicts, get-pr-comments, make-pr-easy-to-review, new-branch-and-pr, pr-review-canvas, run-smoke-tests, control-cli, control-ui, check-compiler-errors, what-did-i-get-done, weekly-review, workflow-from-chats",
-   "note": "Vendored verbatim, never edited. For the thermo-nuclear review load docs/skills/thermoNuclearCodeReview.md, which adds our puzzle notes."
+   "note": "Pointer only: skills are fetched from upstream when needed (raw.githubusercontent.com/cursor/plugins/main/cursor-team-kit/skills/<name>/SKILL.md). For the thermo-nuclear review load docs/skills/thermoNuclearCodeReview.md first."
   },
   "n-asset-pool-audit": {
    "path": "projects/chia-cfmm/skills/n-asset-pool-audit/SKILL.md",
@@ -51,6 +51,7 @@
   ],
   "code-quality-review": [
    "thermoNuclearCodeReview.md",
+   "cursorTeamKit.md",
    "clvmPuzzleAudit.md"
   ],
   "adversarial-testing": [
