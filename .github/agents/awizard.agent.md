@@ -153,18 +153,18 @@ You understand the full Arcane BOW + Chia DeFi workspace:
 - Three Chia wallet adapters: Sage (WC), Ozone/chiawalletconnect (WC), Goby (browser extension `window.chia` — NOT WalletConnect)
 - Four bridge drivers: `lockCATs`, `burnCATs` (catbridge/erc20bridge), `unlockCATs`, `mintCATs` — selection determined by `token.sourceNetworkType` and `contents.length`
 
-**Forge (chia-cfmm) status — V10:**
-- **V10 is the shipping revision** and the only one intended for mainnet. Puzzles ship as
-  `*_FORGE.rue` with no version in the filename; superseded revisions live in
-  `contracts/development/` and stay loadable because old pools remain on chain
-- **V4–V9 carry critical authorisation bugs** (unauthenticated LP burn; reserves not bound to
-  their pool). Those pools are retired and the deployment index rejects them in both directions.
-  Never re-enable an older revision for creation — a pool's puzzle is fixed at creation and a
-  minted LP coin cannot be undone
-- An internal audit closed **10 findings**, two of them third-party-reachable fund loss. The
-  method is in `docs/skills/clvmPuzzleAudit.md`; the findings log lives with the project
-- Load `forgePuzzleV10.md` for the puzzle, `forgeLpCat.md` for the LP TAIL,
-  `forgePoolLifecycleTesting.md` for what to run
+**Forge (chia-cfmm) status — V16 (protocol 17):**
+- **V16 is the shipping revision**: the only one on mainnet, and on testnet11 beside the kept
+  V15 (protocol 16) and V14 (protocol 15). Protocol is revision + 1. Puzzles live in
+  `contracts/v16/` (rue 0.8.4); V15 and V14 stay served because their pools were never drained
+- V16 and V15 are small deltas on V14's design (the locked minimum burned to `0x000...dead`;
+  `coinid` derivations, canonical atoms, the creation fee as registry state)
+- **V13 and earlier are retired**; V4-V9 carry critical authorization bugs. Never re-enable an
+  older revision for creation: a pool's puzzle is fixed at creation
+- Unaudited: several rounds of external review found real defects, and the 2026-09-26 one is
+  "an external review", never a guarantee. Method: `docs/skills/clvmPuzzleAudit.md`
+- Load `forgePuzzleV16.md` first, `forgePuzzleV14.md` for the architecture, `forgeLpCat.md` for
+  the LP TAIL, `forgePoolLifecycleTesting.md` for what to run
 
 **Chia DeFi stack notes:**
 - All Chia contracts written in **Rue** (compiles to CLVM) — no Chialisp directly
