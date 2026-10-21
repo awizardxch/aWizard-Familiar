@@ -88,10 +88,12 @@ the two disagree, the published runbook is what someone else is reading: fix `cl
 ### Forge DeFi Primitives
 
 > Forge-specific knowledge, distinct from generic Chia protocol patterns.
-> **V11** (the CHIP-0050 action layer) is the shipping revision on testnet11; V10 is closed and
-> kept as the record; pre-V10 pools are retired and carry critical authorisation bugs. V10's
-> math is byte-identical in V11, so `forgePuzzleV10.md` and `forgeLpCat.md` still describe the
-> live invariant and LP TAIL — `chip0050ActionLayer.md` covers what actually changed structurally.
+> **V16** (protocol 17) is the shipping revision: the only one on mainnet, and on testnet11
+> beside the kept V15 (protocol 16) and V14 (protocol 15). Start at `forgePuzzleV16.md` (what
+> V15 and V16 changed) and `forgePuzzleV14.md` (the architecture they share);
+> `chip0050ActionLayer.md` covers the action layer. V13 and earlier are retired; V4-V9 carry
+> critical authorization bugs, and the older skills (`forgePuzzleV10.md`, `forgePuzzleV11.md`)
+> are history.
 
 | Skill | Use it for |
 | --- | --- |
