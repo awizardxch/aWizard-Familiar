@@ -13,8 +13,9 @@
 | --- | --- |
 | State channel puzzles | Use upstream `chia-gaming` **unmodified**, pinned by commit. No local referee or unroll fork. |
 | Hub model | **Upstream-compatible hub.** BOW runs `hub-service` with the upstream protocol, so any compatible client or hub frontend can host or join there, and BOW players can take their wallet to any other upstream hub. No federated relay between hubs: upstream allows zero or one hub per player, and federation would need a new protocol. |
-| First games | Upstream production set: **Calpoker, Spacepoker, Krunk** (`games/registry.json`). |
-| Later | Port the BOW battle and Chellyz as chia-gaming games (`GAME_WRITING_GUIDE.md`). Not in this plan. |
+| First games | Upstream production set: **Calpoker, Spacepoker, Krunk** (`games/registry.json`), plus **Love Slots** (`docs/slots/LOVE_SLOTS_SPEC.md`) as an on-chain tile. |
+| BOW battles | **Paused** until a later date. No battle port, and no Fighter tie-ins in other games. |
+| Later | Port Chellyz as a chia-gaming game (`GAME_WRITING_GUIDE.md`). Not in this plan. |
 
 ## What "join or host across hubs" means under this model
 

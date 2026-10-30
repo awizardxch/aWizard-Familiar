@@ -99,10 +99,7 @@ Ideas we rejected or deferred:
 - **Shared "Love Meter" that triggers when full:** rejected. Everyone can see
   how full it is, so players would only bet when it's nearly full, and that
   near-full spin becomes a +EV option. This is the classic must-hit-by exploit.
-- **BOW Fighter crossover** (your Fighter NFT's element sets a bonus
-  multiplier, using the battle damage matrix): deferred to v2. Proving NFT
-  ownership in the ticket spend adds an announcement from the NFT spend, which
-  adds audit surface.
+- **BOW Fighter crossover:** off the table while BOW battles are paused.
 
 ## Economics (from `simulate.py`, 2M simulated spins)
 
@@ -157,7 +154,6 @@ once every 76 spins.
 3. Whether to add a settler bounty, so third parties settle when the keeper is down.
 4. Where the code lives. Following the Forge split, that would be a public
    `love-slots-puzzles` repo for the Chialisp and a private UI in bow-app.
-5. Legal review. This is real-value gambling, and the rules depend on where the operator and players are.
 
 ## Build order
 
