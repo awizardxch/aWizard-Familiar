@@ -64,27 +64,74 @@ a separate, trusted product.
    keeper bot settles every ticket as soon as `R` lands, and a winner can also
    settle their own ticket.
 
-## Economics (from `simulate.py`, default paytable)
+## Bonus features
 
-| Tier (3 reels) | Odds | Pays at max wager |
+Every bonus must follow the same rule as the reels: **all randomness comes from
+a drand round published after the player is locked in.** That allows two
+kinds of bonus:
+
+- **Seed-driven:** the whole bonus is derived from the spin's seed
+  (`sha256(seed, i)` for step `i`). The puzzle evaluates it in the same
+  settlement, so there's no extra wait. Each step costs only a few `sha256` and
+  compare ops; the pairing check is paid once per ticket either way. The
+  animation replays exactly what the puzzle computed, and anyone can recompute it.
+- **Choice-driven:** the player's choice is committed on-chain *before* the
+  round that decides the prizes. This costs a second wait (≈3–5 min) but the
+  choice is real. We don't do fake picks, where the result is already public
+  and the pick is only an animation.
+
+| Bonus | Trigger | Kind | What happens |
+| --- | --- | --- | --- |
+| 🌙 **Moonlit Free Spins** | 3 MOON (1 in 102) | seed-driven | 8 free spins at ×2. They can't retrigger. Each win is paid from the pot as it stands at that step. |
+| 📖 **Wheel of Hearts** | 3 SPELLBOOK (1 in 2,717) | seed-driven | 12-segment wheel: 1%–10% of pot, plus one **Jackpot Shot** segment (1 in 4 for 50%, otherwise 3%). |
+| 🧪 **Potion Pick** | 3 POTION (1 in 340) | choice-driven | Settlement creates a *pick coin* for the player. The player spends it, choosing cauldron 1–3 and naming a new round `R2` (same `COMMIT_MARGIN` rule). When `R2` lands, the cauldron contents (0.6% / 2.5% / 12%) are shuffled by `sha256(sig_R2, pick_coin_id)` and the chosen one pays. Pick coins expire under `SETTLE_WINDOW` like tickets. If the player never picks, the keeper takes a default pick (cauldron 1) after the window, so nothing gets stuck. |
+
+Rules that keep bonuses solvent:
+
+- **`MAX_PAYOUT_BPS` = 5000 caps every single payout, multipliers included.**
+  Without the cap, a ×2 jackpot inside free spins would pay out the whole pot.
+- Bonus payouts scale by `w / W_MAX`, the same as line wins.
+- Each step pays from the current pot, so a long bonus can shrink the pot but
+  can never empty it.
+
+Ideas we rejected or deferred:
+
+- **Shared "Love Meter" that triggers when full:** rejected. Everyone can see
+  how full it is, so players would only bet when it's nearly full, and that
+  near-full spin becomes a +EV option. This is the classic must-hit-by exploit.
+- **BOW Fighter crossover** (your Fighter NFT's element sets a bonus
+  multiplier, using the battle damage matrix): deferred to v2. Proving NFT
+  ownership in the ticket spend adds an announcement from the NFT spend, which
+  adds audit surface.
+
+## Economics (from `simulate.py`, 2M simulated spins)
+
+Reel strip weights: HEART 1, WIZARD 3, SPELLBOOK 2, POTION 4, STAR 12, MOON 6.
+
+| Result (3 reels) | Odds | Pays at max wager |
 | --- | --- | --- |
-| 3 ❤️ HEART | 1 in 32,768 | 50% of pot |
-| 3 🧙 WIZARD | 1 in 1,214 | 8% |
-| 3 🧪 POTION | 1 in 152 | 2% |
-| 3 ⭐ STAR | 1 in 33 | 0.6% |
-| 3 🌙 MOON | 1 in 19 | 0.4% |
-| 2 ❤️ HEART | 1 in 352 | 0.3% |
+| 3 ❤️ HEART | 1 in 23,529 | 50% of pot (jackpot) |
+| 3 📖 SPELLBOOK | 1 in 2,717 | Wheel of Hearts |
+| 3 🧙 WIZARD | 1 in 827 | 8% |
+| 3 🧪 POTION | 1 in 340 | Potion Pick |
+| 2 ❤️ HEART | 1 in 276 | 0.3% |
+| 3 🌙 MOON | 1 in 102 | 0.4% + Moonlit Free Spins |
+| 3 ⭐ STAR | 1 in 13 | 0.3% |
+
+Overall, about 9.7% of spins win something, and a bonus round lands about
+once every 76 spins.
 
 - Payout is proportional to **both the pot and the wager**. Without the
   wager factor, everyone would bet the minimum.
-- **Solvent by construction:** each payout is at most 50% of the pot, so the
-  pot can never go negative or be overdrawn.
-- **Self-balancing:** the pot drifts to `P* = (1 − fee)·W_MAX / k`, where
-  `k = Σ p·f` (≈1.58M LOVE at `W_MAX` = 1,000). At `P*`, the player's expected
-  value is exactly −fee, so the RTP is 97%. Above `P*`, spins are +EV, which
-  draws players in and pulls the pot back down. Below it, losing spins refill it.
+- **Solvent by construction:** each payout is capped at 50% of the pot at that
+  moment, so the pot can never go negative or be overdrawn.
+- **Self-balancing:** the pot drifts to `P* = (1 − fee)·W_MAX / k`, where `k`
+  is the mean pot fraction paid per max-wager spin, bonuses included
+  (≈1.54M LOVE at `W_MAX` = 1,000). At `P*`, the player's expected value is
+  exactly −fee, so the RTP is 97%. Above `P*`, spins are +EV, which draws
+  players in and pulls the pot back down. Below it, losing spins refill it.
 - Seed the pot near `P*`, or players will mostly lose until it fills (the sim
-  shows 96.2% RTP when starting from 10k).
+  shows 96.5% RTP when starting from 10k).
 - All values above are tunable. Re-run `python3 -I simulate.py` after any
   paytable change and record the output in the PR.
 
@@ -99,7 +146,9 @@ a separate, trusted product.
 | Pot singleton contention | Tickets don't touch the pot, and settlement batches. The pot needs one spend per block at most. |
 | drand stops publishing or colludes | Trust assumption: a threshold of the League of Entropy. Tickets would wait until rounds resume. Any refund path must not reopen grinding. |
 | Wrong DST or message for quicknet | Pin against drand's published quicknet test vectors and the `drand-verify` crate before any puzzle code. |
-| CLVM cost | One pairing check (2 pairs) plus `g1_map` is about 6M cost per ticket. Cap tickets per settlement. Confirm the per-pair cost (CHIP-0011 and the chialisp.com costs page disagree). |
+| Forged pick coin | The pot accepts a pick coin only with a lineage proof showing the pot itself created it, and the pick coin's puzzle curries the pot's launcher ID. |
+| Player waits on a pick to see the pot grow | The pick coin expires and the keeper takes the default pick. The prize is a pot fraction at stage-2 settlement, so this is the same bounded edge as delayed ticket settlement. |
+| CLVM cost | One pairing check (2 pairs) plus `g1_map` is about 6M cost per ticket. Free-spin and wheel steps add only `sha256` and compare ops; the Potion Pick's second stage needs a second pairing check. Cap tickets per settlement. Confirm the per-pair cost (CHIP-0011 and the chialisp.com costs page disagree). |
 
 ## Open decisions
 
@@ -113,6 +162,7 @@ a separate, trusted product.
 ## Build order
 
 1. drand verification puzzle alone, tested against the quicknet test vectors (simulator).
-2. `slot_ticket.clsp` + `slot_pot.clsp` on the CAT2 layer, then simulator tests: solvency, ordering, expiry, and the mutation set from `clvmPuzzleAudit.md`.
-3. Keeper bot (settles every round) and a BOW hub tile with reel animation (`networkGameplayUX.md`).
-4. testnet11 with a test CAT, then a `clvmPuzzleAudit.md` review, then the LOVE pot on mainnet.
+2. `slot_ticket.clsp` + `slot_pot.clsp` on the CAT2 layer with line wins, Moonlit Free Spins and Wheel of Hearts, then simulator tests: solvency, ordering, expiry, the payout cap, and the mutation set from `clvmPuzzleAudit.md`. Add a cross-check that the puzzle and `simulate.py` give identical results for the same seeds.
+3. `slot_pick.clsp` for Potion Pick (two-stage), with its own tests: forged pick coin, expiry, default pick.
+4. Keeper bot (settles every round and takes default picks) and a BOW hub tile with reel and bonus animations (`networkGameplayUX.md`).
+5. testnet11 with a test CAT, then a `clvmPuzzleAudit.md` review, then the LOVE pot on mainnet.
