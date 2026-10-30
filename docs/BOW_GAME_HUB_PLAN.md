@@ -75,6 +75,13 @@
 
 ## Risks to check early
 
+- **Discord bans real-value gambling in apps and Activities.** Its policy
+  counts any wager of real-world value, including virtual currency with a
+  market value (LOVE trades against XCH), and apps removed for it can't be
+  recreated. Wagered Calpoker, Spacepoker, Krunk or Love Slots must run on the
+  web hub only. The Discord Activity can host lobbies and no-wager play.
+  Check the current Developer Policy before shipping anything wagered near Discord.
+
 - **Nested iframes.** Discord Activities already run in an iframe, and the
   upstream hub frontend loads games in iframes too. Check the CSP and
   `postMessage` origins inside Discord before building on this.
