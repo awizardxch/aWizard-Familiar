@@ -1,191 +1,238 @@
 """Love Slots game math: Monte Carlo of the model in LOVE_SLOTS_SPEC.md.
 
-Play happens in a state channel between the player and the Bank. Every wager is
-split into a dev fee, jackpot contributions, and the Bank's main pot. Line and
-bonus wins pay fixed multiples of the wager, capped at MAX_WIN per spin (the
-Bank stakes MAX_WIN x wager into each hand). The max wager scales with the main
-pot (MAIN / D). Jackpots pay from their own pools, scaled by wager / max wager.
+5 reels x 3 rows, 20 paylines. The player picks lines (1/5/10/15/20), coins per
+line (1-5) and a coin value; total bet = lines x coins x coin value.
+Line wins pay multiples of the line bet; scatter and feature wins pay multiples
+of the total bet. Each spin's wins are capped at MAX_WIN x total bet (the Bank
+stakes that much into each hand). Jackpots are not on the reels: every spin
+enters the Love Draw, with odds scaled by bet / global max bet; the Grand needs
+max lines and max coins.
 All amounts are in mojos (1 LOVE = 1,000 mojos).
 Run: python3 -I simulate.py
 """
 import random
 
 # ── reels ───────────────────────────────────────────────────────────────────
-STRIP = {"HEART": 1, "WIZARD": 3, "SPELLBOOK": 5, "POTION": 4, "STAR": 12, "MOON": 6}
-SYMS, WEIGHTS = list(STRIP), list(STRIP.values())
+# One strip per reel, built from these weights and shuffled with a fixed seed.
+# A spin picks a stop on each strip; the 3 visible rows are consecutive stops.
+WEIGHTS = {
+    "HEART": 3,      # wild: substitutes for line symbols, pays the top award
+    "WIZARD": 5, "OWL": 7, "CRYSTAL": 10, "CANDLE": 14, "STAR": 18, "LEAF": 22,
+    "MOON": 2,       # scatter: 3+ anywhere pays and starts Moonlit Free Spins
+    "POTION": 2,     # scatter: 3+ anywhere starts Potion Pick
+    "SPELLBOOK": 12, # 6+ anywhere starts Heart Lock
+}
+SCATTERS = {"MOON", "POTION", "SPELLBOOK"}
 
-# line wins: multiples of the wager
-LINE_X = {"3 WIZARD": 80, "3 STAR": 8, "2 HEART": 5, "3 MOON": 5}
-# 3 HEART wins the Major; 3 MOON / 3 POTION / 3 SPELLBOOK start bonuses
 
-FREE_SPINS, FREE_SPIN_MULT = 8, 2               # Moonlit Free Spins
-CAULDRONS = [15, 40, "MINI"]                    # Potion Pick (a real choice)
+def build_strip(reel):
+    strip = [s for s, w in WEIGHTS.items() for _ in range(w)]
+    random.Random(1000 + reel).shuffle(strip)
+    return strip
 
-# Heart Lock (Hold & Win): 15 cells, starts with 3 hearts, 3 respins,
-# every new heart resets the respins to 3; filling all 15 wins the Grand
-HL_CELLS, HL_START, HL_RESPINS, HL_LAND = 15, 3, 3, 0.07
-HL_VALUES = [(2, 40), (3, 25), (5, 15), (8, 10), (15, 6), (50, 3), ("MINI", 0.8), ("MAJOR", 0.2)]
+
+STRIPS = [build_strip(r) for r in range(5)]
+
+LINES = [
+    [1, 1, 1, 1, 1], [0, 0, 0, 0, 0], [2, 2, 2, 2, 2], [0, 1, 2, 1, 0], [2, 1, 0, 1, 2],
+    [0, 0, 1, 2, 2], [2, 2, 1, 0, 0], [1, 0, 0, 0, 1], [1, 2, 2, 2, 1], [1, 0, 1, 0, 1],
+    [1, 2, 1, 2, 1], [0, 1, 0, 1, 0], [2, 1, 2, 1, 2], [1, 1, 0, 1, 1], [1, 1, 2, 1, 1],
+    [0, 1, 1, 1, 0], [2, 1, 1, 1, 2], [0, 2, 0, 2, 0], [2, 0, 2, 0, 2], [0, 0, 2, 0, 0],
+]
+LINE_CHOICES = (1, 5, 10, 15, 20)
+MAX_COINS = 5
+
+# line pays, x line bet, for 3 / 4 / 5 of a kind (left to right)
+PAYS = {
+    "HEART": (100, 500, 2000), "WIZARD": (60, 250, 1000), "OWL": (35, 120, 450),
+    "CRYSTAL": (25, 70, 230), "CANDLE": (12, 35, 140), "STAR": (7, 23, 90), "LEAF": (5, 12, 45),
+}
+TOP_AWARD_MAX_COINS = 5000      # 5 HEART at max coins pays this instead of 2000
+MOON_PAYS = {3: 5, 4: 20, 5: 100}  # x total bet, plus free spins
+FREE_SPINS, FREE_SPIN_MULT = 12, 3
+CAULDRONS = [10, 25, 60]        # Potion Pick, x total bet
+
+# Heart Lock (Hold & Win): the 6+ spellbooks lock as hearts; 3 respins; each
+# new heart resets them to 3; filling all 15 cells pays FULL_GRID x total bet
+HL_TRIGGER, HL_CELLS, HL_RESPINS, HL_LAND = 6, 15, 3, 0.06
+HL_VALUES = [(1, 35), (2, 25), (3, 18), (5, 12), (10, 7), (25, 3)]
+HL_FULL_GRID = 250
 
 # ── money ───────────────────────────────────────────────────────────────────
 FEE_BPS = 300                                   # dev service fee
 JACKPOT_BPS = {"MINI": 50, "MAJOR": 100, "GRAND": 150}
-JACKPOT_PAYS_BPS = 9000                         # max bet takes 90%; the rest re-seeds
-MAX_WIN = 250                                   # published max win per spin, x wager
-D = 2000                                        # max wager = MAIN / D
+# Love Draw odds per spin at the global max bet, scaled by bet / max bet
+DRAW_ODDS = {"MINI": 1 / 1_000, "MAJOR": 1 / 10_000, "GRAND": 1 / 50_000}
+JACKPOT_PAYS_BPS = 9000                         # winner takes 90%; 10% re-seeds
+MAX_WIN = 500                                   # published max win per spin, x total bet
+D = 2000                                        # global max total bet = MAIN / D
 MOJO = 1_000
-W_MIN = 1 * MOJO
+COIN_VALUES = (100, 250, 500, 1_000)            # 0.1 / 0.25 / 0.5 / 1 LOVE
+W_MIN = COIN_VALUES[0]                          # 1 line x 1 coin x 0.1 LOVE
 
 
-def line_tier(r):
-    for s in SYMS:
-        if r.count(s) == 3:
-            return f"3 {s}"
-    return "2 HEART" if r.count("HEART") == 2 else None
+def spin_grid(rng):
+    grid = []
+    for strip in STRIPS:
+        stop = rng.randrange(len(strip))
+        grid.append([strip[(stop + r) % len(strip)] for r in range(3)])
+    return grid  # grid[reel][row]
 
 
-def heart_value(rng):
-    vals, weights = zip(*HL_VALUES)
-    return rng.choices(vals, weights=weights)[0]
+def line_win(symbols, coins):
+    """Multiple of the line bet for one payline."""
+    target = next((s for s in symbols if s != "HEART"), "HEART")
+    if target in SCATTERS:
+        target = "HEART"
+    run = 0
+    for s in symbols:
+        if s == target or s == "HEART":
+            run += 1
+        else:
+            break
+    wild_run = 0
+    for s in symbols:
+        if s == "HEART":
+            wild_run += 1
+        else:
+            break
+    best = 0
+    if target != "HEART" and run >= 3:
+        best = PAYS[target][run - 3]
+    if wild_run >= 3:
+        top = PAYS["HEART"][wild_run - 3]
+        if wild_run == 5 and coins == MAX_COINS:
+            top = TOP_AWARD_MAX_COINS
+        best = max(best, top)
+    return best
 
 
-def heart_lock(rng):
-    """Returns (total multiplier, list of jackpots won)."""
-    hearts = [heart_value(rng) for _ in range(HL_START)]
+def count(grid, sym):
+    return sum(row == sym for reel in grid for row in reel)
+
+
+def lines_win(grid, lines, coins):
+    """Sum of line multiples (x line bet) over the active lines."""
+    return sum(line_win([grid[r][LINES[i][r]] for r in range(5)], coins) for i in range(lines))
+
+
+def heart_lock(rng, start):
+    hearts = [rng.choices(*zip(*HL_VALUES))[0] for _ in range(start)]
     respins = HL_RESPINS
     while respins and len(hearts) < HL_CELLS:
         landed = sum(rng.random() < HL_LAND for _ in range(HL_CELLS - len(hearts)))
         if landed:
-            hearts += [heart_value(rng) for _ in range(landed)]
+            hearts += [rng.choices(*zip(*HL_VALUES))[0] for _ in range(landed)]
             respins = HL_RESPINS
         else:
             respins -= 1
     hearts = hearts[:HL_CELLS]
-    mult = sum(v for v in hearts if isinstance(v, int))
-    jps = [v for v in hearts if isinstance(v, str)]
-    if len(hearts) == HL_CELLS:
-        jps.append("GRAND")
-    return mult, jps
+    return sum(hearts) + (HL_FULL_GRID if len(hearts) == HL_CELLS else 0)
+
+
+def play(rng, lines, coins, stats):
+    """Returns the spin's win as a multiple of the total bet (before the cap)."""
+    grid = spin_grid(rng)
+    per_line = 1 / lines                       # line bet as a share of total bet
+    win = lines_win(grid, lines, coins) * per_line
+    moons, potions, books = count(grid, "MOON"), count(grid, "POTION"), count(grid, "SPELLBOOK")
+    if moons >= 3:
+        stats["FREE SPINS"] = stats.get("FREE SPINS", 0) + 1
+        win += MOON_PAYS[min(moons, 5)]
+        for _ in range(FREE_SPINS):            # no retrigger
+            win += lines_win(spin_grid(rng), lines, coins) * per_line * FREE_SPIN_MULT
+    if potions >= 3:
+        stats["POTION PICK"] = stats.get("POTION PICK", 0) + 1
+        win += rng.choice(CAULDRONS)
+    if books >= HL_TRIGGER:
+        stats["HEART LOCK"] = stats.get("HEART LOCK", 0) + 1
+        win += heart_lock(rng, books)
+    if win >= MAX_WIN:
+        stats["MAX WIN"] = stats.get("MAX WIN", 0) + 1
+    return win
+
+
+def base_rtp(trials, lines, coins, seed):
+    rng = random.Random(seed)
+    stats, total = {}, 0.0
+    for _ in range(trials):
+        total += min(play(rng, lines, coins, stats), MAX_WIN)
+    return total / trials, stats
 
 
 class Bank:
     def __init__(self, main, mini=0, major=0, grand=0):
         self.main = main
         self.jp = {"MINI": mini, "MAJOR": major, "GRAND": grand}
-        self.paid = self.jp_paid = self.fees = self.wagered = 0
-        self.hits = {"FREE SPINS": 0, "POTION PICK": 0, "HEART LOCK": 0, "MAX WIN": 0,
-                     "MINI": 0, "MAJOR": 0, "GRAND": 0}
+        self.paid = self.fees = self.wagered = 0
+        self.jp_hits = {"MINI": 0, "MAJOR": 0, "GRAND": 0}
 
-    def max_wager(self):
+    def max_bet(self):
         return max(W_MIN, self.main // D)
 
-    def jackpot(self, name, w, wmax):
-        out = self.jp[name] * JACKPOT_PAYS_BPS * min(w, wmax) // (10_000 * wmax)
-        self.jp[name] -= out
-        self.paid += out
-        self.jp_paid += out
-        self.hits[name] += 1
-
-    def spin(self, rng, w):
-        wmax = self.max_wager()
-        w = min(w, wmax)                         # stakes over the cap are refused
-        fee = -(-w * FEE_BPS // 10_000)          # rounds up, never 0
-        jps = {k: w * b // 10_000 for k, b in JACKPOT_BPS.items()}
+    def spin(self, rng, lines, coins, coin_value):
+        bet = lines * coins * coin_value
+        if bet > self.max_bet():
+            return False                        # the UI only offers bets under the cap
+        fee = -(-bet * FEE_BPS // 10_000)       # rounds up, never 0
         self.fees += fee
-        self.wagered += w
-        for k, v in jps.items():
+        self.wagered += bet
+        contrib = {k: bet * b // 10_000 for k, b in JACKPOT_BPS.items()}
+        for k, v in contrib.items():
             self.jp[k] += v
-        self.main += w - fee - sum(jps.values())
+        self.main += bet - fee - sum(contrib.values())
 
-        mult, won = 0, []
-        t = line_tier(rng.choices(SYMS, weights=WEIGHTS, k=3))
-        if t == "3 HEART":
-            won.append("MAJOR")
-        elif t in LINE_X:
-            mult += LINE_X[t]
-        if t == "3 MOON":
-            self.hits["FREE SPINS"] += 1
-            for _ in range(FREE_SPINS):
-                ft = line_tier(rng.choices(SYMS, weights=WEIGHTS, k=3))
-                if ft == "3 HEART":
-                    won.append("MAJOR")
-                elif ft in LINE_X:
-                    mult += LINE_X[ft] * FREE_SPIN_MULT
-        elif t == "3 POTION":
-            self.hits["POTION PICK"] += 1
-            c = rng.choice(CAULDRONS)
-            if c == "MINI":
-                won.append("MINI")
-            else:
-                mult += c
-        elif t == "3 SPELLBOOK":
-            self.hits["HEART LOCK"] += 1
-            m, j = heart_lock(rng)
-            mult += m
-            won += j
+        win = int(min(play(rng, lines, coins, {}), MAX_WIN) * bet)
+        self.main -= win
+        self.paid += win
 
-        if mult >= MAX_WIN:
-            self.hits["MAX WIN"] += 1
-        out = min(mult, MAX_WIN) * w
-        self.main -= out
-        self.paid += out
-        for name in won:
-            self.jackpot(name, w, wmax)
+        scale = bet / self.max_bet()            # Love Draw: odds scale with bet
+        for k, odds in DRAW_ODDS.items():
+            if k == "GRAND" and not (lines == 20 and coins == MAX_COINS):
+                continue
+            if rng.random() < odds * scale:
+                out = self.jp[k] * JACKPOT_PAYS_BPS // 10_000
+                self.jp[k] -= out
+                self.paid += out
+                self.jp_hits[k] += 1
+        return True
 
 
-def base_rtp(trials, seed):
-    """Line + bonus return per unit wagered, excluding jackpots."""
-    b = Bank(main=10**15)
-    rng = random.Random(seed)
-    for _ in range(trials):
-        b.spin(rng, 1_000 * MOJO)
-    return (b.paid - b.jp_paid) / b.wagered, b.hits, trials
-
-
-def stress(d, spins, trials):
-    """Every spin at max wager: how often does the main pot fall below half the seed?"""
-    global D
-    old, D = D, d
-    busts, worst = 0, 1.0
-    for t in range(trials):
-        rng = random.Random(1000 + t)
-        b = Bank(36_000 * MOJO, 500 * MOJO, 1_000 * MOJO, 2_500 * MOJO)
-        lo = b.main
-        for _ in range(spins):
-            b.spin(rng, b.max_wager())
-            lo = min(lo, b.main)
-        worst = min(worst, lo / (36_000 * MOJO))
-        busts += lo < 18_000 * MOJO
-    D = old
-    return busts / trials, worst
+def choose_bet(bank, lines, coins):
+    """Largest coin value that keeps the bet under the cap; None if none fits."""
+    for cv in reversed(COIN_VALUES):
+        if lines * coins * cv <= bank.max_bet():
+            return cv
+    return None
 
 
 if __name__ == "__main__":
-    rtp, hits, n = base_rtp(2_000_000, seed=1)
+    n = 300_000
     jp_share = sum(JACKPOT_BPS.values()) / 10_000
-    keep = 1 - FEE_BPS / 10_000 - jp_share - rtp
-    print(f"per LOVE wagered: fee {FEE_BPS/100:.1f}%  jackpots {jp_share:.1%}  "
-          f"line+bonus RTP {rtp:.2%}  kept in pot {keep:.2%}")
-    print(f"player RTP over time ~ {rtp + jp_share * JACKPOT_PAYS_BPS / 10_000:.2%}")
-    print("frequency per spin: " + ", ".join(f"{k} 1 in {n/v:,.0f}" for k, v in hits.items() if v))
+    print("base game + features RTP by bet shape (300k spins each):")
+    for lines, coins in ((1, 1), (10, 1), (20, 1), (20, MAX_COINS)):
+        rtp, stats = base_rtp(n, lines, coins, seed=1)
+        grand = lines == 20 and coins == MAX_COINS
+        jp_back = (jp_share if grand else jp_share - JACKPOT_BPS["GRAND"] / 10_000) * JACKPOT_PAYS_BPS / 10_000
+        print(f"  {lines:>2} lines x {coins} coins: base {rtp:6.2%}  + jackpots ~{jp_back:.2%}"
+              f"  = player RTP ~{rtp + jp_back:6.2%}   "
+              + ", ".join(f"{k} 1 in {n/v:,.0f}" for k, v in sorted(stats.items())))
     print()
 
-    for bet in (5, 20):
+    for label, lines, coins in (("20 lines x 1 coin", 20, 1), ("max bet: 20 lines x 5 coins", 20, MAX_COINS)):
         rng = random.Random(7)
         b = Bank(36_000 * MOJO, 500 * MOJO, 1_000 * MOJO, 2_500 * MOJO)
         lo = b.main
-        print(f"players bet {bet} LOVE per spin (capped at MAIN/{D}); seed 40k = main 36k + jackpots 4k")
-        for i in range(1, 200_001):
-            b.spin(rng, bet * MOJO)
+        print(f"{label}, biggest coin value under the cap; seed 40k = main 36k + jackpots 4k")
+        for i in range(1, 100_001):
+            cv = choose_bet(b, lines, coins)
+            if cv:
+                b.spin(rng, lines, coins, cv)
             lo = min(lo, b.main)
-            if i in (10_000, 50_000, 100_000, 200_000):
-                L = lambda v: v // MOJO
-                print(f"  {i:>7,} spins: main {L(b.main):>9,}  max bet {L(b.max_wager()):>4,}  "
-                      f"mini {L(b.jp['MINI']):>6,}  major {L(b.jp['MAJOR']):>6,}  grand {L(b.jp['GRAND']):>7,}  "
-                      f"dev fees {L(b.fees):>7,}  (LOVE)")
-        print(f"  lowest main pot {lo // MOJO:,} LOVE; RTP {b.paid/b.wagered:.2%}\n")
-
-    print("stress test: every spin at max bet, 5,000 spins from the 40k seed, 400 runs")
-    for d in (1000, 2000):
-        p, worst = stress(d, 5_000, 400)
-        print(f"  D={d:>4} (max bet {36_000//d:>2} LOVE at seed): pot fell below half the seed in "
-              f"{p:.1%} of runs; worst dip to {worst:.0%} of seed")
+            if i in (10_000, 50_000, 100_000):
+                L = lambda v: v / MOJO
+                print(f"  {i:>7,} spins: main {L(b.main):>9,.0f}  max bet {L(b.max_bet()):>5,.1f}  "
+                      f"mini {L(b.jp['MINI']):>6,.0f}  major {L(b.jp['MAJOR']):>6,.0f}  "
+                      f"grand {L(b.jp['GRAND']):>7,.0f}  dev fees {L(b.fees):>7,.0f}  (LOVE)")
+        print(f"  lowest main pot {lo / MOJO:,.0f} LOVE; jackpot hits {b.jp_hits}; "
+              f"RTP {b.paid / b.wagered:.2%}\n")

@@ -1,9 +1,13 @@
 # Love Slots — Design Spec (draft)
 
-> A slot machine played over Chia state channels. Spins are instant and
-> off-chain; the chain is used to open and close channels, hold the bankroll and
-> jackpot pools, and settle any dispute through the upstream referee. LOVE is the
-> first CAT; any CAT works the same way.
+> A decentralized, provably fair 5-reel video slot. Spins are instant hands in a
+> Chia state channel between the player and a Bank. Jackpots come from the
+> **Love Draw**, an on-chain draw decided by the drand public beacon, so nobody,
+> the Bank included, can steer money that belongs to other players. Anyone can
+> run a Bank, and jackpot pools are shared across hubs.
+>
+> LOVE stands in for the play token. The production token will be a dedicated
+> game CAT with no market value; the mechanics are identical.
 >
 > Status: **design only.** Nothing here has been compiled or tested.
 > Game math is checked by `simulate.py` in this folder.
@@ -12,209 +16,223 @@
 
 | Role | What it is |
 | --- | --- |
-| **Player** | Opens a channel with the Bank and plays hands in it. |
-| **Bank** | The operator's channel node. It is the house: it stakes into each hand and is the entity a licence would name. |
-| **Pot** | On-chain singleton holding the Bank's bankroll `MAIN`. It funds Bank channels and receives their settlements. |
-| **Jackpot pools** | On-chain coins for Mini, Major and Grand. They can pay only jackpot claims or a successor pool. |
+| **Player** | Opens a channel with a Bank and plays hands. |
+| **Bank** | Anyone who deploys a pot and runs a Bank node. It is the house for its own channels and stakes into each hand. |
+| **Pot** | The Bank's on-chain bankroll singleton (`MAIN`). It funds the Bank's channels and receives their settlements. |
+| **Jackpot pools** | Network-wide Mini, Major and Grand pools, shared by every Bank on every hub. Funds leave only through a winning Love Draw claim. |
 | **Dev** | Receives the service fee. |
+
+## Fairness
+
+| Money | Decided by | Who can steer it |
+| --- | --- | --- |
+| Line, scatter and feature wins | commit-reveal between the Bank and the player, inside their channel | **Nobody.** The Bank commits first, the player can't see its seed, and a stalled Bank loses its whole stake by timeout. |
+| Jackpots | the Love Draw, decided by drand on-chain | **Nobody**, including a Bank colluding with a player |
+
+A Bank colluding with a fake player can only move its own bankroll around in
+their shared channel. Every coin that belongs to someone else (other players'
+channels, the jackpot pools) is protected by the referee or the drand draw.
+
+## Bets
+
+| Control | Options |
+| --- | --- |
+| Lines | 1, 5, 10, 15, 20 (fixed paylines on a 5×3 grid) |
+| Coins per line | 1–5 |
+| Coin value | set by the table, e.g. 0.1 / 0.25 / 0.5 / 1 |
+| **Total bet** | lines × coins × coin value |
+| **Min bet** | 1 line × 1 coin × the smallest coin value (0.1 at the default table) |
+| Max bet | the smaller of the table's top bet and the global cap `MAIN / D` (`D` = 2000) |
+
+Line wins pay multiples of the **line bet** (coins × coin value). Scatter and
+feature wins pay multiples of the **total bet**. More lines means more ways
+to win, at the same expected return per unit bet.
+
+### Why max bet pays more (as in real slots)
+
+1. **Top award premium:** five ❤️ wilds on a line pay 2,000× the line bet, but
+   **5,000× at max coins**, the way video-poker paytables boost the top award.
+2. **Grand eligibility:** the 👑 Grand is drawn only for spins at **20 lines and
+   5 coins**, as with Megabucks-style progressives. Any coin value qualifies.
+3. **Draw odds scale with bet:** Mini and Major (and the Grand, when eligible)
+   use odds × `bet / global max bet`.
+
+RTP is published per bet shape (see Game facts), so players can see the benefit.
 
 ## Spin protocol (a chia-gaming game, `games/lovespin`)
 
-Built by following upstream `GAME_WRITING_GUIDE.md` (`chiaGamingStateChannels.md`
-has the pinned revision). The pattern is Calpoker's commit-reveal chain
-(`games/calpoker/clsp/onchain/a.clsp`–`e.clsp`). Each **hand is one spin**, and a
-channel can run hands back to back.
+Built by following upstream `GAME_WRITING_GUIDE.md`, against the revision pinned
+in `chiaGamingStateChannels.md`. The pattern is Calpoker's commit-reveal chain
+(`games/calpoker/clsp/onchain/a.clsp`–`e.clsp`). **One hand is one spin**, and
+a channel plays hands back to back.
 
-1. **Bank commits.** The Bank proposes the hand with `H(bank_seed)`.
-   `bank_seed` comes from a certifiable CSPRNG.
-2. **Player moves.** The player stakes `w` and reveals a fresh `player_seed`.
-3. **Bank reveals.** The Bank reveals `bank_seed`. The validator computes
-   `seed = sha256(bank_seed, player_seed, game_id)`, derives the reels and any
-   bonus from it, and settles the hand's split.
-4. **Potion Pick only** adds three moves: the Bank commits a shuffle seed, the
-   player picks a cauldron, and the Bank reveals.
+1. The Bank proposes the hand with `H(bank_seed)`.
+2. The player stakes the total bet, sets lines and coins, and reveals a fresh `player_seed`.
+3. The Bank reveals `bank_seed`. The validator computes
+   `seed = sha256(bank_seed, player_seed, game_id)`, picks the 5 reel stops
+   (rejection sampling, no modulo bias), evaluates the active lines, scatters
+   and features, and splits the hand.
+4. Potion Pick adds three moves: the Bank commits a shuffle seed, the player picks a cauldron, and the Bank reveals.
 
-Why it's fair to the player without trusting the Bank:
+Hand funding: the player puts in the bet, and the Bank puts in `MAX_WIN × bet`.
+If the Bank stalls after the player's move, the referee timeout gives the player the whole hand.
 
-- The Bank commits before it sees `player_seed`, so it can't steer the result.
-- The player doesn't know `bank_seed`, so they can't steer it either.
-- **If the Bank stalls after the player's move, the referee timeout pays the
-  player the Bank's whole stake for the hand** (`MAX_WIN × w`). Refusing to
-  reveal a losing hand is always worse for the Bank than paying it.
-- Every move is co-signed. Any cheating can be proved on-chain through the
-  upstream referee's slash path.
-- After each spin, the player can recompute the result from both seeds
-  ("provably fair" history in the UI).
+## The Love Draw (jackpots)
 
-Hand funding: the player puts in `w`, and the Bank puts in `MAX_WIN × w`. The
-validator pays the player `min(mult, MAX_WIN) × w` and returns the rest to the
-Bank side. Jackpots are not paid inside the hand (see Money flow below).
+Every spin also gets a draw ticket: `ticket = sha256(channel_id, hand_nonce)`.
 
-## Tables and Bank capital
+1. **Batch.** About once a minute, each Bank posts an on-chain batch spend. It
+   pays that minute's jackpot contributions into the shared pools and records
+   a Merkle root of its tickets (ticket, player payout puzzle hash, bet,
+   global max bet, Grand eligibility). It also names a drand round `R` at least
+   `COMMIT_MARGIN` in the future, asserted with `ASSERT_BEFORE_SECONDS_ABSOLUTE`.
+2. **Reimbursement.** The Bank pays the contributions on-chain up front. The
+   channel reimburses it only for tickets the player has an inclusion proof
+   for, so a Bank that leaves a ticket out isn't paid for it, and the player's
+   contribution stays with the player. The player's client asks for the proof
+   before the next hand.
+3. **Draw.** When round `R` is published, each ticket wins tier `k` if
+   `sha256(sig_R, ticket, k) < odds_k × bet / max_bet × 2^256`.
+4. **Claim.** The winner (or a bot on their behalf) presents `sig_R` and the
+   Merkle proof. The pool verifies drand on-chain
+   (`bls_pairing_identity` + `g1_map`, quicknet) and pays 90% of the pool.
+   Several winners in one round are paid in ticket order, each from what's
+   left. Claims expire after a fixed window.
 
-- A Bank channel must hold `MAX_WIN × bet` for every hand it may play, so
-  players open a channel at a **table**: a bet range, such as 1–5 LOVE or
-  5–20 LOVE. The Bank's deposit is sized to the table's top bet.
-- The global max bet is still `MAIN / D`. As `MAIN` grows, higher tables open.
-- **Exposure limit:** the total Bank deposit across open channels must stay at
-  or below `EXPOSURE_BPS` of `MAIN` (e.g. 50%). When the limit is reached, new
-  channels wait for a seat.
+Results show in the UI as the **Love Draw ticker**, a few minutes after the
+spin. Tickets can't be dropped after `R` is known, because the batch is
+on-chain before `R` exists.
 
-## Money flow
-
-Per spin, tracked inside the channel state:
-
-| Share | % of every wager | Where it ends up |
-| --- | --- | --- |
-| Dev service fee | 3.0% (rounded up) | dev |
-| Mini / Major / Grand | 0.5% / 1.0% / 1.5% | the three jackpot pools |
-| The rest | 95.5% | the Bank side of the hand, minus wins paid |
-
-- **At channel close**, clean shutdown or unroll, the Bank's share goes to a
-  splitter spend. It pays the accumulated fee to the dev and the contributions
-  to the jackpot pools, and returns the remainder to `MAIN`. The accumulated
-  totals are part of the co-signed channel state, so the player has signed them
-  too.
-- **Jackpot wins:** a winning hand's final state includes a co-signed jackpot
-  claim with the pool, player puzzle hash, `w` and the max bet at that time.
-  The pool coin pays `POOL × 90% × w / w_max` against a valid claim. The pool
-  puzzle has no other exit except a successor pool, so contributions can't be
-  withdrawn to the operator.
-
-## Trust model
-
-| What | Who you trust |
-| --- | --- |
-| Each spin's fairness to the player | Nobody (commit-reveal + referee) |
-| Getting paid for a won hand | Nobody (channel + referee) |
-| Jackpot contributions reaching the pools | Nobody past channel close. The totals are co-signed, and the splitter pays them out. |
-| The Bank's bankroll `MAIN` | The operator. It is the house's money, and that is the structure licensing regimes expect. |
-| Fair jackpot draws | The operator: a Bank colluding with a fake player could leak `bank_seed`. Mitigations are licensing, the audited CSPRNG, the public on-chain claim history, and per-claim rate limits on the pools. |
-
-The fully trustless alternative, outcomes from on-chain drand with no
-operator, is kept in git history. It means 3–5 minutes per spin, and it has no
-operator to license, which makes the legal path harder.
+| Pool | Funded by | Odds per spin at max bet | Equilibrium size if every spin were at max bet |
+| --- | --- | --- | --- |
+| ✨ Mini | 0.5% of every bet | 1 in 1,000 | ≈ 5.6 × global max bet |
+| 💗 Major | 1.0% | 1 in 10,000 | ≈ 111 × global max bet |
+| 👑 Grand | 1.5% | 1 in 50,000 (20 lines × 5 coins only) | ≈ 833 × global max bet |
 
 ## Game
 
-3 reels. Strip weights: HEART 1, WIZARD 3, SPELLBOOK 5, POTION 4, STAR 12, MOON 6.
+5 reels × 3 rows, 20 paylines. Each reel has one strip of 95 stops (weights:
+❤️ wild 3, 🧙 Wizard 5, 🦉 Owl 7, 💎 Crystal 10, 🕯️ Candle 14, ⭐ Star 18,
+🍃 Leaf 22, 🌙 Moon 2, 🧪 Potion 2, 📖 Spellbook 12). The 3 visible rows are
+consecutive stops, as on a physical reel.
 
-| Result | Odds per spin | Pays |
-| --- | --- | --- |
-| 3 ❤️ HEART | 1 in 29,800 | 💗 Major jackpot |
-| 3 🧙 WIZARD | 1 in 1,100 | 80× |
-| 2 ❤️ HEART | 1 in 330 | 5× |
-| 3 🌙 MOON | 1 in 139 | 5× + 🌙 **Moonlit Free Spins** |
-| 3 📖 SPELLBOOK | 1 in 235 | ❤️‍🔥 **Heart Lock** |
-| 3 🧪 POTION | 1 in 459 | 🧪 **Potion Pick** |
-| 3 ⭐ STAR | 1 in 17 | 8× |
+Line pays (× line bet, 3 / 4 / 5 of a kind from the left, wild substitutes):
 
-Bonus features:
-
-- 🌙 **Moonlit Free Spins:** 8 spins with line wins at ×2. They can't
-  retrigger. A 3 HEART during free spins still wins the Major.
-- ❤️‍🔥 **Heart Lock (Hold & Win):** a 15-cell grid that starts with 3 hearts and
-  gives 3 respins. Hearts lock where they land, and each new heart resets the
-  respins to 3. Hearts carry 2×–50× or a ✨ MINI or 💗 MAJOR jackpot. **Fill
-  all 15 cells to win the 👑 GRAND.**
-- 🧪 **Potion Pick:** pick one of three cauldrons (15×, 40×, ✨ MINI). The
-  shuffle is committed before the pick, so the choice is real.
-
-Published game facts (they must be fixed per release and shown in the game's help screen):
-
-| | |
-| --- | --- |
-| **RTP** | ≈ 91.9% long-run (89.2% base and features, plus 2.7% returned via jackpots) |
-| **Max win** | 250× bet per spin, plus any jackpot |
-| Any bonus feature | ≈1 in 74 spins |
-| Jackpots | Mini ≈1 in 1,000 · Major ≈1 in 8,400 · Grand ≈1 in 31,000 |
-| Volatility | medium-high |
-
-**Fixed odds.** The paytable never changes with the pot, the player, or
-recent results. Earlier drafts paid a share of the pot, which a test lab
-would not certify. Pot size changes only the max bet and the jackpot sizes.
-
-## Economics (from `simulate.py`)
-
-Planned seed: **40k LOVE**, split main 36k + Mini 500 + Major 1,000 + Grand 2,500. `D` = 2000.
-
-| Per LOVE wagered | % |
-| --- | --- |
-| Dev service fee | 3.0 |
-| Jackpot pools (90% returns to players) | 3.0 |
-| Line and feature wins | ≈89.2 |
-| **Kept in `MAIN`** (growth) | **≈4.8** |
-
-| Players bet | After 200k spins | Max bet then | Dev fees | Lowest `MAIN` |
-| --- | --- | --- | --- | --- |
-| 5 LOVE | main ≈96k, Grand ≈11.6k | 47 LOVE | 30k | 34.7k |
-| 20 LOVE (clamped early) | main ≈275k, Grand ≈34k | 137 LOVE | 120k | 31.5k |
-
-Stress test, every spin at the max bet from the seed (5,000 spins × 400 runs):
-
-| `D` | Max bet at seed | `MAIN` below half the seed | Worst dip |
+| Symbol | 3 | 4 | 5 |
 | --- | --- | --- | --- |
-| 1000 | 36 LOVE | 2.5% of runs | 29% of seed |
-| **2000** | **18 LOVE** | **0%** | **55%** |
+| ❤️ Heart (wild) | 100 | 500 | 2,000 (**5,000 at max coins**) |
+| 🧙 Wizard | 60 | 250 | 1,000 |
+| 🦉 Owl | 35 | 120 | 450 |
+| 💎 Crystal | 25 | 70 | 230 |
+| 🕯️ Candle | 12 | 35 | 140 |
+| ⭐ Star | 7 | 23 | 90 |
+| 🍃 Leaf | 5 | 12 | 45 |
 
-Re-run `python3 -I simulate.py` after any change and record its output in the PR.
+Features:
 
-## Compliance profile (built in so a licence application could pass)
+| Feature | Trigger | Odds | What happens |
+| --- | --- | --- | --- |
+| 🌙 **Moonlit Free Spins** | 3+ Moon anywhere | 1 in 242 | Pays 5× / 20× / 100× the total bet, then 12 free spins on the same lines with all wins ×3. They can't retrigger. |
+| ❤️‍🔥 **Heart Lock** (Hold & Win) | 6+ Spellbook anywhere | 1 in 333 | The spellbooks lock as hearts worth 1×–25× the total bet. 3 respins, reset by each new heart. **Fill all 15 cells for +250×.** |
+| 🧪 **Potion Pick** | 3+ Potion anywhere | 1 in 465 | Pick one of 3 cauldrons: 10× / 25× / 60× the total bet. The choice is real (committed before the shuffle). |
 
-The game ships with a per-jurisdiction **compliance profile**. Default to the
-strictest settings, and loosen them only where a licence allows.
+### Game facts (published per release)
 
-| Requirement | Why | Default |
+| Bet shape | Base + features | + Love Draw | **Player RTP** |
+| --- | --- | --- | --- |
+| 1 line | 86.3% | 1.35% | ≈ 87.7% |
+| 10 lines | 89.5% | 1.35% | ≈ 90.8% |
+| 20 lines × 1–4 coins | 89.7% | 1.35% | ≈ 91.0% |
+| **20 lines × 5 coins (max bet)** | 89.7% | 2.70% | **≈ 92.4%** |
+
+- **Max win:** 500× total bet per spin, plus any Love Draw jackpot. The cap
+  binds more often at 1 line, which is why the 1-line RTP is lower.
+- **Fixed odds:** the paytable never changes with the pot, the player, or
+  recent results. Pot size changes only the max bet and the jackpot sizes.
+- Volatility: medium-high. A feature lands about once in 108 spins.
+
+## Money flow
+
+| Share of every bet | % | Where it goes |
 | --- | --- | --- |
-| Certifiable RNG: `bank_seed` from a CSPRNG, test-lab ready | GLI-19 is the RNG standard most regulators reference. BMM has certified a blockchain RNG (Chainlink VRF) under it | on |
-| Fixed, published paytable, RTP and max win | game-math certification | on |
-| Progressive pools can't be withdrawn; contributions are shown | progressive-jackpot rules (check GLI-12) | on, enforced by the pool puzzle |
-| Minimum 2.5 s per spin cycle | UKGC remote standards | on |
-| No autoplay, turbo, quick-spin or slam-stop | UKGC remote standards | on |
-| No celebration when a "win" is less than the stake | UKGC (losses disguised as wins) | on |
-| Session net position and time on screen | UKGC remote standards | on |
-| Deposit, loss and session limits; reality checks; cool-off; self-exclusion | standard responsible-gambling requirements (e.g. Curaçao LOK) | on |
-| No bonus buy | banned or contentious in several markets | not built |
-| Age gate + KYC/AML before real-value play | every licence; enhanced for crypto under Curaçao LOK | required for real-value mode |
-| Geofencing | most of the US allows no online casino, and sweepstakes models are being banned (California AB 831 since Jan 2026, New York Dec 2025, more in 2026) | block unlicensed regions |
-| Full hand history kept (seeds, moves, channel states) | dispute resolution, audit | on (chia-gaming persistence) |
-| **No real-value play inside Discord** | Discord's policy bans wagering real-world value, explicitly including virtual currency with market value, and apps removed for it can't be recreated | **slots live on the web hub only** |
+| Dev service fee | 3.0 (rounded up) | dev, from the Bank's side at channel close |
+| Love Draw pools | 3.0 | shared pools, paid on-chain by the batch |
+| Wins | ≈ 86–90 | the player, inside the hand |
+| **Kept in the Bank's `MAIN`** | ≈ 4–8 | grows the Bank, which raises its max bet |
 
-What licensing still needs beyond this code: a licensed operating entity
-(e.g. a Curaçao LOK B2C licence, which permits crypto with enhanced AML and has
-a CGA crypto guideline due by mid-2027), test-lab certification of the RNG and
-the game math, and counsel for each market. Calling the fee a service fee, or
-the CAT just a unit, doesn't change the analysis, because LOVE trades against
-XCH and so has real-world value.
+`simulate.py`, Bank seeded with 40k (main 36k + jackpots 4k), `D` = 2000, the
+biggest coin value that fits under the cap, 100k spins:
+
+| Players play | `MAIN` after 100k | Max bet then | Dev fees | Lowest `MAIN` | Realized RTP |
+| --- | --- | --- | --- | --- | --- |
+| 20 lines × 1 coin | 116k | 58 | 58k | 35k | 91.2% |
+| 20 lines × 5 coins | 47k | 24 | 30k | 26k | 95.5% (two Grands hit) |
+
+The max-bet run is a reminder that the Bank's `MAIN` also has to absorb
+variance from its own players. The jackpot pools absorb only their own draws.
+
+## Tables and Bank capital
+
+- A table fixes the coin values and so the top bet. The Bank's channel
+  deposit is `MAX_WIN × top bet` per open hand.
+- **Exposure limit:** a Bank's total channel deposits must stay at or below
+  `EXPOSURE_BPS` of its `MAIN` (e.g. 50%). When the limit is reached, new
+  seats wait.
+- More Banks means more seats, and the hub lists every Bank with its on-chain
+  bankroll, open seats and uptime.
+
+## Compliance profile (so a licensed deployment remains possible)
+
+The game ships with a per-jurisdiction profile. It defaults to the strictest
+settings, and an operator may loosen them only where its licence allows.
+
+| Requirement | Default |
+| --- | --- |
+| `bank_seed` from a CSPRNG a test lab can certify (GLI-19); provably fair history per spin | on |
+| Fixed, published paytable, per-bet RTP and max win | on |
+| Jackpot pools can't be withdrawn; contributions shown | on, enforced by the pool puzzle |
+| Minimum 2.5 s per spin; no autoplay, turbo or slam-stop | on (UKGC baseline) |
+| No celebration when a win is less than the stake; session net position and time on screen | on |
+| Deposit, loss and session limits; reality checks; cool-off; self-exclusion | on |
+| No bonus buy | not built |
+| Age gate, KYC and geofencing hooks | off for the no-value game token; required for any real-value deployment |
+
+**Discord and web UIs.** Both run the same game. The no-value game token is
+what keeps the Discord build within Discord's gambling policy, which counts
+virtual currency with a market value as real value. The token must not be
+buyable, sellable or redeemable for anything of value (for example no DEX
+pools, and no swaps to LOVE or XCH). If that ever changes, the Discord build
+has to drop wagering.
 
 ## Attacks considered
 
 | Attack | Mitigation |
 | --- | --- |
-| Bank refuses to reveal a losing hand | The referee timeout pays the player the Bank's full stake. |
-| Player stalls after the Bank commits | The hand times out and both stakes return; nothing was revealed. |
-| Player grinds `player_seed` | `bank_seed` is unknown until after the player moves. |
-| Bank grinds `bank_seed` | It is committed before `player_seed`. |
-| Bank leaks `bank_seed` to an accomplice | Operator-trust residual (see Trust model): licensing, CSPRNG audit, public claim history, pool rate limits. |
-| Forged jackpot claim | Claims must carry both channel signatures and match a hand state; the pool verifies the Bank key and the claim format. |
-| Fee or contribution skipped at close | Totals are in the co-signed state, and the splitter spend must pay them. A player can unroll to that state on-chain. |
+| Bank refuses to reveal a losing hand | The referee timeout gives the player the whole hand. |
+| Either side grinds its seed | Commit-reveal ordering; neither knows the other's seed in time. |
+| Bank colludes with a fake player to win jackpots | The draw uses drand, which is unknown until after the batch is on-chain, so collusion can't change the odds. |
+| Bank drops losing tickets after the draw | Batches are on-chain before round `R` exists. |
+| Bank leaves a ticket out | It isn't reimbursed for that contribution, and the player's client stops before the next hand without an inclusion proof. |
+| Forged or replayed claim | Merkle proof against an on-chain batch, drand verified on-chain, and each ticket can be claimed once (claimed-ticket set or accumulator in the pool state). |
+| Farmer back-dates a batch after seeing `R` | `COMMIT_MARGIN` ≥ 180 s. |
 | Bank over-commits capital | Per-table deposits and `EXPOSURE_BPS`. |
-| Puzzle drift between Bank and players | Pin chia-gaming by commit; show the pinned revision in the UI. |
+| Puzzle drift between Bank and players | Pin chia-gaming by commit, and show the pinned revision in the UI. |
+| drand stalls | Batches wait for the next round; no refund path that reopens grinding. |
 
 ## Open decisions
 
-1. The fee (3%), the jackpot split (0.5 / 1 / 1.5%), and the jackpot seed (planned 4k of the 40k).
-2. Table bet ranges and `EXPOSURE_BPS`.
-3. Where the code lives: the game in a fork of chia-gaming (`games/lovespin`),
-   the pot/pool/splitter puzzles in a public `love-slots-puzzles` repo, and the
-   UI on the web hub.
-4. Whether the Discord Activity gets a link out to the web hub, or no mention of slots at all. Discord's ads policy also restricts promotion.
+1. Fee (3%) and Love Draw split (0.5 / 1 / 1.5%).
+2. Table coin values, `D`, `MAX_WIN` and `EXPOSURE_BPS`.
+3. The game token's TAIL: how it's issued to players, and how the no-value rule is kept (no DEX pools, no swaps).
+4. Where the code lives: `games/lovespin` in a chia-gaming fork; the pot, Love
+   Draw and splitter puzzles in a public `love-slots-puzzles` repo; one UI for web and Discord.
 
 ## Build order
 
-1. `games/lovespin` against the pinned chia-gaming: validators, handler, proposal codec, play UI. Cross-check the validator against `simulate.py` on fixed seeds.
-2. Simulator tests through upstream's harness: clean shutdown, Bank timeout, slash, Potion Pick moves, max-win cap.
-3. Pot, jackpot-pool and splitter puzzles with `clvmPuzzleAudit.md` tests (solvency, no pool exit to the operator, claim forgery, exposure limit).
-4. Bank node: CSPRNG, table manager, exposure tracking, splitter on channel close.
-5. Compliance profile in the UI: spin pacing, session display, limits, geofence and KYC hooks.
-6. testnet11 with a test CAT, then a security review, then the LOVE seed on mainnet.
+1. drand verification puzzle, tested against the quicknet test vectors (simulator).
+2. `games/lovespin`: validators, handler, proposal codec and play UI. Cross-check the validator against `simulate.py` on fixed seeds.
+3. Channel tests through upstream's harness: clean shutdown, Bank timeout, slash, Potion Pick moves, max-win cap.
+4. Love Draw puzzles: batch, pools, claims. Tests: inclusion, replay, ordering, expiry, and the `clvmPuzzleAudit.md` mutation set.
+5. Bank node: CSPRNG, tables, exposure tracking, batch poster, splitter at channel close.
+6. UI: bet controls (lines, coins, coin value, max bet), Love Draw ticker, provably fair history, compliance profile. Ship to web and Discord.
+7. testnet11 with the game token, then a security review, then mainnet.
