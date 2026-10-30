@@ -31,6 +31,9 @@ Player A proposes + bond terms → Player B accepts & signs
 ```
 
 ### State Channel Lifecycle
+
+> On-chain channels use upstream `chia-gaming` (channel coin → unroll → referee),
+> pinned in `chiaGamingStateChannels.md`. The sketch below is the game-level view only.
 ```
 open_channel() → update_state(turn) × N → close_channel(final_state)
 ```

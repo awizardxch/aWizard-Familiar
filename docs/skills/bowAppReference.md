@@ -307,6 +307,12 @@ interface WalletConnectContextValue {
 
 ## 2. State Channel Lifecycle
 
+> ⚠️ **Not a state channel.** The flow below spends one player's coin back to
+> themselves with a REMARK memo. There's no 2-of-2 coin, no unroll and no
+> referee, so results can't be disputed on-chain. Treat it as a wager-intent
+> marker only. The real channel is upstream `chia-gaming`: see
+> `chiaGamingStateChannels.md` and `docs/BOW_GAME_HUB_PLAN.md`.
+
 ```
 [Lobby] Player announces room → tracker creates RoomRecord (status: pending)
    ↓

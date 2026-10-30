@@ -1,6 +1,6 @@
 {
- "version": 15,
- "updated": "2026-10-19",
+ "version": 16,
+ "updated": "2026-10-30",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "cursor-team-kit": {
@@ -32,7 +32,8 @@
    "forgeLpCat.md",
    "forgePoolLifecycleTesting.md",
    "chip0050ActionLayer.md",
-   "chiaDgxchUtils.md"
+   "chiaDgxchUtils.md",
+   "chiaGamingStateChannels.md"
   ],
   "puzzle-security": [
    "clvmPuzzleAudit.md",
@@ -104,6 +105,7 @@
   ],
   "game-systems": [
    "battleKnowledge.md",
+   "chiaGamingStateChannels.md",
    "aiSeedModel.md",
    "apsTierSystem.md",
    "leaderboardRankings.md",
@@ -186,6 +188,12 @@
    "forgeMultisig.md",
    "sageRpc.md",
    "nftRewards.md"
+  ],
+  "state-channels": [
+   "chiaGamingStateChannels.md",
+   "clvmPuzzleAudit.md",
+   "bowAppReference.md",
+   "battleKnowledge.md"
   ]
  }
 }

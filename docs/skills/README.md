@@ -49,6 +49,7 @@ Use this file when:
 | Skill | Use it for |
 | --- | --- |
 | `battleKnowledge.md` | Battle flow, turn systems, engine logic |
+| `chiaGamingStateChannels.md` | Pinned upstream `chia-gaming` puzzles (referee, unroll), potato protocol, hub model, game registry. Load before any channel, hub or game work |
 | `aiSeedModel.md` | Deterministic AI, seeded RNG, fairness model |
 | `apsTierSystem.md` | Progression, ranks, unlock thresholds |
 | `leaderboardRankings.md` | Ranking logic, score surfaces, trustless record planning |

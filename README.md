@@ -49,6 +49,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/skills/blockchainDecentralization.md`** — Chia blockchain philosophy
 - **`docs/skills/bowAppReference.md`** — WalletConnect/CHIP-0002, multi-address scanning (`chip0002_getPublicKeys`), state channel, battle protocol, Fighter types
 - **`docs/skills/snesWorldEngine.md`** — SNES chunk world, biomes, procedural gen, Godot web export
+- **`docs/skills/chiaGamingStateChannels.md`** — pinned upstream `chia-gaming` state channel puzzles (referee, unroll), potato protocol, hub model, Calpoker/Spacepoker/Krunk
 - **`docs/skills/networkGameplayUX.md`** — spell-cast UX, arcane loaders, WebSocket battles, chain tx progress
 
 #### Chia DeFi
@@ -81,6 +82,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/CODE_AUDIT_REPORT.md`** — Code quality baseline and audit results
 - **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V11 (CHIP-0050 action layer) shipping on testnet11, V10 closed as the record, why V4–V9 are unsafe
 - **`docs/FORGE_SECURITY_AUDIT.md`** — Forge findings log: ten findings, severity, how each was closed
+- **`docs/BOW_GAME_HUB_PLAN.md`** — plan for running BOW as an upstream-compatible chia-gaming hub
 - **`docs/TODO_DEFI.md`** — DeFi build phases tracking
 - **`docs/TODO_WORLD.md`** — World engine development tracking
 - **`docs/QUEST_WORKFLOW.md`** — Foundation-First pattern quick reference
