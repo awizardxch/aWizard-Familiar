@@ -83,6 +83,7 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/FORGE_PROTOCOL_STATUS.md`** — Forge protocol status: V11 (CHIP-0050 action layer) shipping on testnet11, V10 closed as the record, why V4–V9 are unsafe
 - **`docs/FORGE_SECURITY_AUDIT.md`** — Forge findings log: ten findings, severity, how each was closed
 - **`docs/BOW_GAME_HUB_PLAN.md`** — plan for running BOW as an upstream-compatible chia-gaming hub
+- **`docs/slots/LOVE_SLOTS_SPEC.md`** — Love Slots: on-chain CAT pot, drand-verified spins, dev fee on intake (`simulate.py` checks the economics)
 - **`docs/TODO_DEFI.md`** — DeFi build phases tracking
 - **`docs/TODO_WORLD.md`** — World engine development tracking
 - **`docs/QUEST_WORKFLOW.md`** — Foundation-First pattern quick reference
