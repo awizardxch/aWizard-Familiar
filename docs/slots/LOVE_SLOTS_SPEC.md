@@ -225,7 +225,8 @@ has to drop wagering.
 2. Table coin values, `D`, `MAX_WIN` and `EXPOSURE_BPS`.
 3. The game token's TAIL: how it's issued to players, and how the no-value rule is kept (no DEX pools, no swaps).
 4. Where the code lives: `games/lovespin` in a chia-gaming fork; the pot, Love
-   Draw and splitter puzzles in a public `love-slots-puzzles` repo; one UI for web and Discord.
+   Draw and splitter puzzles in a public `love-slots-puzzles` repo; the UI in
+   The Nightspire (the BOW project), shared by its web and Discord builds.
 
 ## Build order
 

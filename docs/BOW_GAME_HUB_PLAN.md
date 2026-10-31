@@ -1,8 +1,9 @@
 # BOW as a Chia Gaming Hub — Plan
 
-> Status: **plan, not started in code.** The bow-app source is not on GitHub yet
-> (it lives at `C:\Users\Ricardo\Documents\discord\bow\bow-app`). Push it to a
-> repo first, then work through these phases there.
+> **BOW is The Nightspire** ([awizardxch/The-Nightspire](https://github.com/awizardxch/The-Nightspire)).
+> The separate `bow-app` is retired. The hub work lives there: the Games tab,
+> the patched chia-gaming client build (`game-client/`) and its docs
+> (`docs/GAME_HUB.md`). Merged to `main` in PR #1.
 >
 > Reference skill: `docs/skills/chiaGamingStateChannels.md`, which pins
 > `Chia-Network/chia-gaming@76f0fb8c`.
@@ -32,15 +33,17 @@
 ## Phases
 
 ### Phase 0: Prerequisites
-- [ ] Push bow-app (and the awizard-gui Discord Activity, if it's separate) to GitHub.
+- [x] BOW code on GitHub: The Nightspire is the BOW project.
 - [ ] Build the pinned chia-gaming on a trusted machine. Record the referee and
       unroll puzzle hashes in `chiaGamingStateChannels.md`.
 - [ ] Get the upstream simulator tests passing locally (`SIMULATOR_TESTING.md`).
 
 ### Phase 1: Retire the fake channel
-- [ ] Relabel the current `/channel` flow (REMARK + CREATE_COIN to self) as a
-      "wager intent". It is not a channel, so it must not hold an opponent's funds.
-- [ ] Gate PvP wagers off until Phase 3 lands. PvE gym battles can stay as they are.
+- [x] Battles paused: the Battle tab is out of The Nightspire's nav, so its PvP
+      "channel" (REMARK + CREATE_COIN to self) is no longer reachable there.
+- [ ] Chellyz still uses `stateChannel.ts` / `channelOpen.ts`. Port it to a
+      chia-gaming game rather than extending them; until then it must not hold
+      an opponent's funds.
 
 ### Phase 2: Run a BOW hub
 - [ ] Deploy `hub/hub-service` (Node, Express plus two WebSocket servers) next
@@ -50,16 +53,17 @@
 - [ ] Map Discord identity to the hub `alias` only. The hub `id` and `session_id`
       stay hub-generated, because routing IDs must not be rebound without peer auth.
 
-### Phase 3: Embed the game client in BOW
-- [ ] Vendor `front-end` + `wasm` + `games/{calpoker,spacepoker,krunk}` at the pinned
-      commit (a git submodule or a build-time fetch by commit, never `main`).
-- [ ] Replace `lobbyStore`'s Redis lobbies with a hub client (`useHubSocket`
-      pattern). Keep the Redis tracker for stats and leaderboards only.
-- [ ] Wire BOW's existing WalletConnect / CHIP-0002 provider into the
-      chia-gaming wallet layer. Keep hub and wallet connectivity independent
-      (`CONNECTIVITY.md` cascade rules).
-- [ ] Add a hub picker: the BOW hub by default, plus user-added upstream hub URLs.
-- [ ] Map upstream `SettlementOutcome` values to BOW's arcane loaders and toasts
+### Phase 3: Embed the game client in The Nightspire
+Changed from the original plan: rather than vendoring the client into BOW and
+rewiring BOW's wallet into it, The Nightspire embeds the upstream client (which
+owns its wallet, channel engine, lobby and relay) and carries one patch.
+- [x] Games tab with game catalog and hub picker (BOW hub default, user-added hubs on the web).
+- [x] Client built at the pinned commit by `game-client/build.sh`, never from `main`.
+- [x] Client patch: hubs under a path (needed for Discord URL mappings) and
+      `?hub=` prefill. Tested behind a prefix-stripping proxy (`game-client/e2e/run.sh`).
+- [ ] GitHub Actions build of the client and hub (in progress).
+- [ ] Client's WalletConnect relay inside Discord (same rewrite as The Nightspire's `index.html`).
+- [ ] Map upstream `SettlementOutcome` values to arcane loaders and toasts
       (`networkGameplayUX.md`).
 
 ### Phase 4: Testnet

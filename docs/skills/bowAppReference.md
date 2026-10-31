@@ -1,13 +1,20 @@
 # Skill: bow-app Reference — State Channel & Frontend Patterns
 
-> Extracted from the live `bow-app` (Next.js 16) codebase at
+> ⚠️ **Retired project.** BOW is now The Nightspire
+> ([awizardxch/The-Nightspire](https://github.com/awizardxch/The-Nightspire));
+> `bow-app` is no longer developed. Its WalletConnect / CHIP-0002 patterns are
+> still useful reference, and The Nightspire carries ports of them. For games,
+> hubs and channels use `chiaGamingStateChannels.md` and The Nightspire's
+> `docs/GAME_HUB.md`.
+>
+> Extracted from the `bow-app` (Next.js 16) codebase at
 > `C:\Users\Ricardo\Documents\discord\bow\bow-app`.
 >
 > This is the **ground truth** source for WalletConnect/CHIP-0002 integration,
 > state channel lifecycle, fighter types, the battle commit-reveal protocol,
 > the tracker client, and the Zustand store shape.
 >
-> When building `awizard-gui` or any Chia frontend, treat these patterns as canonical.
+> When building The Nightspire or any Chia frontend, treat the wallet patterns as canonical.
 
 ---
 
