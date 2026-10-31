@@ -140,13 +140,18 @@ Features:
 
 | Bet shape | Base + features | + Love Draw | **Player RTP** |
 | --- | --- | --- | --- |
-| 1 line | 86.3% | 1.35% | ≈ 87.7% |
-| 10 lines | 89.5% | 1.35% | ≈ 90.8% |
-| 20 lines × 1–4 coins | 89.7% | 1.35% | ≈ 91.0% |
-| **20 lines × 5 coins (max bet)** | 89.7% | 2.70% | **≈ 92.4%** |
+| 1 line | 90.9% | 1.35% | ≈ 92.3% |
+| 10 lines | 91.0% | 1.35% | ≈ 92.4% |
+| 20 lines × 1–4 coins | 91.2% | 1.35% | ≈ 92.5% |
+| **20 lines × 5 coins (max bet)** | 91.2% | 2.70% | **≈ 93.9%** |
+
+Base figures are long-run means from `simulate.py`, 6 × 500k spins per shape.
+An earlier version of this table used single 300k-spin runs and understated
+the return by about 1.5 points: at 1 line, single runs swing from 86% to 91%,
+because rare large wins dominate. Quote long-run means only.
 
 - **Max win:** 500× total bet per spin, plus any Love Draw jackpot. The cap
-  binds more often at 1 line, which is why the 1-line RTP is lower.
+  binds more often at 1 line, which lowers its return slightly (90.9% vs 91.2%).
 - **Fixed odds:** the paytable never changes with the pot, the player, or
   recent results. Pot size changes only the max bet and the jackpot sizes.
 - Volatility: medium-high. A feature lands about once in 108 spins.
@@ -157,8 +162,8 @@ Features:
 | --- | --- | --- |
 | Dev service fee | 3.0 (rounded up) | dev, from the Bank's side at channel close |
 | Love Draw pools | 3.0 | shared pools, paid on-chain by the batch |
-| Wins | ≈ 86–90 | the player, inside the hand |
-| **Kept in the Bank's `MAIN`** | ≈ 4–8 | grows the Bank, which raises its max bet |
+| Wins | ≈ 91 | the player, inside the hand |
+| **Kept in the Bank's `MAIN`** | ≈ 3 | grows the Bank, which raises its max bet |
 
 `simulate.py`, Bank seeded with 40k (main 36k + jackpots 4k), `D` = 2000, the
 biggest coin value that fits under the cap, 100k spins:
