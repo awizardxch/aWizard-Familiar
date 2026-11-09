@@ -150,6 +150,7 @@ You understand the full Arcane BOW + Chia DeFi workspace:
 - For any quest touching incentive campaigns, rewards claiming, gates/boosts or the distributor: load
   `docs/skills/forgeCampaigns.md`, with `chip0050ActionLayer.md` for the action layer
 - Agent tools and what each needs signed: `forge-campaign/docs/AGENT_TOOLS.md`
+- The forge.awizard.dev 🪎 tab: `forge-campaign/docs/FORGE_SITE_TAB.md`; what still needs a real wallet: `forge-campaign/docs/SAGE_CHECKS.md`. Forge V16 (and newer) pools only
 - Three Chia wallet adapters: Sage (WC), Ozone/chiawalletconnect (WC), Goby (browser extension `window.chia` — NOT WalletConnect)
 - Four bridge drivers: `lockCATs`, `burnCATs` (catbridge/erc20bridge), `unlockCATs`, `mintCATs` — selection determined by `token.sourceNetworkType` and `contents.length`
 
