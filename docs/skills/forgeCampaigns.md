@@ -2,7 +2,8 @@
 
 > Merkl-style reward campaigns for Forge LP, CAT and NFT holders, on the CHIP-0050 action layer.
 > Repo: <https://github.com/awizardxch/forge-campaign> (puzzles live there, not in `forge-puzzles`).
-> **On testnet11 (five distributors), not on mainnet, no external review yet.**
+> **On testnet11 (five distributors, all on older pins), not on mainnet, no external review yet.**
+> The puzzles were re-pinned on 2026-11-09 (NEW-1 to NEW-4, FLPCR-08): testnet needs a new distributor.
 >
 > **Source of truth, in that repo:**
 > - `CLAUDE.md` (build, rules, decisions; read first);
@@ -65,13 +66,17 @@ multisig; the rest is the budget, emitted equally every day.
   - `create`: our router's message **and** the creator's own coin spend sending `"k" + id` (mode 23).
   - `post_root`: the operator.
   - `veto`: the guardian, and never while a dispute is open.
-  - `dispute`: anyone, with a bond in XCH (production 5 XCH, testnet 0.1). The guardian or the admin
-    resolves it. If upheld, the root is revoked and the bond refunded. If rejected, the bond goes to the
+  - `dispute`: anyone, with a bond in XCH (production 5 XCH, testnet 0.1). The disputer's own coin
+    creates the bond launcher, curried with the bond's destination, the distributor, the refund address
+    and the pending Merkle root; it creates the bond only on the `dispute` leaf's message. That funding
+    spend must also `ASSERT_CONCURRENT_SPEND` every id in `Prepared.concurrent` (the singleton coin), or
+    it can be lifted out of the bundle. The guardian or the admin resolves it. If upheld, the root is revoked and the bond refunded. If rejected, the bond goes to the
     dev multisig and the window restarts.
   - `rotate`: the guardian proposes, it takes effect `rotate_delay` later (production one day, testnet
     24 blocks), and the admin can cancel it.
   - `claim`: the holder, or a delegate the holder granted.
-  - `reclaim`: the creator, the creator's delegate, or the admin.
+  - `reclaim`: the creator, the creator's delegate, or the admin; refused while a dispute is open or
+    while the pending root raises the campaign's total.
   - `delegate`: the owner grants or revokes, and each costs `delegate_fee`.
   - The admin (the dev multisig) can never take funds.
 - **Claims name no generation.** A claim is authorized by `AUTH_SIGNATURE`, `AUTH_MESSAGE` or
@@ -89,7 +94,7 @@ multisig; the rest is the budget, emitted equally every day.
   - the dispute window counts from `h + 32`;
   - `start` runs from `h + 32` to `h + max_campaign_length`;
   - campaign length: testnet from 16 blocks, production from 77, at most 365 days;
-  - the claim window floor is `3 × dispute_blocks + 32` (testnet 56, production 146).
+  - the claim window floor is `4 × (dispute_blocks + 32)` (testnet 160, production 280).
 - **Exclusions:** the burn address `0x…dead` never earns. A creator may exclude up to 16 addresses; they are
   stored as a tree hash, and the claim leaf refuses them.
 - **NFT collections:** a collection is identified by its minter DID, or by a `col1` id, which is
@@ -135,7 +140,9 @@ multisig; the rest is the budget, emitted equally every day.
   - serves `GET /api/v1/status` and `GET /api/v1/claimable/<address>`;
   - takes `POST /api/v1/claims` (the sequencer).
 
-  It holds the operator key only; the router key lives with the create intake. The guardian and the admin
+  - `POST /api/v1/campaigns/quote` and `/create` (the create intake), and `GET /api/v1/watch`.
+
+  It holds the operator key; the router key lives with the create intake. The guardian and the admin
   stay multisigs.
 - **Site:** a 🪎 tab on forge.awizard.dev (`awizardxch/forge-ui`), planned in `docs/FORGE_SITE_TAB.md`.
   - The claim flow is one `chip0002_signCoinSpends` over a stand-in spend `(q . ((49 pk leaf) ...))` plus
@@ -149,11 +156,13 @@ multisig; the rest is the budget, emitted equally every day.
   - CAT rewards live;
   - a lock claim;
   - the hosted service, and rotating the operator to it.
-- **Being built:**
-  - V16 fee events for fee-weighted LP campaigns;
-  - the watcher;
-  - the create intake;
-  - the review probes rerun against the current pins.
+  - a new distributor on the 2026-11-09 pins, and a dispute both ways on it;
+  - a fee-weighted V16 campaign, the watcher and the create intake, live.
+- **Built on 2026-11-09, simulator only:** V16 fee events, the watcher, the create intake (quote, lease,
+  router co-sign), manifests, following foreign singleton spends, and the review probes rerun on the
+  current pins (all ok; 476 tests).
+- **Owner decisions:** the 160/280 floor, CAT/CAT fee valuation, `RouterRules` values, where the router
+  key lives, who pays the create network fee.
 - **The site tab itself**, in forge-ui.
 - **Not built yet:** the distributor registry, cost under load on the current pins, the guardian as a
   Forge multisig safe, an external review, and mainnet.
