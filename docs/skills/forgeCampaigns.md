@@ -160,9 +160,12 @@ multisig; the rest is the budget, emitted equally every day.
   - a fee-weighted V16 campaign, the watcher and the create intake, live.
 - **Built on 2026-11-09, simulator only:** V16 fee events, the watcher, the create intake (quote, lease,
   router co-sign), manifests, following foreign singleton spends, and the review probes rerun on the
-  current pins (all ok; 476 tests).
+  current pins (all ok; 485 tests), the campaign page and pending amounts in the API, and costs on the
+  current pins (every action 0.8% to 2.1% of a block).
 - **Owner decisions:** the 160/280 floor, CAT/CAT fee valuation, `RouterRules` values, where the router
   key lives, who pays the create network fee.
 - **The site tab itself**, in forge-ui.
-- **Not built yet:** the distributor registry, cost under load on the current pins, the guardian as a
-  Forge multisig safe, an external review, and mainnet.
+- **Registry:** `registry/<network>.json` in the repo, one current distributor per (reward asset,
+  router), verified by resync (`python -m flpcr.registry add | verify`), served at
+  `GET /api/v1/distributors`. A file, not a singleton, until there is a second operator.
+- **Not built yet:** the guardian as a Forge multisig safe, an external review, and mainnet.
