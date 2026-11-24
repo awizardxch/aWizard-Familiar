@@ -136,8 +136,8 @@ the two disagree, the published runbook is what someone else is reading: fix `cl
 
 | Skill | Use it for |
 | --- | --- |
-| `mixmageAudioAnalysis.md` | Judging sound without hearing it: loudness (`volumedetect`, `loudnorm`, LUFS), RMS over time, five frequency bands per half-second and how to read the flags, tempo estimation, bass drop-outs and level steadiness through a DJ set, the measured smooth and bass-play house styles, sample gains |
-| `mixmageVideoProduction.md` | Reading and making video without watching it: contact sheets read as images, black and scene detection, YouTube captions with times, keeping credits and title cards out of the picture, yt-dlp fetching, and the Mixmage producer workflow (add a source, script a `djSet`, render, check, report) for music videos, DJ-style sets and promos |
+| `mixmageAudioAnalysis.md` | Judging sound without hearing it: loudness (`volumedetect`, `loudnorm`, LUFS), RMS over time, five frequency bands per half-second and how to read the flags, tempo estimation, key (chromagram + Krumhansl-Kessler), a song's bar-by-bar roots and sections, flam checks by beat phase, bass drop-outs and level steadiness through a DJ set, the measured smooth and bass-play house styles, sample, hat and riser gains |
+| `mixmageVideoProduction.md` | Reading and making video without watching it: contact sheets read as images, black and scene detection, YouTube captions with times, keeping credits and title cards out of the picture, yt-dlp fetching, the Mixmage producer workflow (add a source, script a `djSet`, render, check, report) for music videos, DJ-style sets and promos, and remixing a record into a dance track with the 909-style beat box (sidechain pump, grid lock, build and drop) and Shroom FX (rainbow color on black-and-white footage, kaleidoscope, trails, beat pulse) |
 
 ### Quest and Planning Workflow
 

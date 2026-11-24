@@ -1,9 +1,10 @@
 # Skill: Mixmage Audio Analysis
 
 > How an agent that cannot hear judges sound: amplitude, five frequency bands, loudness, tempo and
-> bass drop-outs, measured with ffmpeg and three small Node scripts from
-> [awizardxch/MixMage](https://github.com/awizardxch/MixMage) (`scripts/analyze-mix.js`,
-> `scripts/study-mix.js`, read at `4e4987e`). The methods are written out here, so the skill works
+> bass drop-outs, key, a song's bar-by-bar form and whether added drums flam, measured with ffmpeg
+> and small Node scripts from [awizardxch/MixMage](https://github.com/awizardxch/MixMage)
+> (`scripts/analyze-mix.js`, `study-mix.js`, `key.js`, `bars.js`, `beat-phase.js`, read at
+> `0a12679`). The methods are written out here, so the skill works
 > without the scripts; fetch the scripts when you want the exact output format.
 > Companion: `mixmageVideoProduction.md` (picture, captions, the producer workflow).
 
@@ -69,6 +70,10 @@ Measured facts worth knowing before you mix:
   track at matched loudness. Play them at gain around 0.4, not 1.
 - **Gains are not portable between sources.** A gain that fixed one sample made another 5 dB too
   loud. Level-match first, set gains near 1, render, then adjust from the measurement.
+- **A quiet intro is short of highs**, so even soft hats added over it stood 8 dB out. Keep hats
+  over a quiet intro at about 0.2 of their normal level.
+- **A noise riser at full level stood 17 dB out in the air band** at its peak; a peak gain of 0.16
+  (against 0.35) sits right.
 
 ---
 
@@ -86,6 +91,54 @@ The estimator in `study-mix.js`, at 11,025 Hz mono:
 Measure 40 seconds from the middle of a track. Readings that jump to about 98-105 in a house set
 are the estimator slipping to a 4:5 ratio in a breakdown, not a real change; ignore isolated ones.
 Narrow the lag range for other genres (100-140 BPM suits house and most pop).
+
+---
+
+## Key (`key.js`)
+
+`node scripts/key.js <file> [fromSeconds] [toSeconds]`, so added bass lines, stabs and pitched
+samples fit the song. Method, at 11,025 Hz mono:
+
+1. FFT frames of 8192 samples, Hann window, half-overlapped. Map every bin from 55 Hz to 2 kHz to
+   its pitch class (`round(12 * log2(f / 440))`, A = 9) and sum magnitudes per class. Normalize each
+   frame to sum 1, so loud and quiet frames count once each; add the frames into a chromagram.
+2. Correlate the chromagram with the Krumhansl-Kessler profiles rotated to all 12 tonics:
+   major `6.35 2.23 3.48 2.33 4.38 4.09 2.52 5.19 2.39 3.66 2.29 2.88`,
+   minor `6.33 2.68 3.52 5.38 2.60 3.53 2.54 4.75 3.98 2.69 3.34 3.17` (index 0 = the tonic).
+3. Rank the 24 keys by correlation. A winner well clear of the runner-up is a confident reading.
+   Relative pairs (C major / A minor share notes) can score close: break the tie with the bass
+   notes, the strongest pitch classes below 220 Hz, which it also prints.
+
+## A song's form, bar by bar (`bars.js`)
+
+`node scripts/bars.js <library folder> <source id>` reads the one-bar clips the app's auto cut made
+(`hits` mode, whole song in one-bar clips), so the bars are the app's own grid. Per bar: the
+strongest bass pitch class (the chord root, from the chromagram above restricted to the low end),
+the level in dB against the loudest bar, and a `_` mark where the low end (one-pole 120 Hz
+low-pass) is 6 dB or more under the song's median (an intro, a break). Rows of 8 bars, so sections
+and chord cycles show up as repeating rows.
+
+Use it to pick sections (a pre-chorus that runs into the chorus is a build and drop with no edit at
+all) and to take the roots for an added bass line. Never guess roots.
+
+Without the app's clips the same works on any fixed grid: cut the file into bars of `240 / bpm`
+seconds from a known downbeat and run the same per-bar measurement.
+
+## Do added drums land with the song? (`beat-phase.js`)
+
+`node scripts/beat-phase.js <file> <bpm> <from> <to> [bandHz=150]`. It low-passes at the band (one
+pole), takes a 1 ms energy envelope, keeps rises against a short running average (so slow swells do
+not count), and folds them over the beat period into 40 slots, printed as a bar chart with the
+strongest slot and the next peak away from it.
+
+- **One peak**: everything hits together.
+- **Two peaks** a few to a few tens of milliseconds apart: two grids, a flam.
+
+Run it on the original song over the section you used and on the render over the same music. For a
+render the phase is relative to the render's start, so compare the shape, not the slot. Measured:
+a beat started on the same event as a video `play()` landed about 20 ms early, because the video
+starts a little late; re-locking the beat to the deck's `currentTime` every 2 bars kept it within a
+few ms (see the beat box in `mixmageVideoProduction.md`).
 
 ---
 
@@ -149,5 +202,6 @@ Keep it short.
 - Checking a render, a mix or any audio file you cannot hear.
 - Studying a DJ set or a song to copy its tempo, blend or bass style.
 - Choosing gains or levels for samples against a track.
+- Finding a song's key, its sections and chord roots, or checking that added drums do not flam.
 
 Pair with `mixmageVideoProduction.md` when the file has picture, or when the job is to make a video.

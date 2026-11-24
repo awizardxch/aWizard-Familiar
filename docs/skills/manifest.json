@@ -26,9 +26,9 @@
   },
   "mixmage": {
    "path": "docs/skills/mixmageVideoProduction.md",
-   "upstream": "https://github.com/awizardxch/MixMage, read at 4e4987e (2026-11-23)",
+   "upstream": "https://github.com/awizardxch/MixMage, read at 0a12679 (2026-11-23)",
    "pairs_with": "mixmageAudioAnalysis.md",
-   "use_for": "the producer skill (.claude/skills/mixmage-producer/SKILL.md) and the analysis scripts (scripts/analyze-mix.js, study-mix.js, captions.js)",
+   "use_for": "the producer skill (.claude/skills/mixmage-producer/SKILL.md) and the analysis scripts (scripts/analyze-mix.js, study-mix.js, captions.js, key.js, bars.js, beat-phase.js), the beat box (src/renderer/beat.js) and Shroom FX (src/renderer/fx.js)",
    "note": "Methods are inline in both skills; fetch the scripts for the exact output format."
   }
  },

@@ -2,9 +2,10 @@
 
 > How an agent that cannot watch reads video and produces finished music videos, DJ-style sets and
 > promos with **Mixmage** ([awizardxch/MixMage](https://github.com/awizardxch/MixMage), read at
-> `4e4987e`; formerly Video Sampler). Mixmage is an Electron sampler and two-deck mixer for audio and
-> video: MIDI pads with pages and auto cut, two decks with BPM sync and a bass control, one viewer,
-> output recording with titles, YouTube search through yt-dlp. The repo carries the full producer
+> `0a12679`; formerly Video Sampler). Mixmage is an Electron sampler and two-deck mixer for audio and
+> video: MIDI pads with pages and auto cut, two decks with BPM sync and a bass control, a
+> synthesized beat box, one viewer with Shroom FX, output recording with titles, YouTube search
+> through yt-dlp. The repo carries the full producer
 > skill at `.claude/skills/mixmage-producer/SKILL.md`; this file holds what an agent needs inline.
 > Companion: `mixmageAudioAnalysis.md` (every sound measurement referred to here).
 
@@ -154,7 +155,59 @@ judge (always: how it sounds), and anything you excluded or changed on your own.
 reads on a phone between takes.
 
 After any change to the app's own source, `SMOKE_SRC=<synthetic mp4> npx electron . --smoke` must
-end with `errors 0`.
+end with `SMOKE_DONE errors 0`. An earlier `SMOKE ... errors` line prints before most checks run;
+only `SMOKE_DONE` is the verdict.
+
+---
+
+## Turning a record into a dance track: beat box and Shroom FX
+
+The `shroomEdit` variant (a country-rock record made into an EDM edit, with psychedelic color over
+cowboys and mushrooms) is the worked example. Read it before writing a remix.
+
+**First map the song** with `bars.js` and `key.js` (`mixmageAudioAnalysis.md`): its sections, and
+one root note per bar for the bass.
+
+**Beat box** (`src/renderer/beat.js`; also the Beat button in the mixer). A 909-style kit
+synthesized live, nothing sampled, into the output limiter, so it records and stays level-safe:
+
+- The kit: kick four on the floor (a sine falling 160 to 48 to 40 Hz, with a click); clap on 2 and
+  4 (three bandpassed noise bursts); open hats on the off-beats and closed sixteenths; an off-beat
+  bass on each bar's root (two detuned saws and a sub sine through a closing resonant low-pass); a
+  snare roll for builds (eighths, then sixteenths, then thirty-seconds, rising); a noise riser.
+- `startBeat({ bpm, roots, duck, parts, at? })` puts bar 0 now (or at ctx time `at`);
+  `setBeatParts({ kick, clap, hat, closed, bass })`; `stopBeat()`; `beatBar()` is the current bar.
+- `beat.roots`: one MIDI note per bar, cycled (C2 = 36). Take them from `bars.js`; never guess.
+- `beat.duck`: the sidechain pump. Each kick pulls the decks' bus down (0.5 is about -6 dB) and it
+  swells back over most of a beat. 0.35 for a verse, 0.55 for a drop.
+- `beat.hats` scales the hats (about 0.2 over a quiet intro, which is short of highs);
+  `beat.roll = { from, to }` in bars; `riser(ctxTime, seconds)` peaks at 0.16 (full level stood
+  17 dB out in the air band).
+- **Lock the grid to the deck.** A video starts a little after `play()`, so a beat started on the
+  same event lands about 20 ms early. Every 2 bars set `beat.start` from the deck's `currentTime`
+  against the song bar's clip start (the `lock` helper in `shroomEdit`); corrections then stay within
+  a few ms. Check with `beat-phase.js`: one peak, not two.
+- **Build and drop:** `setDeckLowCut(0..1, seconds)` sweeps a low cut on the decks. Take the kick
+  out 4 bars before the drop, bring the roll and riser in, one beat of silence (deck `vol` 0), then
+  everything on the one with `setDeckLowCut(0, 0.01)`.
+
+**Shroom FX** (`src/renderer/fx.js`; the FX menu under the viewer), painted in the viewer and in
+the recorded output alike:
+
+- a rainbow gradient in the canvas `color` blend mode, so even black-and-white footage takes color
+  (the frame keeps its own light and shade; only hue and saturation come from the wash), plus a
+  light `multiply` tint so white paper turns pastel instead of staying bare;
+- hue drift, extra saturation and contrast for footage already in color;
+- `mirror` mode: a kaleidoscope (left half onto right, top onto bottom);
+- trails: the previous frame, zoomed and turned slightly, laid over in `lighten` (not `screen`,
+  which adds up frame after frame and bleaches to white);
+- a pulse of zoom and brightness on every beat, and `fxFlash()` on a drop.
+
+Settings: `fx.mode` (`'off'`, `'shroom'`, `'mirror'`), `fx.amount`, `fx.trails`, `fx.beat` (pulse
+strength), `fx.spin` (color speed), and `fx.bpm` / `fx.t0` to put the pulse on the beat (otherwise
+it follows the playing deck's tempo). **Effects fill the frame**: the picture is cropped, not
+letterboxed, while FX are on, because letterbox edges plus trails turn into glowing rectangles.
+Check the result on a contact sheet like any other render.
 
 ---
 
@@ -188,4 +241,5 @@ title cards as picture.
 - Any request for a promo, post, set, mix, music video or a new variant of one, even if Mixmage is
   not named.
 - Adding a YouTube video or song to a mix; changing titles or picture clips.
+- Remixing a record into a dance track (beat box, build and drop) or adding psychedelic color.
 - Checking how a rendered video looks (and, with `mixmageAudioAnalysis.md`, how it measures).

@@ -75,8 +75,8 @@ aWizard agent appears in the VS Code agent dropdown automatically. All domain kn
 - **`docs/skills/warpBridge.md`** — Complete Chia↔EVM bridge system: 4-step wizard, lockCATs/burnCATs/unlockCATs/mintCATs driver selection, EVM wagmi entry (bridgeEtherToChia/bridgeToChia/bridgeBack), all 3 wallet adapters (Sage WC, Ozone WC, Goby extension), NOSTR validator signature collection, portal singleton mechanics, key puzzle hashes, mainnet contract addresses. Source project: `C:\Users\Ricardo\Documents\Web_Connect\warp-ui-love`. Full constants: `warp-ui-love/docs/agent-swarm/IMPLEMENTATION_CONSTANTS.md`
 
 #### Sound & Video (Mixmage)
-- **`docs/skills/mixmageAudioAnalysis.md`** — Judging sound without hearing it: loudness and LUFS with ffmpeg, five frequency bands per half-second, tempo, bass drop-outs, level steadiness through a DJ set, measured house-set styles
-- **`docs/skills/mixmageVideoProduction.md`** — Reading video as contact sheets and captions, keeping credits and title cards out, and the Mixmage producer workflow for music videos, DJ-style sets and promos ([awizardxch/MixMage](https://github.com/awizardxch/MixMage))
+- **`docs/skills/mixmageAudioAnalysis.md`** — Judging sound without hearing it: loudness and LUFS with ffmpeg, five frequency bands per half-second, tempo, key, bar-by-bar form, flam checks, bass drop-outs, level steadiness through a DJ set, measured house-set styles
+- **`docs/skills/mixmageVideoProduction.md`** — Reading video as contact sheets and captions, keeping credits and title cards out, the Mixmage producer workflow for music videos, DJ-style sets and promos, and the beat box and Shroom FX for dance edits ([awizardxch/MixMage](https://github.com/awizardxch/MixMage))
 
 ### Architecture & Guides
 - **`docs/ARCHITECTURE.md`** — Full ecosystem deployment map
