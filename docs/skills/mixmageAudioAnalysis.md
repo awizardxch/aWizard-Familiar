@@ -1,11 +1,13 @@
 # Skill: Mixmage Audio Analysis
 
 > How an agent that cannot hear judges sound: amplitude, five frequency bands, loudness, tempo and
-> bass drop-outs, key, a song's bar-by-bar form and whether added drums flam, measured with ffmpeg
-> and small Node scripts from [awizardxch/MixMage](https://github.com/awizardxch/MixMage)
-> (`scripts/analyze-mix.js`, `study-mix.js`, `key.js`, `bars.js`, `beat-phase.js`, read at
-> `0a12679`). The methods are written out here, so the skill works
-> without the scripts; fetch the scripts when you want the exact output format.
+> bass drop-outs, key, a song's bar-by-bar form, where it is sung, every beat of a live band, whether
+> added drums land on the band, whether additions stay subtle, and how to lay a record's own sound
+> under a video, measured with ffmpeg and small Node scripts from
+> [awizardxch/MixMage](https://github.com/awizardxch/MixMage) (`scripts/analyze-mix.js`,
+> `study-mix.js`, `key.js`, `bars.js`, `vocals.js`, `beats.js` with `src/beats.js`, `sync-check.js`,
+> `compare-mix.js`, `beat-phase.js`, `original-audio.js`, read at `315c40e`). The methods are
+> written out here, so the skill works without the scripts; fetch them for the exact output.
 > Companion: `mixmageVideoProduction.md` (picture, captions, the producer workflow).
 
 ---
@@ -74,6 +76,9 @@ Measured facts worth knowing before you mix:
   over a quiet intro at about 0.2 of their normal level.
 - **A noise riser at full level stood 17 dB out in the air band** at its peak; a peak gain of 0.16
   (against 0.35) sits right.
+- **Added drums under a full band record must stay small.** A kit at 0.9 with a deep sidechain pump
+  (0.45-0.6) and the record's bass up 4 dB took 5 dB of share from its mids; a kit at 0.5, pump
+  0.12-0.3 and bass +1 dB left every band within 1-2 dB (`compare-mix.js`).
 
 ---
 
@@ -119,10 +124,89 @@ low-pass) is 6 dB or more under the song's median (an intro, a break). Rows of 8
 and chord cycles show up as repeating rows.
 
 Use it to pick sections (a pre-chorus that runs into the chorus is a build and drop with no edit at
-all) and to take the roots for an added bass line. Never guess roots.
+all). `--roots` prints just the roots, one per bar. **Treat roots of a live band record as
+uncertain**: a bass line that moves within the bar has no single root, and two methods (this one,
+and the drum-free one in `beats.js` below) agreed on only half the bars of a country-rock record. A
+synth bass on uncertain roots sounds out of time even when it is on time; prefer the record's own
+bass.
 
 Without the app's clips the same works on any fixed grid: cut the file into bars of `240 / bpm`
 seconds from a known downbeat and run the same per-bar measurement.
+
+## Where it is sung (`vocals.js`)
+
+`node scripts/vocals.js <library> <source id>`. The lead vocal is mixed dead center; double-tracked
+guitars and keys sit wide. So per bar, after a 250-3500 Hz band-pass, compare the energy of the
+center `(L+R)/2` with the sides `(L-R)/2`, in dB against the song's median: 3 dB or more above is
+sung (V), 1.5 dB is a maybe (v). The signal is rough (about ±3 dB): read runs of bars alongside
+`bars.js`, never single bars; a centered lead guitar or a mono recording will fool it. Use it to
+put builds, silences and big moments on instrumental bars, and when the lyrics must survive,
+**never cut the record**: play it whole and arrange around it, so a wrong guess costs nothing.
+
+## Every beat of a live band (`beats.js`, `src/beats.js`)
+
+`node scripts/beats.js <file> <bpm hint> [--json out.json]`; in the app, `window.api.beats({ file,
+bpm })` runs the same in a background thread. It takes the best-proven parts of the open-source
+analysis tools:
+
+1. **Onset strength** (librosa): spectral flux over 40 log-spaced bands from 30 Hz to 8 kHz,
+   log-compressed, averaged; 22,050 Hz, FFT 1024, hop 128 (5.8 ms). A local average over about a
+   second is subtracted, so loud passages do not outweigh quiet ones.
+2. **More views** (aubio, Essentia): high-frequency content (snare and hats) and low-band flux
+   under 150 Hz (kicks), each a separate onset curve.
+3. **Tempo** near the hint: autocorrelation of the onset curve within 8% of it, scoring beat, half
+   bar and bar lags together.
+4. **Beat tracking** (librosa, Ellis 2007): dynamic programming over frames, `score(t) = onset(t) +
+   max over p in [t-2P, t-P/2] of score(p) - 100 * log((t-p)/P)^2`, P the period; backtrack from the
+   best score in the last period. The tempo may wander; a sudden skip may not.
+5. **Agreement** (Essentia's multi-feature tracker): track each onset view separately and keep the
+   sequence the others agree with most (F-measure within 50 ms).
+6. **Peak picking** (aubio): move each beat onto the strongest combined onset within 3 frames, with
+   parabolic interpolation; then pull each a quarter of the way toward its neighbors' midpoint.
+7. **Downbeats**: chords change on the one and the kick lands on 1 and 3; the phase (which of every
+   four beats starts a bar) with the most bass-chroma change plus kick weight wins.
+8. **Bass roots** (librosa HPSS, a KeyFinder-style chroma as in Mixxx): median-filter the low end
+   (FFT 8192) along time and along frequency; keep bins where the time view wins (the harmonic
+   part, drums removed); strongest pitch class per bar, with a confidence (top over runner-up, sure
+   at 1.25 or more).
+
+Measured on a live country-rock record: 139.7 BPM overall, 138.0-141.9 from one 8-bar stretch to the
+next, beat-to-beat 134.7-145.8 (5th-95th percentile, after the agreement and peak steps; 134.7-152
+before). The tracked bars landed within a few ms of the app's own bar clips.
+
+## Is the added kick on the band? (`sync-check.js`)
+
+`node scripts/sync-check.js <render> <song> <beats.json> <from> <to> [songTimeAtFrom]`. First it
+finds where the song sits in that stretch of the render (cross-correlating 1-2.5 kHz envelopes; give
+the last argument when the song repeats itself, or it can match the wrong chorus). Then, because
+the beat box's kick is a known sound (a sine falling 160 to 48 to 40 Hz), it finds each kick with a
+**matched filter**, correlating the render's low end with that waveform within 80 ms of every
+tracked beat, keeps the better-matching half, and reports the median offset, the spread and the
+share within 15 ms. In sync: median within about 5 ms, most beats within 15 ms. (Measuring the low
+end's onsets instead does not work on a band record: the bass guitar's notes are onsets too; the
+original alone scored only 30% within 15 ms.)
+
+Measured: a fixed grid at the record's average tempo drifted to 52 ms late and 26 ms early; the beat
+box following the tracked beats landed at a median of -2 ms, every beat within 15 ms.
+
+## Do additions stay subtle? (`compare-mix.js`)
+
+`node scripts/compare-mix.js <remix> <original> <from> <to> [originalTimeAtFrom]`. Over the same
+music in both, each band's share of the total: sub (under 60 Hz), bass (60-150), low-mid (150-500),
+mid (500-2000), presence (2-6 kHz), air (over 6 kHz). Shares, not levels, because the remix is
+mastered to a different loudness. Subtle: the low bands within about +2 dB of the original, the rest
+within 1.5 dB. **Mids losing share means the added beat buries the voice and guitars** (measured
+-5 dB, and the user heard it; after lowering the kit and the pump, within 1-2 dB).
+
+## Laying a record's own sound under a video (`original-audio.js`)
+
+`node scripts/original-audio.js <render> <original> <out> [originalTimeAtStart]`. Onset envelopes of
+both soundtracks are cross-correlated, coarse at 10 ms over ±5 s, then fine at 1 ms over ±20 ms; the
+picture is copied and the original's audio laid in at the found offset (`-itsoffset`, or `-ss` when
+the render starts partway into the record; then give the 4th argument, roughly, and the search stays
+within 5 s of it). It prints a match strength: a true match is well above 0.3 (0.6-0.9 measured);
+near 0 means the wrong place. Use it whenever the sound must be the record as released: a renderer's
+output limiter squashes a mastered record.
 
 ## Do added drums land with the song? (`beat-phase.js`)
 
@@ -135,10 +219,11 @@ strongest slot and the next peak away from it.
 - **Two peaks** a few to a few tens of milliseconds apart: two grids, a flam.
 
 Run it on the original song over the section you used and on the render over the same music. For a
-render the phase is relative to the render's start, so compare the shape, not the slot. Measured:
-a beat started on the same event as a video `play()` landed about 20 ms early, because the video
-starts a little late; re-locking the beat to the deck's `currentTime` every 2 bars kept it within a
-few ms (see the beat box in `mixmageVideoProduction.md`).
+render the phase is relative to the render's start, so compare the shape, not the slot. It assumes
+a steady tempo: on a live band whose tempo moves, use `sync-check.js` against tracked beats instead.
+Measured: a beat started on the same event as a video `play()` lands about 20 ms early (the video
+starts a little late); following tracked beats through the deck's position removes that, except on
+a deck started partway through a piece, which plays about 37 ms behind its reported position.
 
 ---
 
@@ -202,6 +287,8 @@ Keep it short.
 - Checking a render, a mix or any audio file you cannot hear.
 - Studying a DJ set or a song to copy its tempo, blend or bass style.
 - Choosing gains or levels for samples against a track.
-- Finding a song's key, its sections and chord roots, or checking that added drums do not flam.
+- Finding a song's key, its sections and chord roots, or where it is sung.
+- Tracking every beat of a live-played record; checking that added drums land on the band and stay
+  subtle; putting a record's own sound under a video.
 
 Pair with `mixmageVideoProduction.md` when the file has picture, or when the job is to make a video.
