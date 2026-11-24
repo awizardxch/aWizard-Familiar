@@ -1,6 +1,6 @@
 {
- "version": 16,
- "updated": "2026-11-14",
+ "version": 17,
+ "updated": "2026-11-23",
  "notes": "Load only 1-2 skills per quest. README.md has full routing rationale.",
  "companions": {
   "cursor-team-kit": {
@@ -23,6 +23,13 @@
    "license": "Apache-2.0",
    "use_for": "Chia Network's agent guide: recipes, common LLM mistakes, agent security model, constants, errors; chia-mcp read-only MCP server",
    "note": "Pointer only: read upstream files when needed. chia-mcp is not configured here; adding it is the owner's call."
+  },
+  "mixmage": {
+   "path": "docs/skills/mixmageVideoProduction.md",
+   "upstream": "https://github.com/awizardxch/MixMage, read at 4e4987e (2026-11-23)",
+   "pairs_with": "mixmageAudioAnalysis.md",
+   "use_for": "the producer skill (.claude/skills/mixmage-producer/SKILL.md) and the analysis scripts (scripts/analyze-mix.js, study-mix.js, captions.js)",
+   "note": "Methods are inline in both skills; fetch the scripts for the exact output format."
   }
  },
  "domains": {
@@ -189,6 +196,14 @@
   "cross-chain-handover": [
    "greenwoodLockbox.md",
    "warpBridge.md"
+  ],
+  "sound-and-video": [
+   "mixmageAudioAnalysis.md",
+   "mixmageVideoProduction.md"
+  ],
+  "music-video-production": [
+   "mixmageVideoProduction.md",
+   "mixmageAudioAnalysis.md"
   ],
   "incentive-campaigns": [
    "forgeCampaigns.md",
