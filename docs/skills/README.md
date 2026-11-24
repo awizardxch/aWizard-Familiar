@@ -128,6 +128,17 @@ the two disagree, the published runbook is what someone else is reading: fix `cl
 | `chiaTibetAmm.md` | Tibet router and pair model, XCH/CAT LP flows, offer-settled swap/add/remove behavior, reserve handling |
 | `tibetUiFrontend.md` | Tibet UI repo patterns for pair discovery, request caching, wallet UX, and external route presentation |
 
+### Sound and Video (Mixmage)
+
+> An agent cannot hear or watch, so it measures sound and reads pictures as images. Scripts live in
+> the public [awizardxch/MixMage](https://github.com/awizardxch/MixMage) repo; the methods are
+> written out inline in both skills.
+
+| Skill | Use it for |
+| --- | --- |
+| `mixmageAudioAnalysis.md` | Judging sound without hearing it: loudness (`volumedetect`, `loudnorm`, LUFS), RMS over time, five frequency bands per half-second and how to read the flags, tempo estimation, key (chromagram + Krumhansl-Kessler), a song's bar-by-bar roots and sections, where a song is sung (center-to-side), tracking every beat of a live band (log-band flux, multi-feature agreement, dynamic programming, HPSS bass roots), whether added drums land on the band (matched filter) and stay subtle (band shares against the original), laying a record's own sound under a video, flam checks by beat phase, bass drop-outs and level steadiness through a DJ set, the measured smooth and bass-play house styles, sample, hat, riser and beat gains |
+| `mixmageVideoProduction.md` | Reading and making video without watching it: contact sheets read as images, black and scene detection, YouTube captions with times, three-frames-per-clip sheets to keep credits, banners, captions, watermarks and faces out, a picture check for dark, washed-out, frozen and flashing stretches (3 flashes a second at most), yt-dlp fetching, the Mixmage producer workflow (add a source, picture that tells the song, script a piece on tracked bars, render, lay in the original sound, check, report) for music videos, DJ-style sets and promos; the music-video effects (14 mood presets and 17 effects: beat effects, film, VHS, grades, duotone, halftone, thermal, night vision, kaleidoscope, trails, split screen, picture in picture, double exposure, chroma key, beat-timed text, freeze) and how to choose them; and the beat box that follows a live band's beats, with measured levels |
+
 ### Quest and Planning Workflow
 
 | Skill | Use it for |
@@ -204,6 +215,10 @@ Use `tibetUiFrontend.md` when the main problem is external route UX, pair discov
 - `warpBridge.md` — load first; covers all 4 bridge directions, all 3 wallet adapters, driver selection, NOSTR, EVM contracts
 - `chiaPrimitivesPatterns.md` — only if the quest also touches raw Chia singleton or CAT puzzle design
 - `bowAppReference.md` — only if the quest also involves WalletConnect state channel or multi-address scanning alongside bridging
+
+### Music Video / Promo / Sound Quest
+- `mixmageVideoProduction.md` — load first for any promo, post, set, mix or music video, or to check how a render looks
+- `mixmageAudioAnalysis.md` — to measure a render, a song or a DJ set (always, after every render)
 
 ### Architecture / Refactor Quest
 - `projectArchitecture.md`
